@@ -14,7 +14,7 @@ from app.schemas.letter import LetterResponse
 router = APIRouter(prefix="/search", tags=["Búsqueda"])
 
 
-@router.get("/")
+@router.get("")
 def global_search(
     q: str = Query(..., min_length=1, description="Texto a buscar"),
     db: Session = Depends(get_db),

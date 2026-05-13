@@ -11,7 +11,7 @@ from app.services.cloudinary_service import upload_image, delete_image
 router = APIRouter(prefix="/letters", tags=["Cartitas"])
 
 
-@router.get("/", response_model=List[LetterResponse])
+@router.get("", response_model=List[LetterResponse])
 def list_letters(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
@@ -19,7 +19,7 @@ def list_letters(
     return db.query(Letter).order_by(Letter.created_at.desc()).all()
 
 
-@router.post("/", response_model=LetterResponse, status_code=201)
+@router.post("", response_model=LetterResponse, status_code=201)
 def create_letter(
     data: LetterCreate,
     db: Session = Depends(get_db),

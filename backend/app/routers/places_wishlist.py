@@ -29,7 +29,7 @@ def get_random(
     return random.choice(places)
 
 
-@router.get("/", response_model=List[PlaceWishlistResponse])
+@router.get("", response_model=List[PlaceWishlistResponse])
 def list_wishlist(
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -49,7 +49,7 @@ def list_wishlist(
     return query.order_by(PlaceWishlist.order_index.asc()).all()
 
 
-@router.post("/", response_model=PlaceWishlistResponse, status_code=201)
+@router.post("", response_model=PlaceWishlistResponse, status_code=201)
 def create_wishlist(
     data: PlaceWishlistCreate,
     db: Session = Depends(get_db),

@@ -11,7 +11,7 @@ from app.schemas.place_visited import PlaceVisitedCreate, PlaceVisitedUpdate, Pl
 router = APIRouter(prefix="/places/visited", tags=["Lugares visitados"])
 
 
-@router.get("/", response_model=List[PlaceVisitedResponse])
+@router.get("", response_model=List[PlaceVisitedResponse])
 def list_visited(
     sort: str = Query("newest", description="newest | oldest | rating"),
     search: Optional[str] = Query(None),
@@ -41,7 +41,7 @@ def list_visited(
     return query.all()
 
 
-@router.post("/", response_model=PlaceVisitedResponse, status_code=201)
+@router.post("", response_model=PlaceVisitedResponse, status_code=201)
 def create_visited(
     data: PlaceVisitedCreate,
     db: Session = Depends(get_db),
