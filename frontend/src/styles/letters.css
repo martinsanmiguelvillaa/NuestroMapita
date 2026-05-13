@@ -2,6 +2,30 @@
    CARTITAS
    ========================================= */
 
+/* Fondo de la sección */
+.letters-bg {
+  min-height: calc(100vh - var(--navbar-height));
+  background-image: var(--bg-letters);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Overlay semitransparente para que el texto sea legible sobre la foto */
+.letters-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 246, 236, 0.72); /* mismo tono que --color-cream */
+  pointer-events: none;
+  z-index: 0;
+}
+
+.letters-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
 .letters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

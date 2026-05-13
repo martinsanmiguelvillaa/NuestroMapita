@@ -24,6 +24,7 @@ export default function Letters() {
   useEffect(() => { load(); }, [load]);
 
   return (
+    <div className="letters-bg">
     <div className="container">
       {/* Cabecera */}
       <div className="section-header">
@@ -58,6 +59,7 @@ export default function Letters() {
           onCancel={() => setShowForm(false)}
         />
       </Modal>
+    </div>
     </div>
   );
 }
