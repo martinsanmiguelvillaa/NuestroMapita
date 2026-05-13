@@ -78,7 +78,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         next.unshift(selected);
         return next;
       });
-      setLightboxIndex(0);
+      if (lightboxIndex !== null) setLightboxIndex(0);
       coverChangedRef.current = true;
     } catch (err) {
       alert('No se pudo cambiar la portada: ' + err.message);
