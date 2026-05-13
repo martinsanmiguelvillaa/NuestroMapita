@@ -46,6 +46,7 @@ export default function CoverPhoto({
 
   const handleMouseDown = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     startDrag(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect());
     const onMove = (e) => moveDrag(e.clientX, e.clientY);
     const onUp = () => {
@@ -58,6 +59,7 @@ export default function CoverPhoto({
   };
 
   const handleTouchStart = (e) => {
+    e.stopPropagation(); // evita activar el drag de reordenar en wishlist
     const t = e.touches[0];
     startDrag(t.clientX, t.clientY, e.currentTarget.getBoundingClientRect());
     const onMove = (e) => { e.preventDefault(); const t = e.touches[0]; moveDrag(t.clientX, t.clientY); };
