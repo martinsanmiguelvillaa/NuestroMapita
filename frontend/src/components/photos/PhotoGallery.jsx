@@ -9,7 +9,8 @@ function videoThumb(url) {
 }
 
 function LazyVideo({ src, className, onClick }) {
-  const [playing, setPlaying] = useState(false);
+  const [active, setActive] = useState(false);   // IntersectionObserver dice que es visible
+  const [started, setStarted] = useState(false); // el video ya empezó a reproducirse
   const containerRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -19,9 +20,10 @@ function LazyVideo({ src, className, onClick }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setPlaying(true);
+          setActive(true);
         } else {
-          setPlaying(false);
+          setActive(false);
+          setStarted(false);
         }
       },
       { threshold: 0.3 },
@@ -30,16 +32,11 @@ function LazyVideo({ src, className, onClick }) {
     return () => observer.disconnect();
   }, [src]);
 
-  useEffect(() => {
-    if (playing && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, [playing]);
-
-  const replay = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
+  const handleMouseEnter = () => {
+    const v = videoRef.current;
+    if (v && v.paused) {           // solo reinicia si está pausado
+      v.currentTime = 0;
+      v.play().catch(() => {});
     }
   };
 
@@ -48,21 +45,23 @@ function LazyVideo({ src, className, onClick }) {
       ref={containerRef}
       style={{ position: 'relative', width: '100%', height: '100%' }}
       onClick={onClick}
-      onMouseEnter={replay}
+      onMouseEnter={handleMouseEnter}
     >
-      {/* Imagen estática hasta que sea visible — nunca hay video pausado */}
-      {!playing && (
+      {/* Imagen hasta que el video realmente empiece — nunca hay video pausado visible */}
+      {(!active || !started) && (
         <img src={videoThumb(src)} className={className} alt="" loading="lazy" />
       )}
-      {playing && (
+      {active && (
         <video
           ref={videoRef}
           src={src}
           className={className}
+          style={{ display: started ? 'block' : 'none' }}
           muted
           playsInline
-          preload="auto"
-          onEnded={() => setPlaying(false)}
+          autoPlay
+          onPlay={() => setStarted(true)}
+          onEnded={() => { setStarted(false); setActive(false); }}
         />
       )}
     </div>
