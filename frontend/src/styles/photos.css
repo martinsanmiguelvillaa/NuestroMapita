@@ -200,6 +200,11 @@
   display: block;
 }
 
+video.photo-gallery__img::-webkit-media-controls,
+video.photo-gallery__img::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+}
+
 .photo-gallery__item:hover .photo-gallery__img {
   transform: scale(1.05);
 }
