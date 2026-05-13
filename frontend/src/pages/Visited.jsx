@@ -36,8 +36,12 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   }, [showPhotos]);
 
   const handleCoverClick = () => {
-    pendingOpen.current = coverIndex;
-    setShowPhotos(true);
+    if (showPhotos) {
+      galleryRef.current?.openAt(safeIndex);
+    } else {
+      pendingOpen.current = safeIndex;
+      setShowPhotos(true);
+    }
   };
 
   const prevCover = (e) => {
