@@ -5,12 +5,6 @@
 import { useState, useRef } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
 
-// Genera URL del primer frame de un video de Cloudinary como imagen estática
-function videoThumbnailUrl(videoUrl) {
-  return videoUrl
-    .replace('/video/upload/', '/video/upload/so_0,w_800/')
-    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
-}
 
 export default function CoverPhoto({
   photos = [],
@@ -25,6 +19,14 @@ export default function CoverPhoto({
   const [pendingPos, setPendingPos] = useState(null);
   const [saving, setSaving] = useState(false);
   const dragState = useRef(null); // { startX, startY, startPos, rect }
+  const videoRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (photo?.resource_type === 'video' && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+    }
+  };
 
   const photoCount = photos.length;
   const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
@@ -106,18 +108,22 @@ export default function CoverPhoto({
   }
 
   return (
-    <div className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`} style={{ aspectRatio }}>
+    <div
+      className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`}
+      style={{ aspectRatio }}
+      onMouseEnter={handleMouseEnter}
+    >
       {photo.resource_type === 'video' ? (
-        <>
-          <img
-            src={videoThumbnailUrl(photo.cloudinary_url)}
-            alt=""
-            className="cover-photo__img"
-            style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
-            onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
-          />
-          <span className="cover-photo__video-badge">▶</span>
-        </>
+        <video
+          ref={videoRef}
+          src={photo.cloudinary_url}
+          className="cover-photo__img"
+          style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
+          onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+          muted
+          autoPlay
+          playsInline
+        />
       ) : (
         <img
           src={photo.cloudinary_url}

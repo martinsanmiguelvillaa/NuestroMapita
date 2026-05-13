@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
 
-function videoThumbnailUrl(videoUrl) {
-  return videoUrl
-    .replace('/video/upload/', '/video/upload/so_0,w_400/')
-    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
-}
 import '../../styles/photos.css';
 
 const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, canDelete = true }, ref) {
@@ -122,12 +117,15 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         {localPhotos.map((photo, i) => (
           <div key={photo.id} className="photo-gallery__item">
             {photo.resource_type === 'video' ? (
-              <img
-                src={videoThumbnailUrl(photo.cloudinary_url)}
-                alt="Miniatura de video"
+              <video
+                src={photo.cloudinary_url}
                 className="photo-gallery__img"
                 onClick={() => setLightboxIndex(i)}
-                loading="lazy"
+                onMouseEnter={(e) => { e.currentTarget.currentTime = 0; e.currentTarget.play(); }}
+                muted
+                autoPlay
+                playsInline
+                preload="metadata"
               />
             ) : (
               <img
