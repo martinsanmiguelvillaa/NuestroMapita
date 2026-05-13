@@ -1,22 +1,23 @@
 /**
  * Foto de portada con navegación prev/next y ajuste de encuadre.
- * El ajuste guarda el punto focal (object-position) en el backend.
+ * En modo ajuste: arrastrá la imagen para reencuadrar en tiempo real.
  */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
 
 export default function CoverPhoto({
   photos = [],
   coverIndex,
   onCoverIndexChange,
-  onCoverClick,       // (safeIndex) => void — para abrir el lightbox
-  onPositionSaved,    // () => void — para recargar los datos del lugar
+  onCoverClick,
+  onPositionSaved,
   aspectRatio = '4/3',
   placeholder = '📍',
 }) {
   const [adjusting, setAdjusting] = useState(false);
   const [pendingPos, setPendingPos] = useState(null);
   const [saving, setSaving] = useState(false);
+  const dragState = useRef(null); // { startX, startY, startPos, rect }
 
   const photoCount = photos.length;
   const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
@@ -25,13 +26,51 @@ export default function CoverPhoto({
   const storedPos = { x: photo?.position_x ?? 50, y: photo?.position_y ?? 50 };
   const pos = pendingPos ?? storedPos;
 
-  const handleOverlayClick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
-    const y = Math.round(Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100)));
-    setPendingPos({ x, y });
+  // ── Drag (mouse) ──────────────────────────────────────────────────
+  const startDrag = (clientX, clientY, rect) => {
+    dragState.current = { startX: clientX, startY: clientY, startPos: { ...pos }, rect };
   };
 
+  const moveDrag = (clientX, clientY) => {
+    if (!dragState.current) return;
+    const { startX, startY, startPos, rect } = dragState.current;
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+    // Sensitivity: dragging the full container width goes from 0→100%
+    const newX = Math.round(Math.max(0, Math.min(100, startPos.x - (dx / rect.width) * 100)));
+    const newY = Math.round(Math.max(0, Math.min(100, startPos.y - (dy / rect.height) * 100)));
+    setPendingPos({ x: newX, y: newY });
+  };
+
+  const endDrag = () => { dragState.current = null; };
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    startDrag(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect());
+    const onMove = (e) => moveDrag(e.clientX, e.clientY);
+    const onUp = () => {
+      endDrag();
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  const handleTouchStart = (e) => {
+    const t = e.touches[0];
+    startDrag(t.clientX, t.clientY, e.currentTarget.getBoundingClientRect());
+    const onMove = (e) => { e.preventDefault(); const t = e.touches[0]; moveDrag(t.clientX, t.clientY); };
+    const onEnd = () => {
+      endDrag();
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onEnd);
+    };
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+  };
+
+  // ── Save / cancel ─────────────────────────────────────────────────
   const handleSave = async () => {
     if (!photo) { setAdjusting(false); return; }
     setSaving(true);
@@ -47,10 +86,7 @@ export default function CoverPhoto({
     }
   };
 
-  const handleCancel = () => {
-    setPendingPos(null);
-    setAdjusting(false);
-  };
+  const handleCancel = () => { setPendingPos(null); setAdjusting(false); };
 
   if (!photo) {
     return (
@@ -70,17 +106,16 @@ export default function CoverPhoto({
         onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
       />
 
-      {/* Overlay clickeable para ajuste */}
+      {/* Overlay de arrastre */}
       {adjusting && (
-        <div className="cover-photo__adjust-overlay" onClick={handleOverlayClick}>
-          <div
-            className="cover-photo__focal-dot"
-            style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-          />
-        </div>
+        <div
+          className="cover-photo__adjust-overlay"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        />
       )}
 
-      {/* Flechas de navegación (ocultas en modo ajuste) */}
+      {/* Flechas de navegación */}
       {!adjusting && photoCount > 1 && (
         <>
           <button
@@ -95,7 +130,7 @@ export default function CoverPhoto({
         </>
       )}
 
-      {/* Botón ajustar (aparece al hover) */}
+      {/* Botón ajustar */}
       {!adjusting && (
         <button
           className="cover-photo__adjust-btn"
@@ -106,10 +141,10 @@ export default function CoverPhoto({
         </button>
       )}
 
-      {/* Controles del modo ajuste */}
+      {/* Controles modo ajuste */}
       {adjusting && (
         <div className="cover-photo__adjust-controls" onClick={(e) => e.stopPropagation()}>
-          <span className="cover-photo__adjust-hint">Tocá donde querés el enfoque</span>
+          <span className="cover-photo__adjust-hint">Arrastrá la foto para reencuadrar</span>
           <div className="cover-photo__adjust-btns">
             <button className="cover-photo__adjust-save" onClick={handleSave} disabled={saving}>
               {saving ? '...' : '✓ Guardar'}

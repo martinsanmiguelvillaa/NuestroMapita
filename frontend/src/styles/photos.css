@@ -89,24 +89,15 @@
 .cover-photo:hover .cover-photo__adjust-btn { opacity: 1; }
 .cover-photo__adjust-btn:hover { background: rgba(0, 0, 0, 0.7); }
 
-/* Overlay de ajuste (captura el clic para mover el punto focal) */
+/* Overlay de arrastre */
 .cover-photo__adjust-overlay {
   position: absolute;
   inset: 0;
-  cursor: crosshair;
+  cursor: grab;
   z-index: 3;
 }
-
-/* Punto focal */
-.cover-photo__focal-dot {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+.cover-photo__adjust-overlay:active {
+  cursor: grabbing;
 }
 
 /* Barra de controles del modo ajuste */
