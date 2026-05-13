@@ -434,6 +434,15 @@
   animation: fadeIn 0.4s ease;
 }
 
+.random-card__photo {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-md);
+}
+
 .random-card__label {
   font-size: var(--text-sm);
   color: var(--color-text-light);

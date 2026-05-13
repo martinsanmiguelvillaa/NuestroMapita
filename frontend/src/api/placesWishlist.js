@@ -30,4 +30,5 @@ export const reorderWishlistBulk = (orderedIds) =>
 export const convertToVisited = (id, data) =>
   apiFetch(`${BASE}/${id}/convert`, { method: 'POST', body: JSON.stringify(data) });
 
-export const getRandomWishlist = () => apiFetch(`${BASE}/random`);
+export const getRandomWishlist = (excludeId) =>
+  apiFetch(`${BASE}/random${excludeId ? `?exclude_id=${excludeId}` : ''}`);

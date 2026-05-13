@@ -34,14 +34,17 @@ def reorder_all(
 
 @router.get("/random", response_model=PlaceWishlistResponse)
 def get_random(
+    exclude_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Elige un lugar al azar de la lista de pendientes."""
+    """Elige un lugar al azar de la lista de pendientes, opcionalmente excluyendo uno."""
     places = db.query(PlaceWishlist).all()
     if not places:
         raise HTTPException(status_code=404, detail="No hay lugares por visitar todavía")
-    return random.choice(places)
+    candidates = [p for p in places if p.id != exclude_id]
+    # Si solo hay uno y es el excluido, igual lo devolvemos
+    return random.choice(candidates if candidates else places)
 
 
 @router.get("", response_model=List[PlaceWishlistResponse])

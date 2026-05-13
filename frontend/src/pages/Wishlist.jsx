@@ -367,7 +367,7 @@ export default function Wishlist() {
   const handleRandom = async () => {
     setRolling(true);
     try {
-      const place = await getRandomWishlist();
+      const place = await getRandomWishlist(randomPlace?.id);
       setRandomPlace(place);
     } catch (err) {
       alert(err.message);
@@ -395,6 +395,13 @@ export default function Wishlist() {
       {/* Resultado del sorteo */}
       {randomPlace && (
         <div className="random-card fade-in">
+          {randomPlace.photos?.[0]?.cloudinary_url && (
+            <img
+              src={randomPlace.photos[0].cloudinary_url}
+              alt={randomPlace.name}
+              className="random-card__photo"
+            />
+          )}
           <p className="random-card__label">Nuestro próximo plan</p>
           <h2 className="random-card__name">{randomPlace.name}</h2>
           {randomPlace.address && (
