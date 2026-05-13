@@ -5,6 +5,13 @@
 import { useState, useRef } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
 
+// Genera URL del primer frame de un video de Cloudinary como imagen estática
+function videoThumbnailUrl(videoUrl) {
+  return videoUrl
+    .replace('/video/upload/', '/video/upload/so_0,w_800/')
+    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+}
+
 export default function CoverPhoto({
   photos = [],
   coverIndex,
@@ -101,16 +108,16 @@ export default function CoverPhoto({
   return (
     <div className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`} style={{ aspectRatio }}>
       {photo.resource_type === 'video' ? (
-        <video
-          src={photo.cloudinary_url}
-          className="cover-photo__img"
-          style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
-          onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
-          muted
-          autoPlay
-          loop
-          playsInline
-        />
+        <>
+          <img
+            src={videoThumbnailUrl(photo.cloudinary_url)}
+            alt=""
+            className="cover-photo__img"
+            style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
+            onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+          />
+          <span className="cover-photo__video-badge">▶</span>
+        </>
       ) : (
         <img
           src={photo.cloudinary_url}
