@@ -33,6 +33,8 @@ function LazyVideo({ src, className, onClick }) {
       muted
       playsInline
       preload="none"
+      disableRemotePlayback
+      x-webkit-airplay="deny"
     />
   );
 }

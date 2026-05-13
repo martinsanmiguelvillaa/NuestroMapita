@@ -200,9 +200,11 @@
   display: block;
 }
 
-video.photo-gallery__img::-webkit-media-controls,
-video.photo-gallery__img::-webkit-media-controls-overlay-play-button {
+video::-webkit-media-controls,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-start-playback-button {
   display: none !important;
+  -webkit-appearance: none;
 }
 
 .photo-gallery__item:hover .photo-gallery__img {
