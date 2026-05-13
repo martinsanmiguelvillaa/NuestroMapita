@@ -41,7 +41,6 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
     try {
       await deletePhoto(photo.id);
       onDelete?.();
-      // Si queda alguna foto anterior al índice actual, ajustar
       if (lightboxIndex >= photos.length - 1) {
         setLightboxIndex(photos.length > 1 ? photos.length - 2 : null);
       }
@@ -49,6 +48,22 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
       alert('No se pudo eliminar la foto: ' + err.message);
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleDownload = async (photo) => {
+    try {
+      const res = await fetch(photo.cloudinary_url);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `foto-${photo.id}.jpg`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // fallback: abrir en nueva pestaña
+      window.open(photo.cloudinary_url, '_blank');
     }
   };
 
@@ -128,6 +143,27 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
               ›
             </button>
           )}
+
+          {/* Acciones: descargar + eliminar */}
+          <div className="lightbox__actions" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="lightbox__action-btn"
+              onClick={() => handleDownload(current)}
+              title="Descargar foto"
+            >
+              ⬇ Descargar
+            </button>
+            {canDelete && (
+              <button
+                className="lightbox__action-btn lightbox__action-btn--danger"
+                onClick={() => handleDelete(current)}
+                disabled={deleting === current.id}
+                title="Eliminar foto"
+              >
+                {deleting === current.id ? '...' : '🗑 Eliminar'}
+              </button>
+            )}
+          </div>
 
           {/* Miniaturas en la barra inferior */}
           {photos.length > 1 && (
