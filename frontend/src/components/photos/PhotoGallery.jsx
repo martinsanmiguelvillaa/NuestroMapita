@@ -1,28 +1,42 @@
-import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
 import '../../styles/photos.css';
 
 const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, canDelete = true }, ref) {
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
+  const [localPhotos, setLocalPhotos] = useState(photos);
+  const coverChangedRef = useRef(false);
+
+  // Sincronizar cuando el padre actualiza el array (ej: tras eliminar o recargar)
+  useEffect(() => {
+    setLocalPhotos(photos);
+  }, [photos]);
 
   useImperativeHandle(ref, () => ({
     openAt: (index) => setLightboxIndex(index),
   }), []);
+
   const [deleting, setDeleting] = useState(null);
   const [settingCover, setSettingCover] = useState(null);
 
   const isOpen = lightboxIndex !== null;
-  const current = isOpen ? photos[lightboxIndex] : null;
+  const current = isOpen ? localPhotos[lightboxIndex] : null;
 
   const prev = useCallback(() => {
-    setLightboxIndex((i) => (i - 1 + photos.length) % photos.length);
-  }, [photos.length]);
+    setLightboxIndex((i) => (i - 1 + localPhotos.length) % localPhotos.length);
+  }, [localPhotos.length]);
 
   const next = useCallback(() => {
-    setLightboxIndex((i) => (i + 1) % photos.length);
-  }, [photos.length]);
+    setLightboxIndex((i) => (i + 1) % localPhotos.length);
+  }, [localPhotos.length]);
 
-  const close = () => setLightboxIndex(null);
+  const close = () => {
+    setLightboxIndex(null);
+    if (coverChangedRef.current) {
+      coverChangedRef.current = false;
+      onCoverSet?.();
+    }
+  };
 
   // Teclado: flechas + Escape
   useEffect(() => {
@@ -42,8 +56,8 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     try {
       await deletePhoto(photo.id);
       onDelete?.();
-      if (lightboxIndex >= photos.length - 1) {
-        setLightboxIndex(photos.length > 1 ? photos.length - 2 : null);
+      if (lightboxIndex >= localPhotos.length - 1) {
+        setLightboxIndex(localPhotos.length > 1 ? localPhotos.length - 2 : null);
       }
     } catch (err) {
       alert('No se pudo eliminar la foto: ' + err.message);
@@ -57,7 +71,11 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     setSettingCover(photo.id);
     try {
       await setCoverPhoto(photo.id);
-      onCoverSet?.();
+      // Actualizar badges localmente sin recargar el padre ni cerrar el lightbox
+      setLocalPhotos((prev) =>
+        prev.map((p, i) => ({ ...p, sort_order: p.id === photo.id ? 0 : i + 1 }))
+      );
+      coverChangedRef.current = true;
     } catch (err) {
       alert('No se pudo cambiar la portada: ' + err.message);
     } finally {
@@ -81,13 +99,13 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     }
   };
 
-  if (!photos.length) return null;
+  if (!localPhotos.length) return null;
 
   return (
     <>
       {/* Grilla de miniaturas */}
       <div className="photo-gallery">
-        {photos.map((photo, i) => (
+        {localPhotos.map((photo, i) => (
           <div key={photo.id} className="photo-gallery__item">
             <img
               src={photo.cloudinary_url}
@@ -137,14 +155,14 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         <div className="lightbox" onClick={close}>
           {/* Contador */}
           <div className="lightbox__counter" onClick={(e) => e.stopPropagation()}>
-            {lightboxIndex + 1} / {photos.length}
+            {lightboxIndex + 1} / {localPhotos.length}
           </div>
 
           {/* Botón cerrar */}
           <button className="lightbox__close" onClick={close}>×</button>
 
           {/* Flecha anterior */}
-          {photos.length > 1 && (
+          {localPhotos.length > 1 && (
             <button
               className="lightbox__arrow lightbox__arrow--prev"
               onClick={(e) => { e.stopPropagation(); prev(); }}
@@ -162,7 +180,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           />
 
           {/* Flecha siguiente */}
-          {photos.length > 1 && (
+          {localPhotos.length > 1 && (
             <button
               className="lightbox__arrow lightbox__arrow--next"
               onClick={(e) => { e.stopPropagation(); next(); }}
@@ -203,9 +221,9 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           </div>
 
           {/* Miniaturas en la barra inferior */}
-          {photos.length > 1 && (
+          {localPhotos.length > 1 && (
             <div className="lightbox__thumbs" onClick={(e) => e.stopPropagation()}>
-              {photos.map((p, i) => (
+              {localPhotos.map((p, i) => (
                 <img
                   key={p.id}
                   src={p.cloudinary_url}
