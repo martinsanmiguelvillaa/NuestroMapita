@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 class PlaceWishlistCreate(BaseModel):
     name: str
     description: Optional[str] = None
-    address: str
+    address: Optional[str] = None
     google_maps_url: Optional[str] = None
     social_url: Optional[str] = None
     latitude: Optional[Decimal] = None
@@ -18,13 +18,6 @@ class PlaceWishlistCreate(BaseModel):
     def name_not_empty(cls, v):
         if not v or not v.strip():
             raise ValueError("El nombre es obligatorio")
-        return v.strip()
-
-    @field_validator("address")
-    @classmethod
-    def address_not_empty(cls, v):
-        if not v or not v.strip():
-            raise ValueError("La dirección es obligatoria")
         return v.strip()
 
 
@@ -42,7 +35,7 @@ class PlaceWishlistResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
-    address: str
+    address: Optional[str]
     google_maps_url: Optional[str]
     social_url: Optional[str]
     latitude: Optional[Decimal]

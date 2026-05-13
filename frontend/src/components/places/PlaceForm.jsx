@@ -1,47 +1,32 @@
 /**
  * Formulario para crear/editar un lugar visitado.
- * También incluye geocodificación con Nominatim (opcional).
  */
 import { useState } from 'react';
+import LocationPickerMap from './LocationPickerMap';
 
 const EMPTY_FORM = {
   name: '',
-  address: '',
   visit_date: '',
   comment: '',
   rating: null,
   google_maps_url: '',
-  latitude: '',
-  longitude: '',
+  latitude: null,
+  longitude: null,
 };
 
 export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loading }) {
-  const [form, setForm] = useState({ ...EMPTY_FORM, ...initialData });
-  const [geocoding, setGeocoding] = useState(false);
+  const [form, setForm] = useState({
+    ...EMPTY_FORM,
+    ...initialData,
+    latitude: initialData.latitude ? parseFloat(initialData.latitude) : null,
+    longitude: initialData.longitude ? parseFloat(initialData.longitude) : null,
+  });
   const [error, setError] = useState('');
 
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
-  const handleGeocode = async () => {
-    if (!form.address.trim()) return;
-    setGeocoding(true);
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(form.address)}&limit=1`,
-        { headers: { 'User-Agent': 'NuestroMapita/1.0' } }
-      );
-      const data = await res.json();
-      if (data && data.length > 0) {
-        set('latitude', parseFloat(data[0].lat).toFixed(7));
-        set('longitude', parseFloat(data[0].lon).toFixed(7));
-      } else {
-        alert('No se encontraron coordenadas para esa dirección. Podés ingresarlas manualmente.');
-      }
-    } catch {
-      alert('No se pudo buscar la ubicación. Verificá tu conexión.');
-    } finally {
-      setGeocoding(false);
-    }
+  const handleLocationChange = ({ lat, lng }) => {
+    setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
   };
 
   const handleSubmit = async (e) => {
@@ -49,18 +34,16 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
     setError('');
 
     if (!form.name.trim()) return setError('El nombre es obligatorio');
-    if (!form.address.trim()) return setError('La dirección es obligatoria');
     if (!form.visit_date) return setError('La fecha de visita es obligatoria');
 
     const payload = {
       name: form.name.trim(),
-      address: form.address.trim(),
       visit_date: form.visit_date,
       comment: form.comment.trim() || null,
       rating: form.rating || null,
       google_maps_url: form.google_maps_url.trim() || null,
-      latitude: form.latitude ? parseFloat(form.latitude) : null,
-      longitude: form.longitude ? parseFloat(form.longitude) : null,
+      latitude: form.latitude ?? null,
+      longitude: form.longitude ?? null,
     };
 
     try {
@@ -86,27 +69,12 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
       </div>
 
       <div className="form-group">
-        <label className="form-label">Dirección *</label>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input
-            className="form-input"
-            value={form.address}
-            onChange={(e) => set('address', e.target.value)}
-            placeholder="Ej: Rivadavia 2100, Buenos Aires"
-            required
-          />
-          <button
-            type="button"
-            className="btn btn-outline btn-sm"
-            onClick={handleGeocode}
-            disabled={geocoding}
-            title="Buscar coordenadas automáticamente"
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            {geocoding ? '...' : '📍 Buscar'}
-          </button>
-        </div>
-        <span className="form-hint">Tocá "Buscar" para obtener coordenadas automáticamente y que aparezca en el mapa.</span>
+        <label className="form-label">Ubicación en el mapa</label>
+        <LocationPickerMap
+          lat={form.latitude}
+          lng={form.longitude}
+          onChange={handleLocationChange}
+        />
       </div>
 
       <div className="form-group">
@@ -164,31 +132,6 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
           onChange={(e) => set('google_maps_url', e.target.value)}
           placeholder="https://maps.google.com/..."
         />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        <div className="form-group">
-          <label className="form-label">Latitud</label>
-          <input
-            className="form-input"
-            type="number"
-            step="any"
-            value={form.latitude}
-            onChange={(e) => set('latitude', e.target.value)}
-            placeholder="-34.6037"
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Longitud</label>
-          <input
-            className="form-input"
-            type="number"
-            step="any"
-            value={form.longitude}
-            onChange={(e) => set('longitude', e.target.value)}
-            placeholder="-58.3816"
-          />
-        </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>

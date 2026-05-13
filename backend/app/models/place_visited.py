@@ -9,7 +9,7 @@ class PlaceVisited(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String(200), nullable=False)
-    address = Column(String(400), nullable=False)
+    address = Column(String(400), nullable=True)
     visit_date = Column(Date, nullable=False)
     comment = Column(Text, nullable=True)
     rating = Column(SmallInteger, nullable=True)          # 1 a 5

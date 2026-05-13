@@ -49,11 +49,6 @@ export default function ConvertModal({ place, isOpen, onClose, onConverted }) {
           <input className="form-input" value={place?.name || ''} disabled />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Dirección</label>
-          <input className="form-input" value={place?.address || ''} disabled />
-        </div>
-
         {/* Datos nuevos */}
         <div className="form-group">
           <label className="form-label">Fecha de visita *</label>
