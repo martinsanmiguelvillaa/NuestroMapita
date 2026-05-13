@@ -1,7 +1,41 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
-
 import '../../styles/photos.css';
+
+function LazyVideo({ src, className, onClick }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      className={className}
+      onClick={onClick}
+      onMouseEnter={() => { ref.current.currentTime = 0; ref.current.play().catch(() => {}); }}
+      muted
+      playsInline
+      preload="none"
+    />
+  );
+}
 
 const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, canDelete = true }, ref) {
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
@@ -117,15 +151,10 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         {localPhotos.map((photo, i) => (
           <div key={photo.id} className="photo-gallery__item">
             {photo.resource_type === 'video' ? (
-              <video
+              <LazyVideo
                 src={photo.cloudinary_url}
                 className="photo-gallery__img"
                 onClick={() => setLightboxIndex(i)}
-                onMouseEnter={(e) => { e.currentTarget.currentTime = 0; e.currentTarget.play(); }}
-                muted
-                autoPlay
-                playsInline
-                preload="metadata"
               />
             ) : (
               <img

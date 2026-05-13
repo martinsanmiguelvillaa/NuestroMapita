@@ -2,7 +2,7 @@
  * Foto de portada con navegación prev/next y ajuste de encuadre.
  * En modo ajuste: arrastrá la imagen para reencuadrar en tiempo real.
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
 
 
@@ -20,11 +20,33 @@ export default function CoverPhoto({
   const [saving, setSaving] = useState(false);
   const dragState = useRef(null); // { startX, startY, startPos, rect }
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Reproduce el video solo cuando la tarjeta es visible en pantalla
+  useEffect(() => {
+    const video = videoRef.current;
+    const container = containerRef.current;
+    if (!video || !container || photo?.resource_type !== 'video') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [photo?.resource_type, photo?.cloudinary_url]);
 
   const handleMouseEnter = () => {
     if (photo?.resource_type === 'video' && videoRef.current) {
       videoRef.current.currentTime = 0;
-      videoRef.current.play();
+      videoRef.current.play().catch(() => {});
     }
   };
 
@@ -109,6 +131,7 @@ export default function CoverPhoto({
 
   return (
     <div
+      ref={containerRef}
       className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`}
       style={{ aspectRatio }}
       onMouseEnter={handleMouseEnter}
@@ -121,8 +144,8 @@ export default function CoverPhoto({
           style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
           onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
           muted
-          autoPlay
           playsInline
+          preload="none"
         />
       ) : (
         <img
