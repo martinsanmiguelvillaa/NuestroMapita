@@ -83,10 +83,6 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
       )}
 
       <div className="wish-card__header">
-        {/* Handle de arrastre */}
-        <div className="wish-card__drag-handle" {...dragHandleProps} title="Mantené presionado para arrastrar">
-          <span className="drag-dots">⠿</span>
-        </div>
         <h3 className="wish-card__name">{place.name}</h3>
       </div>
 
