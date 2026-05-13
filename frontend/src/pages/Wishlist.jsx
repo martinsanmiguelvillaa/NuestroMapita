@@ -7,16 +7,31 @@ import {
   getWishlist, createWishlist, updateWishlist,
   deleteWishlist, reorderWishlistBulk, getRandomWishlist,
 } from '../api/placesWishlist';
+import { uploadWishlistPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
 import ConvertModal from '../components/places/ConvertModal';
+import PhotoSection from '../components/photos/PhotoSection';
 import SearchBar from '../components/ui/SearchBar';
 import '../styles/places.css';
+import '../styles/photos.css';
 
 // ─── Tarjeta individual ──────────────────────────────────────────────────────
 
-function WishCard({ place, onEdit, onDelete, onConvert, dragHandleProps, isDragging }) {
+function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHandleProps, isDragging }) {
   const [deleting, setDeleting] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (files) => {
+    setUploading(true);
+    try {
+      await uploadWishlistPhotos(place.id, files);
+      onPhotosChanged?.();
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm(`¿Eliminar "${place.name}"?`)) return;
@@ -42,6 +57,31 @@ function WishCard({ place, onEdit, onDelete, onConvert, dragHandleProps, isDragg
 
       {place.description && <p className="wish-card__desc">{place.description}</p>}
       {place.address && <p className="wish-card__address">📍 {place.address}</p>}
+
+      {/* Fotos */}
+      <div style={{ margin: '8px 0' }}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => setShowPhotos(!showPhotos)}
+          style={{ fontSize: '12px' }}
+        >
+          📷 {(place.photos?.length ?? 0) > 0
+            ? `${place.photos.length} foto${place.photos.length !== 1 ? 's' : ''}`
+            : 'Fotos'}
+          {showPhotos ? ' ▲' : ' ▼'}
+        </button>
+        {showPhotos && (
+          <div style={{ marginTop: '8px' }}>
+            <PhotoSection
+              photos={place.photos ?? []}
+              onUpload={handleUpload}
+              onDelete={onPhotosChanged}
+              uploading={uploading}
+            />
+          </div>
+        )}
+      </div>
 
       <div className="wish-card__links">
         {place.google_maps_url && (
@@ -244,10 +284,13 @@ export default function Wishlist() {
     onOrderChange: handleOrderChange,
   });
 
-  const handleCreate = async (data) => {
+  const handleCreate = async (data, files) => {
     setSaving(true);
     try {
-      await createWishlist(data);
+      const newPlace = await createWishlist(data);
+      if (files?.length) {
+        await uploadWishlistPhotos(newPlace.id, files);
+      }
       setShowForm(false);
       load();
     } finally {
@@ -344,6 +387,7 @@ export default function Wishlist() {
                 dragHandleProps={dragHandleProps}
                 onEdit={setEditing}
                 onDelete={load}
+                onPhotosChanged={load}
                 onConvert={setConvertPlace}
               />
             </div>

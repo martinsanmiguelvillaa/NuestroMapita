@@ -65,6 +65,24 @@
   transform: scale(1.1);
 }
 
+/* Photo section (galería + upload inline en tarjetas) */
+.photo-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.photo-section__upload {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.photo-section__add-btn {
+  font-size: var(--text-xs) !important;
+}
+
 /* Upload de fotos */
 .photo-upload {
   margin-top: var(--space-4);

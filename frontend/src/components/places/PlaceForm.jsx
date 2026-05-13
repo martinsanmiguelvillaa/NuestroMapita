@@ -1,7 +1,7 @@
 /**
  * Formulario para crear/editar un lugar visitado.
  */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import LocationPickerMap from './LocationPickerMap';
 
 const EMPTY_FORM = {
@@ -22,6 +22,8 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
     longitude: initialData.longitude ? parseFloat(initialData.longitude) : null,
   });
   const [error, setError] = useState('');
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const photoInputRef = useRef();
 
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -47,7 +49,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
     };
 
     try {
-      await onSubmit(payload);
+      await onSubmit(payload, photoFiles.length ? photoFiles : null);
     } catch (err) {
       setError(err.message);
     }
@@ -132,6 +134,25 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
           onChange={(e) => set('google_maps_url', e.target.value)}
           placeholder="https://maps.google.com/..."
         />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Fotos <span style={{ fontWeight: 400, color: 'var(--color-text-light)' }}>(opcional)</span></label>
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={(e) => setPhotoFiles(Array.from(e.target.files))}
+        />
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => photoInputRef.current?.click()}
+        >
+          📷 {photoFiles.length > 0 ? `${photoFiles.length} foto${photoFiles.length !== 1 ? 's' : ''} seleccionada${photoFiles.length !== 1 ? 's' : ''}` : 'Seleccionar fotos'}
+        </button>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>

@@ -1,13 +1,9 @@
-/**
- * Página de Lugares Visitados.
- * CRUD completo + upload de fotos + búsqueda + ordenamiento.
- */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getVisited, createVisited, updateVisited, deleteVisited } from '../api/placesVisited';
 import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
-import PhotoGallery from '../components/photos/PhotoGallery';
+import PhotoSection from '../components/photos/PhotoSection';
 import SearchBar from '../components/ui/SearchBar';
 import StarRating from '../components/places/StarRating';
 import '../styles/places.css';
@@ -20,22 +16,16 @@ function formatDate(dateStr) {
   });
 }
 
-// Tarjeta individual de lugar visitado
 function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
-  const [expanded, setExpanded] = useState(false);
-  const [photoFiles, setPhotoFiles] = useState([]);
+  const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const handleUpload = async () => {
-    if (!photoFiles.length) return;
+  const handleUpload = async (files) => {
     setUploading(true);
     try {
-      await uploadPhotos(place.id, photoFiles);
-      setPhotoFiles([]);
+      await uploadPhotos(place.id, files);
       onPhotosChanged?.();
-    } catch (err) {
-      alert('Error al subir fotos: ' + err.message);
     } finally {
       setUploading(false);
     }
@@ -54,6 +44,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   };
 
   const coverPhoto = place.photos?.[0]?.cloudinary_url;
+  const photoCount = place.photos?.length ?? 0;
 
   return (
     <div className="place-card fade-in">
@@ -67,54 +58,48 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
       <div className="place-card__body">
         <h3 className="place-card__name">{place.name}</h3>
         <p className="place-card__date">{formatDate(place.visit_date)}</p>
-        <p className="place-card__address">📍 {place.address}</p>
+        {place.address && <p className="place-card__address">📍 {place.address}</p>}
         {place.rating && <StarRating value={place.rating} readOnly small />}
         {place.comment && <p className="place-card__comment">"{place.comment}"</p>}
 
-        {/* Expandir para ver más */}
-        {expanded && (
-          <div style={{ marginTop: '12px' }}>
-            {place.google_maps_url && (
-              <a href={place.google_maps_url} target="_blank" rel="noreferrer" className="wish-card__link">
-                Ver en Google Maps
-              </a>
-            )}
-            {/* Galería de fotos */}
-            {place.photos?.length > 0 && (
-              <div style={{ marginTop: '12px' }}>
-                <p style={{ fontSize: '12px', color: 'var(--color-text-light)', marginBottom: '8px' }}>
-                  {place.photos.length} foto{place.photos.length !== 1 ? 's' : ''}
-                </p>
-                <PhotoGallery photos={place.photos} onDelete={onPhotosChanged} />
-              </div>
-            )}
-            {/* Upload de fotos */}
-            <div style={{ marginTop: '12px' }}>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => setPhotoFiles(Array.from(e.target.files))}
-                style={{ fontSize: '12px', marginBottom: '8px' }}
-              />
-              {photoFiles.length > 0 && (
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={handleUpload}
-                  disabled={uploading}
-                >
-                  {uploading ? 'Subiendo...' : `Subir ${photoFiles.length} foto${photoFiles.length !== 1 ? 's' : ''}`}
-                </button>
-              )}
-            </div>
-          </div>
+        {place.google_maps_url && (
+          <a
+            href={place.google_maps_url}
+            target="_blank"
+            rel="noreferrer"
+            className="wish-card__link"
+            style={{ marginTop: '6px', display: 'inline-block' }}
+          >
+            🗺 Ver en Google Maps
+          </a>
         )}
+
+        {/* Sección fotos */}
+        <div style={{ marginTop: '10px' }}>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => setShowPhotos(!showPhotos)}
+            style={{ fontSize: '12px' }}
+          >
+            📷 {photoCount > 0 ? `${photoCount} foto${photoCount !== 1 ? 's' : ''}` : 'Fotos'}
+            {showPhotos ? ' ▲' : ' ▼'}
+          </button>
+
+          {showPhotos && (
+            <div style={{ marginTop: '8px' }}>
+              <PhotoSection
+                photos={place.photos ?? []}
+                onUpload={handleUpload}
+                onDelete={onPhotosChanged}
+                uploading={uploading}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="place-card__footer">
-        <button className="btn btn-ghost btn-sm" onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'Menos' : 'Ver más'}
-        </button>
         <div className="place-card__actions">
           <button className="btn btn-ghost btn-sm" onClick={() => onEdit(place)}>Editar</button>
           <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
@@ -148,10 +133,13 @@ export default function Visited() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleCreate = async (data) => {
+  const handleCreate = async (data, files) => {
     setSaving(true);
     try {
-      await createVisited(data);
+      const newPlace = await createVisited(data);
+      if (files?.length) {
+        await uploadPhotos(newPlace.id, files);
+      }
       setShowForm(false);
       load();
     } finally {
@@ -172,15 +160,10 @@ export default function Visited() {
 
   return (
     <div className="container">
-      {/* Cabecera */}
       <div className="section-header">
         <h1 className="section-header__title">Lugares visitados</h1>
         <div className="section-controls">
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Buscar lugar..."
-          />
+          <SearchBar value={search} onChange={setSearch} placeholder="Buscar lugar..." />
           <select
             className="form-select"
             value={sort}
@@ -197,7 +180,6 @@ export default function Visited() {
         </div>
       </div>
 
-      {/* Lista */}
       {loading ? (
         <div className="loading-state">Cargando...</div>
       ) : places.length === 0 ? (
@@ -221,7 +203,6 @@ export default function Visited() {
         </div>
       )}
 
-      {/* Modal crear */}
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo lugar visitado">
         <PlaceForm
           onSubmit={handleCreate}
@@ -230,15 +211,12 @@ export default function Visited() {
         />
       </Modal>
 
-      {/* Modal editar */}
       <Modal isOpen={!!editing} onClose={() => setEditing(null)} title="Editar lugar">
         {editing && (
           <PlaceForm
             initialData={{
               ...editing,
               visit_date: editing.visit_date || '',
-              latitude: editing.latitude ? String(editing.latitude) : '',
-              longitude: editing.longitude ? String(editing.longitude) : '',
               google_maps_url: editing.google_maps_url || '',
               comment: editing.comment || '',
             }}

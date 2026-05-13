@@ -1,7 +1,8 @@
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional, List
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from app.schemas.photo import PhotoResponse
 
 
 class PlaceWishlistCreate(BaseModel):
@@ -43,6 +44,7 @@ class PlaceWishlistResponse(BaseModel):
     order_index: int
     created_at: datetime
     updated_at: datetime
+    photos: List[PhotoResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -11,10 +11,16 @@ class Photo(Base):
     place_visited_id = Column(
         Integer,
         ForeignKey("places_visited.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
     )
-    cloudinary_url = Column(String(500), nullable=False)       # URL pública de la imagen
-    cloudinary_public_id = Column(String(200), nullable=False) # ID para borrarla de Cloudinary
+    place_wishlist_id = Column(
+        Integer,
+        ForeignKey("places_wishlist.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    cloudinary_url = Column(String(500), nullable=False)
+    cloudinary_public_id = Column(String(200), nullable=False)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     place_visited = relationship("PlaceVisited", back_populates="photos")
+    place_wishlist = relationship("PlaceWishlist", back_populates="photos")

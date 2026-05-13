@@ -17,5 +17,16 @@ export async function uploadPhotos(placeId, files) {
   });
 }
 
+export async function uploadWishlistPhotos(placeId, files) {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('files', file);
+  }
+  return apiFetch(`/places/wishlist/${placeId}/photos`, {
+    method: 'POST',
+    body: formData,
+  });
+}
+
 export const deletePhoto = (photoId) =>
   apiFetch(`/photos/${photoId}`, { method: 'DELETE' });
