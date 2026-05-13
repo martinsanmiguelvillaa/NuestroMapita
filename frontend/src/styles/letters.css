@@ -16,7 +16,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.72); /* mismo tono que --color-cream */
+  background: rgba(30, 18, 10, 0.55); /* vidrio polarizado oscuro */
   pointer-events: none;
   z-index: 0;
 }
