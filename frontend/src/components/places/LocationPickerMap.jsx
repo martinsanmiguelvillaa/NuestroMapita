@@ -63,8 +63,7 @@ export default function LocationPickerMap({ lat, lng, onChange }) {
     [onChange],
   );
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleSearch = async () => {
     if (!search.trim()) return;
     setSearching(true);
     try {
@@ -88,22 +87,24 @@ export default function LocationPickerMap({ lat, lng, onChange }) {
 
   return (
     <div className="location-picker">
-      <form className="location-picker__search" onSubmit={handleSearch}>
+      <div className="location-picker__search">
         <input
           className="form-input"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearch())}
           placeholder="Buscar lugar en el mapa..."
         />
         <button
-          type="submit"
+          type="button"
           className="btn btn-outline btn-sm"
+          onClick={handleSearch}
           disabled={searching}
           style={{ whiteSpace: 'nowrap' }}
         >
           {searching ? '...' : 'Buscar'}
         </button>
-      </form>
+      </div>
 
       <div className="location-picker__map">
         <MapContainer
