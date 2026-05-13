@@ -24,18 +24,23 @@ function LazyVideo({ src, className, onClick }) {
   }, [src]);
 
   return (
-    <video
-      ref={ref}
-      src={src}
-      className={className}
-      onClick={onClick}
-      onMouseEnter={() => { ref.current.currentTime = 0; ref.current.play().catch(() => {}); }}
-      muted
-      playsInline
-      preload="none"
-      disableRemotePlayback
-      x-webkit-airplay="deny"
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <video
+        ref={ref}
+        src={src}
+        className={className}
+        muted
+        playsInline
+        preload="none"
+        disableRemotePlayback
+      />
+      {/* Capa transparente que bloquea el overlay nativo del browser */}
+      <div
+        style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+        onClick={onClick}
+        onMouseEnter={() => { ref.current.currentTime = 0; ref.current.play().catch(() => {}); }}
+      />
+    </div>
   );
 }
 
