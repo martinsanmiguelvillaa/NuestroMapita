@@ -66,15 +66,19 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     }
   };
 
-  const handleSetCover = async (photo) => {
-    if (photo.sort_order === 0) return; // ya es portada
+  const handleSetCover = async (photo, index) => {
+    if (index === 0) return; // ya es portada (primera del array)
     setSettingCover(photo.id);
     try {
       await setCoverPhoto(photo.id);
-      // Actualizar badges localmente sin recargar el padre ni cerrar el lightbox
-      setLocalPhotos((prev) =>
-        prev.map((p, i) => ({ ...p, sort_order: p.id === photo.id ? 0 : i + 1 }))
-      );
+      // Mover la foto seleccionada al frente localmente
+      setLocalPhotos((prev) => {
+        const next = [...prev];
+        const [selected] = next.splice(index, 1);
+        next.unshift(selected);
+        return next;
+      });
+      setLightboxIndex(0);
       coverChangedRef.current = true;
     } catch (err) {
       alert('No se pudo cambiar la portada: ' + err.message);
@@ -114,7 +118,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               onClick={() => setLightboxIndex(i)}
               loading="lazy"
             />
-            {photo.sort_order === 0 && (
+            {i === 0 && (
               <span className="photo-gallery__cover-badge" title="Portada">★</span>
             )}
             <div className="photo-gallery__overlay">
@@ -125,10 +129,10 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               >
                 ⤢
               </button>
-              {onCoverSet && photo.sort_order !== 0 && (
+              {onCoverSet && i !== 0 && (
                 <button
                   className="photo-gallery__cover-btn"
-                  onClick={() => handleSetCover(photo)}
+                  onClick={() => handleSetCover(photo, i)}
                   disabled={settingCover === photo.id}
                   title="Usar como portada"
                 >
@@ -193,12 +197,12 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           <div className="lightbox__actions" onClick={(e) => e.stopPropagation()}>
             {onCoverSet && (
               <button
-                className={`lightbox__action-btn${current.sort_order === 0 ? ' lightbox__action-btn--active' : ''}`}
-                onClick={() => handleSetCover(current)}
-                disabled={settingCover === current.id || current.sort_order === 0}
-                title={current.sort_order === 0 ? 'Ya es la portada' : 'Usar como portada'}
+                className={`lightbox__action-btn${lightboxIndex === 0 ? ' lightbox__action-btn--active' : ''}`}
+                onClick={() => handleSetCover(current, lightboxIndex)}
+                disabled={settingCover === current.id || lightboxIndex === 0}
+                title={lightboxIndex === 0 ? 'Ya es la portada' : 'Usar como portada'}
               >
-                {settingCover === current.id ? '...' : current.sort_order === 0 ? '★ Portada' : '☆ Portada'}
+                {settingCover === current.id ? '...' : lightboxIndex === 0 ? '★ Portada' : '☆ Portada'}
               </button>
             )}
             <button
