@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { deletePhoto } from '../../api/photos';
+import { deletePhoto, setCoverPhoto } from '../../api/photos';
 import '../../styles/photos.css';
 
-const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, canDelete = true }, ref) {
+const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, canDelete = true }, ref) {
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
 
   useImperativeHandle(ref, () => ({
     openAt: (index) => setLightboxIndex(index),
   }), []);
   const [deleting, setDeleting] = useState(null);
+  const [settingCover, setSettingCover] = useState(null);
 
   const isOpen = lightboxIndex !== null;
   const current = isOpen ? photos[lightboxIndex] : null;
@@ -51,6 +52,20 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
     }
   };
 
+  const handleSetCover = async (photo) => {
+    if (photo.sort_order === 0) return; // ya es portada
+    setSettingCover(photo.id);
+    try {
+      await setCoverPhoto(photo.id);
+      onCoverSet?.();
+      close();
+    } catch (err) {
+      alert('No se pudo cambiar la portada: ' + err.message);
+    } finally {
+      setSettingCover(null);
+    }
+  };
+
   const handleDownload = async (photo) => {
     try {
       const res = await fetch(photo.cloudinary_url);
@@ -82,6 +97,9 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
               onClick={() => setLightboxIndex(i)}
               loading="lazy"
             />
+            {photo.sort_order === 0 && (
+              <span className="photo-gallery__cover-badge" title="Portada">★</span>
+            )}
             <div className="photo-gallery__overlay">
               <button
                 className="photo-gallery__expand"
@@ -90,6 +108,16 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
               >
                 ⤢
               </button>
+              {onCoverSet && photo.sort_order !== 0 && (
+                <button
+                  className="photo-gallery__cover-btn"
+                  onClick={() => handleSetCover(photo)}
+                  disabled={settingCover === photo.id}
+                  title="Usar como portada"
+                >
+                  {settingCover === photo.id ? '...' : '★'}
+                </button>
+              )}
               {canDelete && (
                 <button
                   className="photo-gallery__delete"
@@ -144,8 +172,18 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, c
             </button>
           )}
 
-          {/* Acciones: descargar + eliminar */}
+          {/* Acciones: portada + descargar + eliminar */}
           <div className="lightbox__actions" onClick={(e) => e.stopPropagation()}>
+            {onCoverSet && (
+              <button
+                className={`lightbox__action-btn${current.sort_order === 0 ? ' lightbox__action-btn--active' : ''}`}
+                onClick={() => handleSetCover(current)}
+                disabled={settingCover === current.id || current.sort_order === 0}
+                title={current.sort_order === 0 ? 'Ya es la portada' : 'Usar como portada'}
+              >
+                {settingCover === current.id ? '...' : current.sort_order === 0 ? '★ Portada' : '☆ Portada'}
+              </button>
+            )}
             <button
               className="lightbox__action-btn"
               onClick={() => handleDownload(current)}

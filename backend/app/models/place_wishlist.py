@@ -19,4 +19,5 @@ class PlaceWishlist(Base):
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    photos = relationship("Photo", back_populates="place_wishlist", cascade="all, delete-orphan")
+    photos = relationship("Photo", back_populates="place_wishlist", cascade="all, delete-orphan",
+                          order_by="Photo.sort_order, Photo.created_at")

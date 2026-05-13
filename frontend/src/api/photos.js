@@ -39,3 +39,6 @@ export const updatePhotoPosition = (photoId, x, y) =>
     method: 'PATCH',
     body: JSON.stringify({ x, y }),
   });
+
+export const setCoverPhoto = (photoId) =>
+  apiFetch(`/photos/${photoId}/set-cover`, { method: 'PATCH' });

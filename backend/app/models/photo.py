@@ -22,6 +22,7 @@ class Photo(Base):
     cloudinary_public_id = Column(String(200), nullable=False)
     position_x = Column(Integer, nullable=False, default=50, server_default="50")
     position_y = Column(Integer, nullable=False, default=50, server_default="50")
+    sort_order = Column(Integer, nullable=False, default=0, server_default="0")
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     place_visited = relationship("PlaceVisited", back_populates="photos")

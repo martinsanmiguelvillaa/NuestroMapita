@@ -114,6 +114,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
                 photos={photos}
                 onUpload={handleUpload}
                 onDelete={onPhotosChanged}
+                onCoverSet={onPhotosChanged}
                 uploading={uploading}
                 galleryRef={galleryRef}
               />

@@ -126,6 +126,37 @@ async def upload_wishlist_photos(
     return created
 
 
+@router.patch("/photos/{photo_id}/set-cover", status_code=200)
+def set_cover_photo(
+    photo_id: int,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Establece esta foto como portada (sort_order=0) y reordena las demás."""
+    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+
+    # Obtener todas las fotos del mismo lugar
+    if photo.place_visited_id:
+        siblings = db.query(Photo).filter(
+            Photo.place_visited_id == photo.place_visited_id,
+            Photo.id != photo_id,
+        ).order_by(Photo.sort_order, Photo.created_at).all()
+    else:
+        siblings = db.query(Photo).filter(
+            Photo.place_wishlist_id == photo.place_wishlist_id,
+            Photo.id != photo_id,
+        ).order_by(Photo.sort_order, Photo.created_at).all()
+
+    photo.sort_order = 0
+    for i, sibling in enumerate(siblings):
+        sibling.sort_order = i + 1
+
+    db.commit()
+    return {"ok": True}
+
+
 @router.patch("/photos/{photo_id}/position", status_code=200)
 def update_photo_position(
     photo_id: int,

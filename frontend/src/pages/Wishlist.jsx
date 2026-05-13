@@ -108,6 +108,7 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
               photos={photos}
               onUpload={handleUpload}
               onDelete={onPhotosChanged}
+              onCoverSet={onPhotosChanged}
               uploading={uploading}
               galleryRef={galleryRef}
             />

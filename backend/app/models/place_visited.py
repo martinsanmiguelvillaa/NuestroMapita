@@ -20,4 +20,5 @@ class PlaceVisited(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relación 1:N con fotos (se eliminan en cascada si se borra el lugar)
-    photos = relationship("Photo", back_populates="place_visited", cascade="all, delete-orphan")
+    photos = relationship("Photo", back_populates="place_visited", cascade="all, delete-orphan",
+                          order_by="Photo.sort_order, Photo.created_at")

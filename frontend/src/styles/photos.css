@@ -273,6 +273,39 @@
   display: none;
 }
 
+/* Badge de portada actual */
+.photo-gallery__cover-badge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #f5c518;
+  font-size: 12px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Botón "usar como portada" en overlay de miniatura */
+.photo-gallery__cover-btn {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c8960c;
+  transition: var(--transition-fast);
+  margin-right: 4px;
+}
+.photo-gallery__cover-btn:hover { background: white; transform: scale(1.1); }
+
 /* Botón expandir en overlay de miniatura */
 .photo-gallery__expand {
   background: rgba(255,255,255,0.9);
@@ -395,6 +428,10 @@
 .lightbox__action-btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+.lightbox__action-btn--active {
+  color: #f5c518;
+  border-color: rgba(245, 197, 24, 0.5);
 }
 
 /* Miniaturas inferiores */
