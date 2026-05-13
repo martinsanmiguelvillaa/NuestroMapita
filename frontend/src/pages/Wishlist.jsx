@@ -12,6 +12,7 @@ import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
 import ConvertModal from '../components/places/ConvertModal';
 import PhotoSection from '../components/photos/PhotoSection';
+import CoverPhoto from '../components/photos/CoverPhoto';
 import SearchBar from '../components/ui/SearchBar';
 import '../styles/places.css';
 import '../styles/photos.css';
@@ -27,7 +28,6 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
   const pendingOpen = useRef(null);
 
   const photos = place.photos ?? [];
-  const photoCount = photos.length;
 
   useEffect(() => {
     if (showPhotos && pendingOpen.current != null) {
@@ -36,23 +36,13 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
     }
   }, [showPhotos]);
 
-  const handleCoverClick = () => {
+  const handleCoverClick = (idx) => {
     if (showPhotos) {
-      galleryRef.current?.openAt(safeIndex);
+      galleryRef.current?.openAt(idx);
     } else {
-      pendingOpen.current = safeIndex;
+      pendingOpen.current = idx;
       setShowPhotos(true);
     }
-  };
-
-  const prevCover = (e) => {
-    e.stopPropagation();
-    setCoverIndex((i) => (i - 1 + photoCount) % photoCount);
-  };
-
-  const nextCover = (e) => {
-    e.stopPropagation();
-    setCoverIndex((i) => (i + 1) % photoCount);
   };
 
   const handleUpload = async (files) => {
@@ -77,28 +67,18 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
     }
   };
 
-  const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
-  const coverUrl = photos[safeIndex]?.cloudinary_url;
-
   return (
     <div className={`wish-card fade-in${isDragging ? ' wish-card--dragging' : ''}`}>
       {/* Foto de portada (solo si hay fotos) */}
-      {coverUrl && (
-        <div className="wish-card__cover">
-          <img
-            src={coverUrl}
-            alt={place.name}
-            className="wish-card__cover-img"
-            onClick={handleCoverClick}
-          />
-          {photoCount > 1 && (
-            <>
-              <button className="wish-card__cover-arrow wish-card__cover-arrow--prev" onClick={prevCover}>‹</button>
-              <button className="wish-card__cover-arrow wish-card__cover-arrow--next" onClick={nextCover}>›</button>
-              <span className="wish-card__cover-counter">{safeIndex + 1}/{photoCount}</span>
-            </>
-          )}
-        </div>
+      {photos.length > 0 && (
+        <CoverPhoto
+          photos={photos}
+          coverIndex={coverIndex}
+          onCoverIndexChange={setCoverIndex}
+          onCoverClick={handleCoverClick}
+          onPositionSaved={onPhotosChanged}
+          aspectRatio="16/9"
+        />
       )}
 
       <div className="wish-card__header">

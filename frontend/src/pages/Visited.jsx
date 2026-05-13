@@ -4,6 +4,7 @@ import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
 import PhotoSection from '../components/photos/PhotoSection';
+import CoverPhoto from '../components/photos/CoverPhoto';
 import SearchBar from '../components/ui/SearchBar';
 import StarRating from '../components/places/StarRating';
 import '../styles/places.css';
@@ -25,9 +26,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   const pendingOpen = useRef(null);
 
   const photos = place.photos ?? [];
-  const photoCount = photos.length;
 
-  // When showPhotos becomes true after a cover click, trigger the lightbox
   useEffect(() => {
     if (showPhotos && pendingOpen.current != null) {
       galleryRef.current?.openAt(pendingOpen.current);
@@ -35,23 +34,13 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
     }
   }, [showPhotos]);
 
-  const handleCoverClick = () => {
+  const handleCoverClick = (idx) => {
     if (showPhotos) {
-      galleryRef.current?.openAt(safeIndex);
+      galleryRef.current?.openAt(idx);
     } else {
-      pendingOpen.current = safeIndex;
+      pendingOpen.current = idx;
       setShowPhotos(true);
     }
-  };
-
-  const prevCover = (e) => {
-    e.stopPropagation();
-    setCoverIndex((i) => (i - 1 + photoCount) % photoCount);
-  };
-
-  const nextCover = (e) => {
-    e.stopPropagation();
-    setCoverIndex((i) => (i + 1) % photoCount);
   };
 
   const handleUpload = async (files) => {
@@ -76,31 +65,16 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
     }
   };
 
-  const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
-  const coverUrl = photos[safeIndex]?.cloudinary_url;
-
   return (
     <div className="place-card fade-in">
-      {/* Foto de portada con flechas */}
-      <div className="place-card__photo-wrapper">
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={place.name}
-            className="place-card__photo"
-            onClick={handleCoverClick}
-          />
-        ) : (
-          <div className="place-card__photo-placeholder">📍</div>
-        )}
-        {photoCount > 1 && (
-          <>
-            <button className="place-card__cover-arrow place-card__cover-arrow--prev" onClick={prevCover}>‹</button>
-            <button className="place-card__cover-arrow place-card__cover-arrow--next" onClick={nextCover}>›</button>
-            <span className="place-card__photo-counter">{safeIndex + 1}/{photoCount}</span>
-          </>
-        )}
-      </div>
+      <CoverPhoto
+        photos={photos}
+        coverIndex={coverIndex}
+        onCoverIndexChange={setCoverIndex}
+        onCoverClick={handleCoverClick}
+        onPositionSaved={onPhotosChanged}
+        aspectRatio="4/3"
+      />
 
       <div className="place-card__body">
         <h3 className="place-card__name">{place.name}</h3>

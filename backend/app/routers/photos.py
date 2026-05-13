@@ -7,7 +7,7 @@ from app.dependencies import get_current_user
 from app.models.place_visited import PlaceVisited
 from app.models.place_wishlist import PlaceWishlist
 from app.models.photo import Photo
-from app.schemas.photo import PhotoResponse
+from app.schemas.photo import PhotoResponse, PhotoPositionUpdate
 from app.services.cloudinary_service import upload_image, delete_image
 from app.services.upload_validation import MAX_PLACE_PHOTOS_PER_REQUEST, read_valid_image_upload
 
@@ -124,6 +124,23 @@ async def upload_wishlist_photos(
     for p in created:
         db.refresh(p)
     return created
+
+
+@router.patch("/photos/{photo_id}/position", status_code=200)
+def update_photo_position(
+    photo_id: int,
+    data: PhotoPositionUpdate,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Guarda el punto focal (object-position) de una foto."""
+    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Foto no encontrada")
+    photo.position_x = max(0, min(100, data.x))
+    photo.position_y = max(0, min(100, data.y))
+    db.commit()
+    return {"ok": True}
 
 
 @router.delete("/photos/{photo_id}", status_code=204)

@@ -33,3 +33,9 @@ export const uploadWishlistPhotos = (placeId, files) =>
 
 export const deletePhoto = (photoId) =>
   apiFetch(`/photos/${photoId}`, { method: 'DELETE' });
+
+export const updatePhotoPosition = (photoId, x, y) =>
+  apiFetch(`/photos/${photoId}/position`, {
+    method: 'PATCH',
+    body: JSON.stringify({ x, y }),
+  });
