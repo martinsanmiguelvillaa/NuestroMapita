@@ -35,7 +35,9 @@ def list_visited(
     if sort == "oldest":
         query = query.order_by(PlaceVisited.visit_date.asc())
     elif sort == "rating":
-        query = query.order_by(PlaceVisited.rating.desc().nullslast())
+        # nullslast no es compatible con todas las versiones de MySQL;
+        # rating IS NULL devuelve 0 (no nulo) o 1 (nulo), ordenando nulos al final
+        query = query.order_by(PlaceVisited.rating.is_(None), PlaceVisited.rating.desc())
     else:  # newest
         query = query.order_by(PlaceVisited.visit_date.desc())
 
