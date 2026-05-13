@@ -28,6 +28,7 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
   const pendingOpen = useRef(null);
 
   const photos = place.photos ?? [];
+  const photoCount = photos.length;
 
   useEffect(() => {
     if (showPhotos && pendingOpen.current != null) {
