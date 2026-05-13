@@ -2,44 +2,69 @@ import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHand
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
 import '../../styles/photos.css';
 
+function videoThumb(url) {
+  return url
+    .replace('/video/upload/', '/video/upload/so_0,w_400/')
+    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+}
+
 function LazyVideo({ src, className, onClick }) {
-  const ref = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const containerRef = useRef(null);
+  const videoRef = useRef(null);
 
   useEffect(() => {
-    const video = ref.current;
-    if (!video) return;
+    const el = containerRef.current;
+    if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(() => {});
+          setPlaying(true);
         } else {
-          video.pause();
-          video.currentTime = 0;
+          setPlaying(false);
         }
       },
       { threshold: 0.3 },
     );
-    observer.observe(video);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [src]);
 
+  useEffect(() => {
+    if (playing && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [playing]);
+
+  const replay = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <video
-        ref={ref}
-        src={src}
-        className={className}
-        muted
-        playsInline
-        preload="none"
-        disableRemotePlayback
-      />
-      {/* Capa transparente que bloquea el overlay nativo del browser */}
-      <div
-        style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
-        onClick={onClick}
-        onMouseEnter={() => { ref.current.currentTime = 0; ref.current.play().catch(() => {}); }}
-      />
+    <div
+      ref={containerRef}
+      style={{ position: 'relative', width: '100%', height: '100%' }}
+      onClick={onClick}
+      onMouseEnter={replay}
+    >
+      {/* Imagen estática hasta que sea visible — nunca hay video pausado */}
+      {!playing && (
+        <img src={videoThumb(src)} className={className} alt="" loading="lazy" />
+      )}
+      {playing && (
+        <video
+          ref={videoRef}
+          src={src}
+          className={className}
+          muted
+          playsInline
+          preload="auto"
+          onEnded={() => setPlaying(false)}
+        />
+      )}
     </div>
   );
 }
