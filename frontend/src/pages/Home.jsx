@@ -83,10 +83,6 @@ export default function Home() {
             <div className="home__stat-number">{stats.wishlist}</div>
             <div className="home__stat-label">por visitar</div>
           </div>
-          <div className="home__stat">
-            <div className="home__stat-number">{stats.letters}</div>
-            <div className="home__stat-label">cartitas</div>
-          </div>
         </div>
       )}
 
