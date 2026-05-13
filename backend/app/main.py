@@ -8,6 +8,7 @@ app = FastAPI(
     title="Nuestro Mapita API",
     description="Backend de la app de recuerdos compartidos.",
     version="1.0.0",
+    redirect_slashes=False,  # Evita redirects 307 que rompen CORS en POST
 )
 
 # --- CORS ---
