@@ -58,7 +58,6 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     try {
       await setCoverPhoto(photo.id);
       onCoverSet?.();
-      close();
     } catch (err) {
       alert('No se pudo cambiar la portada: ' + err.message);
     } finally {
