@@ -18,6 +18,7 @@ import '../styles/home.css';
 export default function Home() {
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
+  const [previewLetters, setPreviewLetters] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,6 +35,8 @@ export default function Home() {
           wishlist: wishlist.length,
           letters: letters.length,
         });
+
+        setPreviewLetters(letters.slice(0, 3));
 
         // Juntar todas las fotos de todos los lugares visitados, tomar las últimas 8
         const photos = visited
@@ -104,12 +107,28 @@ export default function Home() {
       {/* Cartitas destacadas */}
       <section className="home__recent" style={{ paddingBottom: '0' }}>
         <h2 className="home__section-title">Cartitas</h2>
-        <Link to="/cartitas" className="home__letters-btn">
-          💌 Ver nuestras cartitas
-          {stats.letters > 0 && (
-            <span className="home__letters-count">{stats.letters}</span>
-          )}
-        </Link>
+        <div className="home__letters-grid">
+          {previewLetters.map((letter) => (
+            <Link key={letter.id} to="/cartitas" className="home__letter-card">
+              {letter.photo_url && (
+                <img src={letter.photo_url} alt="" className="home__letter-card-img" />
+              )}
+              <div className="home__letter-card-body">
+                <p className="home__letter-card-title">💌 {letter.title}</p>
+                <p className="home__letter-card-snippet">
+                  {letter.body.length > 80 ? letter.body.slice(0, 80) + '…' : letter.body}
+                </p>
+              </div>
+            </Link>
+          ))}
+          <Link to="/cartitas" className="home__letter-card home__letter-card--more">
+            <span className="home__letter-card-more-icon">💌</span>
+            <span className="home__letter-card-more-label">Ver todas las cartitas</span>
+            {stats.letters > 3 && (
+              <span className="home__letter-card-more-count">+{stats.letters - 3}</span>
+            )}
+          </Link>
+        </div>
       </section>
 
       {/* Álbum de fotos recientes */}
