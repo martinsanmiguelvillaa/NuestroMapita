@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { deletePhoto } from '../../api/photos';
 import '../../styles/photos.css';
 
-export default function PhotoGallery({ photos = [], onDelete, canDelete = true }) {
+const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, canDelete = true }, ref) {
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
+
+  useImperativeHandle(ref, () => ({
+    openAt: (index) => setLightboxIndex(index),
+  }), []);
   const [deleting, setDeleting] = useState(null);
 
   const isOpen = lightboxIndex !== null;
@@ -143,4 +147,6 @@ export default function PhotoGallery({ photos = [], onDelete, canDelete = true }
       )}
     </>
   );
-}
+});
+
+export default PhotoGallery;

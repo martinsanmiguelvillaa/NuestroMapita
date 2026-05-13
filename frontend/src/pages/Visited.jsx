@@ -20,6 +20,35 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const galleryRef = useRef(null);
+  const pendingOpen = useRef(null);
+
+  const photos = place.photos ?? [];
+  const photoCount = photos.length;
+
+  // When showPhotos becomes true after a cover click, trigger the lightbox
+  useEffect(() => {
+    if (showPhotos && pendingOpen.current != null) {
+      galleryRef.current?.openAt(pendingOpen.current);
+      pendingOpen.current = null;
+    }
+  }, [showPhotos]);
+
+  const handleCoverClick = () => {
+    pendingOpen.current = coverIndex;
+    setShowPhotos(true);
+  };
+
+  const prevCover = (e) => {
+    e.stopPropagation();
+    setCoverIndex((i) => (i - 1 + photoCount) % photoCount);
+  };
+
+  const nextCover = (e) => {
+    e.stopPropagation();
+    setCoverIndex((i) => (i + 1) % photoCount);
+  };
 
   const handleUpload = async (files) => {
     setUploading(true);
@@ -43,17 +72,31 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
     }
   };
 
-  const coverPhoto = place.photos?.[0]?.cloudinary_url;
-  const photoCount = place.photos?.length ?? 0;
+  const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
+  const coverUrl = photos[safeIndex]?.cloudinary_url;
 
   return (
     <div className="place-card fade-in">
-      {/* Foto de portada */}
-      {coverPhoto ? (
-        <img src={coverPhoto} alt={place.name} className="place-card__photo" />
-      ) : (
-        <div className="place-card__photo-placeholder">📍</div>
-      )}
+      {/* Foto de portada con flechas */}
+      <div className="place-card__photo-wrapper">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={place.name}
+            className="place-card__photo"
+            onClick={handleCoverClick}
+          />
+        ) : (
+          <div className="place-card__photo-placeholder">📍</div>
+        )}
+        {photoCount > 1 && (
+          <>
+            <button className="place-card__cover-arrow place-card__cover-arrow--prev" onClick={prevCover}>‹</button>
+            <button className="place-card__cover-arrow place-card__cover-arrow--next" onClick={nextCover}>›</button>
+            <span className="place-card__photo-counter">{safeIndex + 1}/{photoCount}</span>
+          </>
+        )}
+      </div>
 
       <div className="place-card__body">
         <h3 className="place-card__name">{place.name}</h3>
@@ -89,10 +132,11 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
           {showPhotos && (
             <div style={{ marginTop: '8px' }}>
               <PhotoSection
-                photos={place.photos ?? []}
+                photos={photos}
                 onUpload={handleUpload}
                 onDelete={onPhotosChanged}
                 uploading={uploading}
+                galleryRef={galleryRef}
               />
             </div>
           )}

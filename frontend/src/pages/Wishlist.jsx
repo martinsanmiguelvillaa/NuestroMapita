@@ -22,6 +22,34 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
   const [deleting, setDeleting] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const galleryRef = useRef(null);
+  const pendingOpen = useRef(null);
+
+  const photos = place.photos ?? [];
+  const photoCount = photos.length;
+
+  useEffect(() => {
+    if (showPhotos && pendingOpen.current != null) {
+      galleryRef.current?.openAt(pendingOpen.current);
+      pendingOpen.current = null;
+    }
+  }, [showPhotos]);
+
+  const handleCoverClick = () => {
+    pendingOpen.current = coverIndex;
+    setShowPhotos(true);
+  };
+
+  const prevCover = (e) => {
+    e.stopPropagation();
+    setCoverIndex((i) => (i - 1 + photoCount) % photoCount);
+  };
+
+  const nextCover = (e) => {
+    e.stopPropagation();
+    setCoverIndex((i) => (i + 1) % photoCount);
+  };
 
   const handleUpload = async (files) => {
     setUploading(true);
@@ -45,8 +73,30 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
     }
   };
 
+  const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
+  const coverUrl = photos[safeIndex]?.cloudinary_url;
+
   return (
     <div className={`wish-card fade-in${isDragging ? ' wish-card--dragging' : ''}`}>
+      {/* Foto de portada (solo si hay fotos) */}
+      {coverUrl && (
+        <div className="wish-card__cover">
+          <img
+            src={coverUrl}
+            alt={place.name}
+            className="wish-card__cover-img"
+            onClick={handleCoverClick}
+          />
+          {photoCount > 1 && (
+            <>
+              <button className="wish-card__cover-arrow wish-card__cover-arrow--prev" onClick={prevCover}>‹</button>
+              <button className="wish-card__cover-arrow wish-card__cover-arrow--next" onClick={nextCover}>›</button>
+              <span className="wish-card__cover-counter">{safeIndex + 1}/{photoCount}</span>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="wish-card__header">
         {/* Handle de arrastre */}
         <div className="wish-card__drag-handle" {...dragHandleProps} title="Mantené presionado para arrastrar">
@@ -66,18 +116,19 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
           onClick={() => setShowPhotos(!showPhotos)}
           style={{ fontSize: '12px' }}
         >
-          📷 {(place.photos?.length ?? 0) > 0
-            ? `${place.photos.length} foto${place.photos.length !== 1 ? 's' : ''}`
+          📷 {photoCount > 0
+            ? `${photoCount} foto${photoCount !== 1 ? 's' : ''}`
             : 'Fotos'}
           {showPhotos ? ' ▲' : ' ▼'}
         </button>
         {showPhotos && (
           <div style={{ marginTop: '8px' }}>
             <PhotoSection
-              photos={place.photos ?? []}
+              photos={photos}
               onUpload={handleUpload}
               onDelete={onPhotosChanged}
               uploading={uploading}
+              galleryRef={galleryRef}
             />
           </div>
         )}
