@@ -44,7 +44,7 @@ export default function PhotoSection({ photos = [], onUpload, onDelete, onCoverS
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           hidden
           onChange={handleFiles}

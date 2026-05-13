@@ -23,6 +23,7 @@ class Photo(Base):
     position_x = Column(Integer, nullable=False, default=50, server_default="50")
     position_y = Column(Integer, nullable=False, default=50, server_default="50")
     sort_order = Column(Integer, nullable=False, default=0, server_default="0")
+    resource_type = Column(String(10), nullable=False, default="image", server_default="image")
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     place_visited = relationship("PlaceVisited", back_populates="photos")

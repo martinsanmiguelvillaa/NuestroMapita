@@ -115,13 +115,27 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
       <div className="photo-gallery">
         {localPhotos.map((photo, i) => (
           <div key={photo.id} className="photo-gallery__item">
-            <img
-              src={photo.cloudinary_url}
-              alt="Foto del lugar"
-              className="photo-gallery__img"
-              onClick={() => setLightboxIndex(i)}
-              loading="lazy"
-            />
+            {photo.resource_type === 'video' ? (
+              <video
+                src={photo.cloudinary_url}
+                className="photo-gallery__img"
+                onClick={() => setLightboxIndex(i)}
+                muted
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <img
+                src={photo.cloudinary_url}
+                alt="Foto del lugar"
+                className="photo-gallery__img"
+                onClick={() => setLightboxIndex(i)}
+                loading="lazy"
+              />
+            )}
+            {photo.resource_type === 'video' && (
+              <span className="photo-gallery__video-badge">▶</span>
+            )}
             {i === 0 && (
               <span className="photo-gallery__cover-badge" title="Portada">★</span>
             )}
@@ -179,13 +193,25 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
             </button>
           )}
 
-          {/* Foto */}
-          <img
-            src={current.cloudinary_url}
-            alt="Foto ampliada"
-            className="lightbox__img"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {/* Foto o video */}
+          {current.resource_type === 'video' ? (
+            <video
+              key={current.id}
+              src={current.cloudinary_url}
+              className="lightbox__img"
+              controls
+              autoPlay
+              playsInline
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={current.cloudinary_url}
+              alt="Foto ampliada"
+              className="lightbox__img"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
 
           {/* Flecha siguiente */}
           {localPhotos.length > 1 && (

@@ -100,13 +100,26 @@ export default function CoverPhoto({
 
   return (
     <div className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`} style={{ aspectRatio }}>
-      <img
-        src={photo.cloudinary_url}
-        alt=""
-        className="cover-photo__img"
-        style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
-        onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
-      />
+      {photo.resource_type === 'video' ? (
+        <video
+          src={photo.cloudinary_url}
+          className="cover-photo__img"
+          style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
+          onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+          muted
+          autoPlay
+          loop
+          playsInline
+        />
+      ) : (
+        <img
+          src={photo.cloudinary_url}
+          alt=""
+          className="cover-photo__img"
+          style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
+          onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+        />
+      )}
 
       {/* Overlay de arrastre */}
       {adjusting && (

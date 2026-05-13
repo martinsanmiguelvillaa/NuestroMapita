@@ -8,8 +8,8 @@ from app.models.place_visited import PlaceVisited
 from app.models.place_wishlist import PlaceWishlist
 from app.models.photo import Photo
 from app.schemas.photo import PhotoResponse, PhotoPositionUpdate
-from app.services.cloudinary_service import upload_image, delete_image
-from app.services.upload_validation import MAX_PLACE_PHOTOS_PER_REQUEST, read_valid_image_upload
+from app.services.cloudinary_service import upload_image, upload_video, delete_media
+from app.services.upload_validation import MAX_PLACE_PHOTOS_PER_REQUEST, read_valid_media_upload
 
 router = APIRouter(tags=["Fotos"])
 
@@ -37,32 +37,36 @@ async def upload_photos(
     if not place:
         raise HTTPException(status_code=404, detail="Lugar no encontrado")
 
-    image_contents = []
+    media_contents = []
     for file in files:
-        image_contents.append(await read_valid_image_upload(file))
+        media_contents.append(await read_valid_media_upload(file))
 
     created = []
-    uploaded_public_ids = []
+    uploaded = []  # list of (public_id, resource_type)
     try:
-        for content in image_contents:
-            result = upload_image(content, folder="nuestro-mapita/lugares")
-            uploaded_public_ids.append(result["public_id"])
+        for content, resource_type in media_contents:
+            if resource_type == "video":
+                result = upload_video(content, folder="nuestro-mapita/lugares")
+            else:
+                result = upload_image(content, folder="nuestro-mapita/lugares")
+            uploaded.append((result["public_id"], resource_type))
 
             photo = Photo(
                 place_visited_id=place_id,
                 cloudinary_url=result["url"],
                 cloudinary_public_id=result["public_id"],
+                resource_type=resource_type,
             )
             db.add(photo)
-            db.flush()  # Obtener el ID sin hacer commit todavía
+            db.flush()
             created.append(photo)
 
         db.commit()
     except Exception:
         db.rollback()
-        for public_id in uploaded_public_ids:
+        for public_id, rtype in uploaded:
             try:
-                delete_image(public_id)
+                delete_media(public_id, resource_type=rtype)
             except Exception:
                 pass
         raise
@@ -93,20 +97,24 @@ async def upload_wishlist_photos(
     if not place:
         raise HTTPException(status_code=404, detail="Lugar no encontrado")
 
-    image_contents = []
+    media_contents = []
     for file in files:
-        image_contents.append(await read_valid_image_upload(file))
+        media_contents.append(await read_valid_media_upload(file))
 
     created = []
-    uploaded_public_ids = []
+    uploaded = []
     try:
-        for content in image_contents:
-            result = upload_image(content, folder="nuestro-mapita/lugares")
-            uploaded_public_ids.append(result["public_id"])
+        for content, resource_type in media_contents:
+            if resource_type == "video":
+                result = upload_video(content, folder="nuestro-mapita/lugares")
+            else:
+                result = upload_image(content, folder="nuestro-mapita/lugares")
+            uploaded.append((result["public_id"], resource_type))
             photo = Photo(
                 place_wishlist_id=place_id,
                 cloudinary_url=result["url"],
                 cloudinary_public_id=result["public_id"],
+                resource_type=resource_type,
             )
             db.add(photo)
             db.flush()
@@ -114,9 +122,9 @@ async def upload_wishlist_photos(
         db.commit()
     except Exception:
         db.rollback()
-        for public_id in uploaded_public_ids:
+        for public_id, rtype in uploaded:
             try:
-                delete_image(public_id)
+                delete_media(public_id, resource_type=rtype)
             except Exception:
                 pass
         raise
@@ -187,7 +195,7 @@ def delete_photo(
 
     # Borrar de Cloudinary primero
     try:
-        delete_image(photo.cloudinary_public_id)
+        delete_media(photo.cloudinary_public_id, resource_type=photo.resource_type)
     except Exception:
         pass  # Si falla en Cloudinary, seguimos y borramos de la BD de todas formas
 

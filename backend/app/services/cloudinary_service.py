@@ -39,6 +39,24 @@ def upload_image(file_bytes: bytes, folder: str = "nuestro-mapita") -> dict:
     }
 
 
+def upload_video(file_bytes: bytes, folder: str = "nuestro-mapita") -> dict:
+    """Sube un video a Cloudinary y devuelve su URL pública y su public_id."""
+    result = cloudinary.uploader.upload(
+        file_bytes,
+        folder=folder,
+        resource_type="video",
+    )
+    return {
+        "url": result["secure_url"],
+        "public_id": result["public_id"],
+    }
+
+
+def delete_media(public_id: str, resource_type: str = "image") -> None:
+    """Elimina un recurso de Cloudinary (imagen o video)."""
+    cloudinary.uploader.destroy(public_id, resource_type=resource_type)
+
+
 def delete_image(public_id: str) -> None:
     """Elimina una imagen de Cloudinary usando su public_id."""
     cloudinary.uploader.destroy(public_id, resource_type="image")
