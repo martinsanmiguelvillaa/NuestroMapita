@@ -5,6 +5,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
 
+function videoThumb(url) {
+  return url
+    .replace('/video/upload/', '/video/upload/so_0,w_800/')
+    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+}
+
 
 export default function CoverPhoto({
   photos = [],
@@ -18,6 +24,7 @@ export default function CoverPhoto({
   const [adjusting, setAdjusting] = useState(false);
   const [pendingPos, setPendingPos] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
   const dragState = useRef(null); // { startX, startY, startPos, rect }
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -128,18 +135,32 @@ export default function CoverPhoto({
       style={{ aspectRatio }}
     >
       {photo.resource_type === 'video' ? (
-        <video
-          ref={videoRef}
-          src={photo.cloudinary_url}
-          className="cover-photo__img"
-          style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
-          onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
-          muted
-          autoPlay
-          loop
-          playsInline
-          preload="metadata"
-        />
+        <>
+          {/* Thumbnail estático hasta que el video empiece — evita botón de play nativo */}
+          {!videoPlaying && (
+            <img
+              src={videoThumb(photo.cloudinary_url)}
+              alt=""
+              className="cover-photo__img"
+              style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
+              onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+            />
+          )}
+          <video
+            ref={videoRef}
+            src={photo.cloudinary_url}
+            className="cover-photo__img"
+            style={{ objectPosition: `${pos.x}% ${pos.y}%`, display: videoPlaying ? 'block' : 'none' }}
+            onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+            muted
+            autoPlay
+            loop
+            playsInline
+            preload="none"
+            onPlay={() => setVideoPlaying(true)}
+            onPause={() => setVideoPlaying(false)}
+          />
+        </>
       ) : (
         <img
           src={photo.cloudinary_url}
