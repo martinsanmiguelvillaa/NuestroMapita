@@ -119,13 +119,32 @@
   display: none;
 }
 
-/* Lightbox (foto ampliada) */
+/* Botón expandir en overlay de miniatura */
+.photo-gallery__expand {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-brown);
+  transition: var(--transition-fast);
+  margin-right: 4px;
+}
+.photo-gallery__expand:hover { background: white; transform: scale(1.1); }
+
+/* Lightbox (galería ampliada con navegación) */
 .lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   z-index: 300;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   animation: modalFadeIn 0.2s ease;
@@ -133,9 +152,10 @@
 
 .lightbox__img {
   max-width: 90vw;
-  max-height: 90vh;
+  max-height: 75vh;
   object-fit: contain;
   border-radius: var(--radius-md);
+  user-select: none;
 }
 
 .lightbox__close {
@@ -148,11 +168,74 @@
   width: 44px;
   height: 44px;
   border-radius: var(--radius-full);
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: var(--transition-fast);
+  z-index: 10;
 }
 .lightbox__close:hover { background: rgba(255,255,255,0.3); }
+
+.lightbox__counter {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.7);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+}
+
+/* Flechas de navegación */
+.lightbox__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  font-size: 2.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  z-index: 10;
+  user-select: none;
+}
+.lightbox__arrow:hover { background: rgba(255,255,255,0.3); }
+.lightbox__arrow--prev { left: var(--space-4); }
+.lightbox__arrow--next { right: var(--space-4); }
+
+/* Miniaturas inferiores */
+.lightbox__thumbs {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  max-width: 90vw;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.lightbox__thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0.5;
+  border: 2px solid transparent;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+.lightbox__thumb:hover { opacity: 0.8; }
+.lightbox__thumb--active {
+  opacity: 1;
+  border-color: white;
+}
