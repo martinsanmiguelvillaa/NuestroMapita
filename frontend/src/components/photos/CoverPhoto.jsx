@@ -22,6 +22,10 @@ export default function CoverPhoto({
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
+  const photoCount = photos.length;
+  const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
+  const photo = photos[safeIndex];
+
   // Reproduce el video solo cuando la tarjeta es visible en pantalla
   useEffect(() => {
     const video = videoRef.current;
@@ -49,10 +53,6 @@ export default function CoverPhoto({
       videoRef.current.play().catch(() => {});
     }
   };
-
-  const photoCount = photos.length;
-  const safeIndex = photoCount > 0 ? Math.min(coverIndex, photoCount - 1) : 0;
-  const photo = photos[safeIndex];
 
   const storedPos = { x: photo?.position_x ?? 50, y: photo?.position_y ?? 50 };
   const pos = pendingPos ?? storedPos;
