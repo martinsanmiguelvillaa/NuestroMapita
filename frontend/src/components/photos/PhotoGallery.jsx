@@ -132,7 +132,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               {onCoverSet && i !== 0 && (
                 <button
                   className="photo-gallery__cover-btn"
-                  onClick={() => handleSetCover(photo, i)}
+                  onClick={(e) => { e.stopPropagation(); handleSetCover(photo, i); }}
                   disabled={settingCover === photo.id}
                   title="Usar como portada"
                 >
