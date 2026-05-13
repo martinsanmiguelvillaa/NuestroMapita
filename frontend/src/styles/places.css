@@ -147,6 +147,43 @@
   flex: 1;
 }
 
+.wish-card--dragging {
+  box-shadow: var(--shadow-lg);
+  transform: rotate(1deg) scale(1.02);
+  z-index: 100;
+  position: relative;
+}
+
+/* Handle de arrastre */
+.wish-card__drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--color-beige-dark);
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+  user-select: none;
+  transition: var(--transition-fast);
+}
+
+.wish-card__drag-handle:hover {
+  background: var(--color-beige);
+  color: var(--color-brown);
+}
+
+.wish-card__drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-dots {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
 .wish-card__order-controls {
   display: flex;
   flex-direction: column;

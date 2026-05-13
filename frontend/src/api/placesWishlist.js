@@ -24,6 +24,9 @@ export const deleteWishlist = (id) =>
 export const reorderWishlist = (id, direction) =>
   apiFetch(`${BASE}/${id}/order?direction=${direction}`, { method: 'PATCH' });
 
+export const reorderWishlistBulk = (orderedIds) =>
+  apiFetch(`${BASE}/reorder`, { method: 'PUT', body: JSON.stringify({ ordered_ids: orderedIds }) });
+
 export const convertToVisited = (id, data) =>
   apiFetch(`${BASE}/${id}/convert`, { method: 'POST', body: JSON.stringify(data) });
 

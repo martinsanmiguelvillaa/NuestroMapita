@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, field_validator
 
 
@@ -45,6 +45,10 @@ class PlaceWishlistResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ReorderRequest(BaseModel):
+    ordered_ids: List[int]
 
 
 # Schema para convertir un lugar por visitar en visitado

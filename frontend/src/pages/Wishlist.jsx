@@ -1,11 +1,11 @@
 /**
  * Página de Lugares por Visitar.
- * CRUD completo + orden manual + sorteo aleatorio + "Ya fuimos".
+ * Orden manual con drag-and-drop (mouse y touch long-press).
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getWishlist, createWishlist, updateWishlist,
-  deleteWishlist, reorderWishlist, getRandomWishlist,
+  deleteWishlist, reorderWishlistBulk, getRandomWishlist,
 } from '../api/placesWishlist';
 import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
@@ -13,7 +13,9 @@ import ConvertModal from '../components/places/ConvertModal';
 import SearchBar from '../components/ui/SearchBar';
 import '../styles/places.css';
 
-function WishCard({ place, onEdit, onDelete, onReorder, onConvert }) {
+// ─── Tarjeta individual ──────────────────────────────────────────────────────
+
+function WishCard({ place, onEdit, onDelete, onConvert, dragHandleProps, isDragging }) {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -29,20 +31,18 @@ function WishCard({ place, onEdit, onDelete, onReorder, onConvert }) {
   };
 
   return (
-    <div className="wish-card fade-in">
+    <div className={`wish-card fade-in${isDragging ? ' wish-card--dragging' : ''}`}>
       <div className="wish-card__header">
-        <h3 className="wish-card__name">{place.name}</h3>
-        {/* Botones de orden */}
-        <div className="wish-card__order-controls">
-          <button className="order-btn" onClick={() => onReorder(place.id, 'up')} title="Subir">▲</button>
-          <button className="order-btn" onClick={() => onReorder(place.id, 'down')} title="Bajar">▼</button>
+        {/* Handle de arrastre */}
+        <div className="wish-card__drag-handle" {...dragHandleProps} title="Mantené presionado para arrastrar">
+          <span className="drag-dots">⠿</span>
         </div>
+        <h3 className="wish-card__name">{place.name}</h3>
       </div>
 
       {place.description && <p className="wish-card__desc">{place.description}</p>}
-      <p className="wish-card__address">📍 {place.address}</p>
+      {place.address && <p className="wish-card__address">📍 {place.address}</p>}
 
-      {/* Links */}
       <div className="wish-card__links">
         {place.google_maps_url && (
           <a href={place.google_maps_url} target="_blank" rel="noreferrer" className="wish-card__link">
@@ -57,15 +57,6 @@ function WishCard({ place, onEdit, onDelete, onReorder, onConvert }) {
       </div>
 
       <div className="wish-card__footer">
-        {/* Mover al principio / final */}
-        <div style={{ display: 'flex', gap: '6px' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => onReorder(place.id, 'top')} title="Mover al principio">
-            ⬆
-          </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => onReorder(place.id, 'bottom')} title="Mover al final">
-            ⬇
-          </button>
-        </div>
         <div style={{ display: 'flex', gap: '6px' }}>
           <button className="btn btn-ghost btn-sm" onClick={() => onEdit(place)}>Editar</button>
           <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
@@ -79,6 +70,141 @@ function WishCard({ place, onEdit, onDelete, onReorder, onConvert }) {
     </div>
   );
 }
+
+// ─── Hook de drag-and-drop nativo (mouse + touch) ────────────────────────────
+
+function useDragSort({ items, onOrderChange }) {
+  const [order, setOrder] = useState(items.map((i) => i.id));
+  const [draggingId, setDraggingId] = useState(null);
+  const [overId, setOverId] = useState(null);
+
+  // Sincroniza cuando cambia la lista externa (búsqueda, carga)
+  useEffect(() => {
+    setOrder(items.map((i) => i.id));
+  }, [items]);
+
+  // ── Desktop (HTML5 drag) ──
+  const onDragStart = (id) => (e) => {
+    e.dataTransfer.effectAllowed = 'move';
+    setDraggingId(id);
+  };
+
+  const onDragOver = (id) => (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (id !== draggingId) setOverId(id);
+  };
+
+  const onDrop = (id) => (e) => {
+    e.preventDefault();
+    if (draggingId == null || draggingId === id) return;
+    const newOrder = reinsert(order, draggingId, id);
+    setOrder(newOrder);
+    setDraggingId(null);
+    setOverId(null);
+    onOrderChange(newOrder);
+  };
+
+  const onDragEnd = () => {
+    setDraggingId(null);
+    setOverId(null);
+  };
+
+  // ── Mobile (touch long-press + drag) ──
+  const touchState = useRef({
+    id: null,
+    startY: 0,
+    timer: null,
+    active: false,
+  });
+
+  const onTouchStart = (id) => (e) => {
+    touchState.current.id = id;
+    touchState.current.startY = e.touches[0].clientY;
+    touchState.current.active = false;
+
+    touchState.current.timer = setTimeout(() => {
+      touchState.current.active = true;
+      setDraggingId(id);
+      // Vibración haptica si disponible
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, 300);
+  };
+
+  const onTouchMove = (e) => {
+    if (!touchState.current.active) {
+      // Cancelar long press si se mueve antes de los 300ms
+      const delta = Math.abs(e.touches[0].clientY - touchState.current.startY);
+      if (delta > 8) {
+        clearTimeout(touchState.current.timer);
+      }
+      return;
+    }
+
+    e.preventDefault(); // Bloquear scroll mientras arrastra
+
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const card = el?.closest('[data-drag-id]');
+    if (card) {
+      const targetId = parseInt(card.dataset.dragId, 10);
+      if (targetId !== touchState.current.id) setOverId(targetId);
+    }
+  };
+
+  const onTouchEnd = () => {
+    clearTimeout(touchState.current.timer);
+    if (touchState.current.active && touchState.current.id != null && overId != null) {
+      const newOrder = reinsert(order, touchState.current.id, overId);
+      setOrder(newOrder);
+      onOrderChange(newOrder);
+    }
+    touchState.current.active = false;
+    touchState.current.id = null;
+    setDraggingId(null);
+    setOverId(null);
+  };
+
+  // Reordena el array moviendo `fromId` a la posición de `toId`
+  function reinsert(ids, fromId, toId) {
+    const arr = [...ids];
+    const fromIdx = arr.indexOf(fromId);
+    const toIdx = arr.indexOf(toId);
+    arr.splice(fromIdx, 1);
+    arr.splice(toIdx, 0, fromId);
+    return arr;
+  }
+
+  // Construye los sorted items según el orden actual
+  const sortedItems = order
+    .map((id) => items.find((item) => item.id === id))
+    .filter(Boolean);
+
+  const getItemProps = (id) => ({
+    draggable: true,
+    'data-drag-id': id,
+    onDragStart: onDragStart(id),
+    onDragOver: onDragOver(id),
+    onDrop: onDrop(id),
+    onDragEnd,
+    onTouchStart: onTouchStart(id),
+    onTouchMove,
+    onTouchEnd,
+    style: {
+      opacity: draggingId === id ? 0.4 : 1,
+      outline: overId === id && overId !== draggingId ? '2px dashed var(--color-brown)' : 'none',
+      transition: 'opacity 0.15s, outline 0.1s',
+    },
+  });
+
+  const dragHandleProps = {
+    style: { touchAction: 'none', cursor: 'grab' },
+  };
+
+  return { sortedItems, draggingId, getItemProps, dragHandleProps };
+}
+
+// ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function Wishlist() {
   const [places, setPlaces] = useState([]);
@@ -104,6 +230,20 @@ export default function Wishlist() {
 
   useEffect(() => { load(); }, [load]);
 
+  const handleOrderChange = async (orderedIds) => {
+    try {
+      await reorderWishlistBulk(orderedIds);
+    } catch (err) {
+      console.error('Error al guardar orden:', err);
+      load(); // revert si falla
+    }
+  };
+
+  const { sortedItems, draggingId, getItemProps, dragHandleProps } = useDragSort({
+    items: places,
+    onOrderChange: handleOrderChange,
+  });
+
   const handleCreate = async (data) => {
     setSaving(true);
     try {
@@ -123,15 +263,6 @@ export default function Wishlist() {
       load();
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleReorder = async (id, direction) => {
-    try {
-      await reorderWishlist(id, direction);
-      load();
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -168,7 +299,9 @@ export default function Wishlist() {
         <div className="random-card fade-in">
           <p className="random-card__label">Nuestro próximo plan</p>
           <h2 className="random-card__name">{randomPlace.name}</h2>
-          <p style={{ color: 'var(--color-text-mid)', marginBottom: '8px' }}>📍 {randomPlace.address}</p>
+          {randomPlace.address && (
+            <p style={{ color: 'var(--color-text-mid)', marginBottom: '8px' }}>📍 {randomPlace.address}</p>
+          )}
           {randomPlace.description && (
             <p style={{ fontStyle: 'italic', color: 'var(--color-text-mid)', marginBottom: '12px' }}>
               {randomPlace.description}
@@ -185,12 +318,8 @@ export default function Wishlist() {
                 Ver reel
               </a>
             )}
-            <button className="btn btn-ghost btn-sm" onClick={handleRandom}>
-              Elegir otro
-            </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => setRandomPlace(null)}>
-              Cerrar
-            </button>
+            <button className="btn btn-ghost btn-sm" onClick={handleRandom}>Elegir otro</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setRandomPlace(null)}>Cerrar</button>
           </div>
         </div>
       )}
@@ -207,15 +336,17 @@ export default function Wishlist() {
         </div>
       ) : (
         <div className="cards-grid">
-          {places.map((place) => (
-            <WishCard
-              key={place.id}
-              place={place}
-              onEdit={setEditing}
-              onDelete={load}
-              onReorder={handleReorder}
-              onConvert={setConvertPlace}
-            />
+          {sortedItems.map((place) => (
+            <div key={place.id} {...getItemProps(place.id)}>
+              <WishCard
+                place={place}
+                isDragging={draggingId === place.id}
+                dragHandleProps={dragHandleProps}
+                onEdit={setEditing}
+                onDelete={load}
+                onConvert={setConvertPlace}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -238,8 +369,6 @@ export default function Wishlist() {
               google_maps_url: editing.google_maps_url || '',
               social_url: editing.social_url || '',
               description: editing.description || '',
-              latitude: editing.latitude ? String(editing.latitude) : '',
-              longitude: editing.longitude ? String(editing.longitude) : '',
             }}
             onSubmit={handleUpdate}
             onCancel={() => setEditing(null)}

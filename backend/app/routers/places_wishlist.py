@@ -10,11 +10,26 @@ from app.models.place_wishlist import PlaceWishlist
 from app.models.place_visited import PlaceVisited
 from app.schemas.place_wishlist import (
     PlaceWishlistCreate, PlaceWishlistUpdate,
-    PlaceWishlistResponse, ConvertToVisitedRequest,
+    PlaceWishlistResponse, ConvertToVisitedRequest, ReorderRequest,
 )
 from app.schemas.place_visited import PlaceVisitedResponse
 
 router = APIRouter(prefix="/places/wishlist", tags=["Lugares por visitar"])
+
+
+@router.put("/reorder", status_code=200)
+def reorder_all(
+    data: ReorderRequest,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Reordena toda la lista de una vez. Recibe los IDs en el nuevo orden deseado."""
+    for index, place_id in enumerate(data.ordered_ids):
+        db.query(PlaceWishlist).filter(PlaceWishlist.id == place_id).update(
+            {"order_index": index}
+        )
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/random", response_model=PlaceWishlistResponse)
