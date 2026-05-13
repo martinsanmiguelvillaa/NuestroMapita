@@ -95,6 +95,7 @@
   inset: 0;
   cursor: grab;
   z-index: 3;
+  touch-action: none; /* evita que el browser scrollee mientras ajustás */
 }
 .cover-photo__adjust-overlay:active {
   cursor: grabbing;
