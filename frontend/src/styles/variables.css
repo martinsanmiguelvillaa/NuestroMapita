@@ -1,0 +1,80 @@
+/* =========================================
+   VARIABLES GLOBALES - NUESTRO MAPITA
+   Cambiá estos valores para personalizar
+   toda la apariencia de la app de una vez.
+   ========================================= */
+
+:root {
+  /* --- Paleta principal --- */
+  --color-cream: #FDF6EC;        /* Fondo general */
+  --color-beige: #F0E4D0;        /* Fondo de tarjetas */
+  --color-beige-mid: #E8D5BB;    /* Bordes suaves */
+  --color-beige-dark: #D4B896;   /* Bordes más marcados */
+
+  --color-brown: #A0745A;        /* Color primario (botones, links) */
+  --color-brown-dark: #7A5540;   /* Hover del primario */
+  --color-brown-light: #C49A78;  /* Marrón suave para detalles */
+
+  --color-rose: #E8C4C4;         /* Acento romántico */
+  --color-rose-dark: #D4A5A5;    /* Hover del acento */
+  --color-rose-light: #F5E0E0;   /* Fondo rosado suave */
+
+  --color-text: #4A3728;         /* Texto principal */
+  --color-text-mid: #6B5242;     /* Texto secundario */
+  --color-text-light: #9A7E6F;   /* Texto de ayuda / placeholders */
+
+  --color-white: #FFFDF9;        /* Blanco cálido */
+  --color-star: #E8A045;         /* Estrellas doradas */
+  --color-error: #C0505A;        /* Errores */
+  --color-success: #6B9E6B;      /* Éxito */
+
+  /* --- Tipografías --- */
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Nunito', 'Helvetica Neue', Arial, sans-serif;
+
+  /* --- Tamaños de fuente --- */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+
+  /* --- Bordes redondeados --- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* --- Sombras --- */
+  --shadow-xs: 0 1px 4px rgba(74, 55, 40, 0.08);
+  --shadow-sm: 0 2px 8px rgba(74, 55, 40, 0.12);
+  --shadow-md: 0 4px 16px rgba(74, 55, 40, 0.14);
+  --shadow-lg: 0 8px 32px rgba(74, 55, 40, 0.18);
+  --shadow-polaroid: 3px 4px 14px rgba(74, 55, 40, 0.22);
+
+  /* --- Transiciones --- */
+  --transition-fast: all 0.15s ease;
+  --transition: all 0.22s ease;
+  --transition-slow: all 0.35s ease;
+
+  /* --- Espaciado --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* --- Layout --- */
+  --max-width: 1100px;
+  --navbar-height: 64px;
+  --mobile-nav-height: 68px;
+}

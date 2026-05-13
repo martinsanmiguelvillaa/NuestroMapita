@@ -1,0 +1,51 @@
+/**
+ * App.jsx - Punto de entrada de la aplicación React.
+ *
+ * Estructura:
+ * - AuthProvider: provee el contexto de sesión a toda la app
+ * - BrowserRouter: maneja las rutas
+ * - ProtectedRoute: si no está autenticado, redirige a /login
+ * - Layout: renderiza la navbar + la página actual (via <Outlet>)
+ */
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Layout from './components/layout/Layout';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import MapPage from './pages/Map';
+import Visited from './pages/Visited';
+import Wishlist from './pages/Wishlist';
+import Letters from './pages/Letters';
+
+// Ruta protegida: si no hay sesión, manda al login
+function ProtectedRoute() {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Página de login (sin navbar) */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Rutas protegidas: requieren estar autenticado */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/mapa" element={<MapPage />} />
+              <Route path="/visitados" element={<Visited />} />
+              <Route path="/por-visitar" element={<Wishlist />} />
+              <Route path="/cartitas" element={<Letters />} />
+            </Route>
+          </Route>
+
+          {/* Cualquier ruta desconocida va al home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

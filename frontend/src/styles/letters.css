@@ -1,0 +1,118 @@
+/* =========================================
+   CARTITAS
+   ========================================= */
+
+.letters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+/* Tarjeta de carta - estilo papelito / nota */
+.letter-card {
+  background: #FEFBF3;
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Línea decorativa en el margen izquierdo (estilo cuaderno) */
+.letter-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 38px;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--color-rose-light);
+  opacity: 0.7;
+}
+
+.letter-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px) rotate(0.3deg);
+  border-color: var(--color-rose);
+}
+
+.letter-card__header {
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+
+.letter-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  font-style: italic;
+  margin-bottom: var(--space-1);
+}
+
+.letter-card__date {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+}
+
+.letter-card__body {
+  padding-left: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--color-text-mid);
+  line-height: 1.7;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  white-space: pre-wrap;
+}
+
+/* Foto opcional de la carta */
+.letter-card__photo {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin: var(--space-3) 0;
+}
+
+.letter-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-beige-mid);
+}
+
+/* Vista completa de una carta (en modal) */
+.letter-full {
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  font-family: var(--font-body);
+  padding: var(--space-2) 0;
+}
+
+.letter-full__date {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  font-style: italic;
+  margin-bottom: var(--space-4);
+}
+
+/* Formulario de carta */
+.letter-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 480px) {
+  .letters-grid {
+    grid-template-columns: 1fr;
+  }
+}

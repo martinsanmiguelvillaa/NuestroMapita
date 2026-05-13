@@ -1,0 +1,246 @@
+/* =========================================
+   HOME - Página principal
+   ========================================= */
+
+.home {
+  min-height: 100vh;
+}
+
+/* --- Hero --- */
+.home__hero {
+  text-align: center;
+  padding: var(--space-12) var(--space-4) var(--space-8);
+  background: linear-gradient(160deg, var(--color-rose-light) 0%, var(--color-cream) 60%);
+}
+
+.home__hero-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.home__hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  color: var(--color-brown);
+  margin-bottom: var(--space-4);
+  line-height: 1.15;
+}
+
+.home__hero-title em {
+  font-style: italic;
+  color: var(--color-brown-dark);
+}
+
+.home__hero-desc {
+  font-size: var(--text-lg);
+  color: var(--color-text-mid);
+  max-width: 500px;
+  margin: 0 auto;
+  font-style: italic;
+}
+
+/* --- Stats suaves --- */
+.home__stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-4) 0;
+  flex-wrap: wrap;
+}
+
+.home__stat {
+  text-align: center;
+}
+
+.home__stat-number {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  color: var(--color-brown);
+  line-height: 1;
+}
+
+.home__stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: var(--space-1);
+}
+
+/* --- Sección de accesos rápidos --- */
+.home__sections {
+  padding: var(--space-8) var(--space-4);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.home__section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  color: var(--color-text);
+  margin-bottom: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.home__section-title::after {
+  content: '';
+  flex: 1;
+  height: 1.5px;
+  background: var(--color-beige-mid);
+  margin-left: var(--space-3);
+}
+
+/* --- Cards de navegación --- */
+.home__nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-10);
+}
+
+.home__nav-card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  text-decoration: none;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.home__nav-card:hover {
+  border-color: var(--color-rose);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  background: var(--color-rose-light);
+}
+
+.home__nav-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.home__nav-card-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.home__nav-card-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+}
+
+/* --- Álbum de recuerdos reciente --- */
+.home__recent {
+  padding: 0 var(--space-4) var(--space-12);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.home__polaroids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  justify-content: center;
+  padding: var(--space-4) 0;
+}
+
+/* Cada foto estilo polaroid */
+.polaroid {
+  background: var(--color-white);
+  padding: 10px 10px 32px;
+  box-shadow: var(--shadow-polaroid);
+  border-radius: 2px;
+  width: 160px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.polaroid:nth-child(odd) { transform: rotate(-2deg); }
+.polaroid:nth-child(even) { transform: rotate(1.5deg); }
+.polaroid:nth-child(3n) { transform: rotate(-1deg); }
+
+.polaroid:hover {
+  transform: rotate(0deg) scale(1.05) !important;
+  z-index: 5;
+  box-shadow: var(--shadow-lg);
+}
+
+.polaroid__img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.polaroid__caption {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-light);
+  margin-top: var(--space-2);
+  font-family: var(--font-body);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Acceso a cartitas con burbuja de notificación */
+.home__letters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-rose-light);
+  border: 2px solid var(--color-rose);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  color: var(--color-brown-dark);
+  font-weight: 700;
+  font-size: var(--text-base);
+  transition: var(--transition);
+  margin-top: var(--space-3);
+}
+.home__letters-btn:hover {
+  background: var(--color-rose);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-brown-dark);
+}
+
+.home__letters-count {
+  background: var(--color-brown);
+  color: white;
+  border-radius: var(--radius-full);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .home__hero {
+    padding: var(--space-8) var(--space-4) var(--space-6);
+  }
+
+  .home__polaroids {
+    gap: var(--space-3);
+  }
+
+  .polaroid {
+    width: 130px;
+    padding: 8px 8px 28px;
+  }
+}

@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  # --- Base de datos MySQL ---
+  db:
+    image: mysql:8.0
+    container_name: mapita_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password_cambiar}
+      MYSQL_DATABASE: ${DB_NAME:-nuestro_mapita}
+      MYSQL_USER: ${DB_USER:-mapita}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-mapita_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mapita_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_password_cambiar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # --- Backend FastAPI ---
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mapita_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-nuestro_mapita}
+      DB_USER: ${DB_USER:-mapita}
+      DB_PASSWORD: ${DB_PASSWORD:-mapita_password}
+      APP_PASSWORD: ${APP_PASSWORD:-cambiar_esto}
+      SECRET_KEY: ${SECRET_KEY:-cambiar_por_clave_segura_generada}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:80,http://localhost}
+    ports:
+      - "8000:8000"
+    volumes:
+      # Hot reload en desarrollo
+      - ./backend:/app
+
+  # --- Frontend React (Nginx) ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mapita_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  # Volumen persistente para los datos de MySQL
+  mapita_db_data:
+    driver: local
