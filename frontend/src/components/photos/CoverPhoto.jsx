@@ -38,7 +38,6 @@ export default function CoverPhoto({
           video.play().catch(() => {});
         } else {
           video.pause();
-          video.currentTime = 0;
         }
       },
       { threshold: 0.3 },
@@ -46,13 +45,6 @@ export default function CoverPhoto({
     observer.observe(container);
     return () => observer.disconnect();
   }, [photo?.resource_type, photo?.cloudinary_url]);
-
-  const handleMouseEnter = () => {
-    if (photo?.resource_type === 'video' && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-  };
 
   const storedPos = { x: photo?.position_x ?? 50, y: photo?.position_y ?? 50 };
   const pos = pendingPos ?? storedPos;
@@ -134,7 +126,6 @@ export default function CoverPhoto({
       ref={containerRef}
       className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`}
       style={{ aspectRatio }}
-      onMouseEnter={handleMouseEnter}
     >
       {photo.resource_type === 'video' ? (
         <video
@@ -144,8 +135,10 @@ export default function CoverPhoto({
           style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
           onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
           muted
+          autoPlay
+          loop
           playsInline
-          preload="none"
+          preload="metadata"
         />
       ) : (
         <img

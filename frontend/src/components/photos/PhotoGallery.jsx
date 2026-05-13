@@ -32,20 +32,11 @@ function LazyVideo({ src, className, onClick }) {
     return () => observer.disconnect();
   }, [src]);
 
-  const handleMouseEnter = () => {
-    const v = videoRef.current;
-    if (v && v.paused) {           // solo reinicia si está pausado
-      v.currentTime = 0;
-      v.play().catch(() => {});
-    }
-  };
-
   return (
     <div
       ref={containerRef}
       style={{ position: 'relative', width: '100%', height: '100%' }}
       onClick={onClick}
-      onMouseEnter={handleMouseEnter}
     >
       {/* Imagen hasta que el video realmente empiece — nunca hay video pausado visible */}
       {(!active || !started) && (
@@ -195,9 +186,6 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
                 onClick={() => setLightboxIndex(i)}
                 loading="lazy"
               />
-            )}
-            {photo.resource_type === 'video' && (
-              <span className="photo-gallery__video-badge">▶</span>
             )}
             {i === 0 && (
               <span className="photo-gallery__cover-badge" title="Portada">★</span>

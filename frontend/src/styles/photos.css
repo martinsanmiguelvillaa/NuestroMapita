@@ -31,25 +31,6 @@
   color: var(--color-beige-dark);
 }
 
-/* Badge de video en portada */
-.cover-photo__video-badge {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.45);
-  color: white;
-  font-size: 22px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 1;
-}
-
 /* Flechas de navegación */
 .cover-photo__arrow {
   position: absolute;
@@ -302,25 +283,6 @@ video::-webkit-media-controls-start-playback-button {
 
 .photo-upload__input {
   display: none;
-}
-
-/* Badge de video en miniatura */
-.photo-gallery__video-badge {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  font-size: 20px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 1;
 }
 
 /* Badge de portada actual */
