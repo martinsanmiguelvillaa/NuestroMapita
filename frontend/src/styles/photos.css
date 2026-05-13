@@ -194,6 +194,11 @@
   justify-content: center;
   opacity: 0;
   transition: var(--transition-fast);
+  pointer-events: none;
+}
+
+.photo-gallery__item:hover .photo-gallery__overlay {
+  pointer-events: auto;
 }
 
 .photo-gallery__item:hover .photo-gallery__overlay {
