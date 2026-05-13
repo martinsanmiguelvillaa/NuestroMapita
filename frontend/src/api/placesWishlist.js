@@ -3,8 +3,11 @@ import apiFetch from './client';
 const BASE = '/places/wishlist';
 
 export const getWishlist = (params = {}) => {
-  const qs = new URLSearchParams(params).toString();
-  return apiFetch(`${BASE}?${qs}`);
+  const clean = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+  );
+  const qs = new URLSearchParams(clean).toString();
+  return apiFetch(`${BASE}${qs ? '?' + qs : ''}`);
 };
 
 export const getWishlistById = (id) => apiFetch(`${BASE}/${id}`);

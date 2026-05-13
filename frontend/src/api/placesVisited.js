@@ -3,8 +3,12 @@ import apiFetch from './client';
 const BASE = '/places/visited';
 
 export const getVisited = (params = {}) => {
-  const qs = new URLSearchParams(params).toString();
-  return apiFetch(`${BASE}?${qs}`);
+  // Filtrar valores undefined/null para no mandar "search=undefined" en la URL
+  const clean = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+  );
+  const qs = new URLSearchParams(clean).toString();
+  return apiFetch(`${BASE}${qs ? '?' + qs : ''}`);
 };
 
 export const getVisitedById = (id) => apiFetch(`${BASE}/${id}`);
