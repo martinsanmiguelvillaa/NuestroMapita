@@ -197,7 +197,7 @@
 /* --- Grid de preview de cartitas --- */
 .home__letters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-4);
   margin-top: var(--space-2);
 }
@@ -323,6 +323,10 @@
 @media (max-width: 768px) {
   .home__hero {
     padding: var(--space-8) var(--space-4) var(--space-6);
+  }
+
+  .home__letters-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .home__polaroids {

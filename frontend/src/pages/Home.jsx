@@ -124,9 +124,6 @@ export default function Home() {
           <Link to="/cartitas" className="home__letter-card home__letter-card--more">
             <span className="home__letter-card-more-icon">💌</span>
             <span className="home__letter-card-more-label">Ver todas las cartitas</span>
-            {stats.letters > 3 && (
-              <span className="home__letter-card-more-count">+{stats.letters - 3}</span>
-            )}
           </Link>
         </div>
       </section>
