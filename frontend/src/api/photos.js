@@ -1,32 +1,35 @@
 import apiFetch from './client';
 
-/**
- * Sube una o varias fotos a un lugar visitado.
- * @param {number} placeId - ID del lugar visitado
- * @param {FileList|File[]} files - Archivos de imagen
- */
-export async function uploadPhotos(placeId, files) {
+async function uploadWithTimeout(url, files, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   const formData = new FormData();
   for (const file of files) {
     formData.append('files', file);
   }
-  return apiFetch(`/places/visited/${placeId}/photos`, {
-    method: 'POST',
-    body: formData,
-    // No setear Content-Type, el browser lo pone automáticamente con el boundary
-  });
+
+  try {
+    return await apiFetch(url, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('La subida tardó demasiado. Verificá tu conexión e intentá de nuevo.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
-export async function uploadWishlistPhotos(placeId, files) {
-  const formData = new FormData();
-  for (const file of files) {
-    formData.append('files', file);
-  }
-  return apiFetch(`/places/wishlist/${placeId}/photos`, {
-    method: 'POST',
-    body: formData,
-  });
-}
+export const uploadPhotos = (placeId, files) =>
+  uploadWithTimeout(`/places/visited/${placeId}/photos`, files);
+
+export const uploadWishlistPhotos = (placeId, files) =>
+  uploadWithTimeout(`/places/wishlist/${placeId}/photos`, files);
 
 export const deletePhoto = (photoId) =>
   apiFetch(`/photos/${photoId}`, { method: 'DELETE' });

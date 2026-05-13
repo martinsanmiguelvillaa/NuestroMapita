@@ -8,20 +8,23 @@ import '../../styles/photos.css';
 
 export default function PhotoSection({ photos = [], onUpload, onDelete, uploading }) {
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [error, setError] = useState('');
   const inputRef = useRef();
 
   const handleFiles = (e) => {
+    setError('');
     setPendingFiles(Array.from(e.target.files));
   };
 
   const handleUpload = async () => {
     if (!pendingFiles.length) return;
+    setError('');
     try {
       await onUpload(pendingFiles);
       setPendingFiles([]);
       if (inputRef.current) inputRef.current.value = '';
     } catch (err) {
-      alert('Error al subir fotos: ' + err.message);
+      setError(err.message || 'Error al subir. Intentá de nuevo.');
     }
   };
 
@@ -29,6 +32,12 @@ export default function PhotoSection({ photos = [], onUpload, onDelete, uploadin
     <div className="photo-section">
       {photos.length > 0 && (
         <PhotoGallery photos={photos} onDelete={onDelete} />
+      )}
+
+      {error && (
+        <p style={{ color: 'var(--color-error)', fontSize: 'var(--text-xs)', margin: '4px 0' }}>
+          ⚠ {error}
+        </p>
       )}
 
       <div className="photo-section__upload">

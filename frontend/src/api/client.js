@@ -26,6 +26,7 @@ async function apiFetch(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
+    signal: options.signal,
   });
 
   // Sesión expirada o token inválido: ir al login
