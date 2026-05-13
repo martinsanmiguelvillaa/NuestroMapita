@@ -7,6 +7,7 @@ from app.dependencies import get_current_user
 from app.models.letter import Letter
 from app.schemas.letter import LetterCreate, LetterUpdate, LetterResponse
 from app.services.cloudinary_service import upload_image, delete_image
+from app.services.upload_validation import read_valid_image_upload
 
 router = APIRouter(prefix="/letters", tags=["Cartitas"])
 
@@ -92,22 +93,31 @@ async def upload_letter_photo(
     if not letter:
         raise HTTPException(status_code=404, detail="Cartita no encontrada")
 
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="El archivo debe ser una imagen")
+    content = await read_valid_image_upload(file)
+    old_public_id = letter.photo_public_id
 
-    # Si ya tenía foto, borrarla de Cloudinary
-    if letter.photo_public_id:
-        try:
-            delete_image(letter.photo_public_id)
-        except Exception:
-            pass
-
-    content = await file.read()
     result = upload_image(content, folder="nuestro-mapita/cartitas")
     letter.photo_url = result["url"]
     letter.photo_public_id = result["public_id"]
-    db.commit()
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        try:
+            delete_image(result["public_id"])
+        except Exception:
+            pass
+        raise
+
     db.refresh(letter)
+
+    if old_public_id:
+        try:
+            delete_image(old_public_id)
+        except Exception:
+            pass
+
     return letter
 
 

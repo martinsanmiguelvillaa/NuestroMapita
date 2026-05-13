@@ -8,6 +8,7 @@ from app.models.place_visited import PlaceVisited
 from app.models.photo import Photo
 from app.schemas.photo import PhotoResponse
 from app.services.cloudinary_service import upload_image, delete_image
+from app.services.upload_validation import MAX_PLACE_PHOTOS_PER_REQUEST, read_valid_image_upload
 
 router = APIRouter(tags=["Fotos"])
 
@@ -23,29 +24,48 @@ async def upload_photos(
     Sube una o varias fotos a Cloudinary y las asocia al lugar visitado.
     Recibe multipart/form-data con campo 'files'.
     """
+    if not files:
+        raise HTTPException(status_code=400, detail="Tenés que subir al menos una imagen")
+    if len(files) > MAX_PLACE_PHOTOS_PER_REQUEST:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Podés subir hasta {MAX_PLACE_PHOTOS_PER_REQUEST} fotos por vez",
+        )
+
     place = db.query(PlaceVisited).filter(PlaceVisited.id == place_id).first()
     if not place:
         raise HTTPException(status_code=404, detail="Lugar no encontrado")
 
-    created = []
+    image_contents = []
     for file in files:
-        # Validar que sea imagen
-        if not file.content_type or not file.content_type.startswith("image/"):
-            raise HTTPException(status_code=400, detail=f"'{file.filename}' no es una imagen válida")
+        image_contents.append(await read_valid_image_upload(file))
 
-        content = await file.read()
-        result = upload_image(content, folder="nuestro-mapita/lugares")
+    created = []
+    uploaded_public_ids = []
+    try:
+        for content in image_contents:
+            result = upload_image(content, folder="nuestro-mapita/lugares")
+            uploaded_public_ids.append(result["public_id"])
 
-        photo = Photo(
-            place_visited_id=place_id,
-            cloudinary_url=result["url"],
-            cloudinary_public_id=result["public_id"],
-        )
-        db.add(photo)
-        db.flush()  # Obtener el ID sin hacer commit todavía
-        created.append(photo)
+            photo = Photo(
+                place_visited_id=place_id,
+                cloudinary_url=result["url"],
+                cloudinary_public_id=result["public_id"],
+            )
+            db.add(photo)
+            db.flush()  # Obtener el ID sin hacer commit todavía
+            created.append(photo)
 
-    db.commit()
+        db.commit()
+    except Exception:
+        db.rollback()
+        for public_id in uploaded_public_ids:
+            try:
+                delete_image(public_id)
+            except Exception:
+                pass
+        raise
+
     for p in created:
         db.refresh(p)
 

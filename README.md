@@ -81,6 +81,8 @@ CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
 ```
 
+> Importante: `APP_PASSWORD` y `SECRET_KEY` no pueden quedar vacíos ni con valores de ejemplo. El backend falla al iniciar si detecta una configuración insegura.
+
 ### 2. Levantar todo
 
 ```bash
@@ -138,6 +140,16 @@ alembic upgrade head
 
 # Iniciar servidor
 uvicorn app.main:app --reload --port 8000
+```
+
+### Tests del backend
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements-dev.txt
+pytest
 ```
 
 ### Frontend

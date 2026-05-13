@@ -7,6 +7,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.place_visited import PlaceVisited
 from app.schemas.place_visited import PlaceVisitedCreate, PlaceVisitedUpdate, PlaceVisitedResponse
+from app.services.cloudinary_service import delete_image
 
 router = APIRouter(prefix="/places/visited", tags=["Lugares visitados"])
 
@@ -94,9 +95,16 @@ def delete_visited(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Elimina un lugar visitado y todas sus fotos (por cascade)."""
+    """Elimina un lugar visitado y sus fotos en Cloudinary y base de datos."""
     place = db.query(PlaceVisited).filter(PlaceVisited.id == place_id).first()
     if not place:
         raise HTTPException(status_code=404, detail="Lugar no encontrado")
+
+    for photo in place.photos:
+        try:
+            delete_image(photo.cloudinary_public_id)
+        except Exception:
+            pass
+
     db.delete(place)
     db.commit()

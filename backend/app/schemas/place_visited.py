@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional, List
-from pydantic import BaseModel, ConfigDict, field_validator, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.photo import PhotoResponse
 
@@ -68,6 +68,6 @@ class PlaceVisitedResponse(BaseModel):
     longitude: Optional[Decimal]
     created_at: datetime
     updated_at: datetime
-    photos: List[PhotoResponse] = []
+    photos: List[PhotoResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
