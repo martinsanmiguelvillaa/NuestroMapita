@@ -8,6 +8,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.place_wishlist import PlaceWishlist
 from app.models.place_visited import PlaceVisited
+from app.models.photo import Photo
 from app.schemas.place_wishlist import (
     PlaceWishlistCreate, PlaceWishlistUpdate,
     PlaceWishlistResponse, ConvertToVisitedRequest, ReorderRequest,
@@ -198,6 +199,17 @@ def convert_to_visited(
         rating=data.rating,
     )
     db.add(visited)
+    db.flush()  # obtener visited.id antes del commit
+
+    # Reasignar fotos al nuevo lugar visitado para evitar que el cascade
+    # de place_wishlist las borre al hacer db.delete(wish).
+    db.query(Photo).filter(Photo.place_wishlist_id == place_id).update(
+        {"place_wishlist_id": None, "place_visited_id": visited.id},
+        synchronize_session=False,
+    )
+    # Limpiar la colección en memoria para que el cascade no encuentre fotos que borrar.
+    db.expire(wish, ["photos"])
+
     db.delete(wish)
     db.commit()
     db.refresh(visited)
