@@ -274,7 +274,9 @@ img {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: var(--space-6);
+  column-gap: var(--space-6);
+  row-gap: 0;
+  align-items: start;
 }
 
 /* --- Animación fade in --- */
