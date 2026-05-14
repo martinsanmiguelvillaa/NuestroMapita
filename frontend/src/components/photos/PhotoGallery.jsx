@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
+import { thumbUrl, fullUrl } from '../../utils/cloudinary';
 import '../../styles/photos.css';
 
 function videoThumb(url) {
   return url
-    .replace('/video/upload/', '/video/upload/so_0,w_400/')
+    .replace('/video/upload/', '/video/upload/so_0,w_400,q_auto/')
     .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
 }
 
@@ -162,7 +163,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               />
             ) : (
               <img
-                src={photo.cloudinary_url}
+                src={thumbUrl(photo.cloudinary_url)}
                 alt="Foto del lugar"
                 className="photo-gallery__img"
                 onClick={() => setLightboxIndex(i)}
@@ -239,7 +240,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
             />
           ) : (
             <img
-              src={current.cloudinary_url}
+              src={fullUrl(current.cloudinary_url)}
               alt="Foto ampliada"
               className="lightbox__img"
               onClick={(e) => e.stopPropagation()}
@@ -293,7 +294,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               {localPhotos.map((p, i) => (
                 <img
                   key={p.id}
-                  src={p.cloudinary_url}
+                  src={thumbUrl(p.cloudinary_url)}
                   alt=""
                   className={`lightbox__thumb${i === lightboxIndex ? ' lightbox__thumb--active' : ''}`}
                   onClick={() => setLightboxIndex(i)}

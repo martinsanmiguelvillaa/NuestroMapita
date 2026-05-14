@@ -10,9 +10,9 @@
  */
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getVisited } from '../api/placesVisited';
-import { getWishlist } from '../api/placesWishlist';
+import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
+import { polaroidUrl, fullUrl } from '../utils/cloudinary';
 import '../styles/home.css';
 import '../styles/photos.css';
 
@@ -37,7 +37,7 @@ function VideoPolaroid({ photo, onClick }) {
   return (
     <video
       ref={videoRef}
-      src={photo.cloudinary_url}
+      src={photo.cloudinary_url}  // videos no se transforman
       className="polaroid__img"
       muted
       loop
@@ -146,7 +146,7 @@ function HomeLightbox({ photo, onClose }) {
         <VideoPlayer key={photo.id} src={photo.cloudinary_url} />
       ) : (
         <img
-          src={photo.cloudinary_url}
+          src={fullUrl(photo.cloudinary_url)}
           alt={photo.placeName}
           className="lightbox__img"
           onClick={(e) => e.stopPropagation()}
@@ -172,21 +172,22 @@ export default function Home() {
 
   const load = async () => {
     try {
-      const [visited, wishlist, letters] = await Promise.all([
-        getVisited({ sort: 'newest' }),
-        getWishlist(),
+      const [stats, photos, letters] = await Promise.all([
+        getStats(),
+        getRecentPhotos(16),
         getLetters(),
       ]);
 
       setStats({
-        visited: visited.length,
-        wishlist: wishlist.length,
-        letters: letters.length,
+        visited: stats.visited,
+        wishlist: stats.wishlist,
+        letters: stats.letters,
       });
 
       setPreviewLetters(letters.slice(0, 3));
 
-      const all = visited.flatMap((p) => p.photos.map((ph) => ({ ...ph, placeName: p.name })));
+      // Mezclar aleatoriamente y mostrar 8
+      const all = photos.map((p) => ({ ...p, placeName: p.place_name }));
       for (let i = all.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [all[i], all[j]] = [all[j], all[i]];
@@ -282,7 +283,7 @@ export default function Home() {
               <div key={photo.id} className="polaroid" onClick={() => setLightboxPhoto(photo)}>
                 {photo.resource_type === 'video'
                   ? <VideoPolaroid photo={photo} onClick={() => setLightboxPhoto(photo)} />
-                  : <img src={photo.cloudinary_url} alt={photo.placeName} className="polaroid__img" loading="lazy" />
+                  : <img src={polaroidUrl(photo.cloudinary_url)} alt={photo.placeName} className="polaroid__img" loading="lazy" />
                 }
                 <p className="polaroid__caption">{photo.placeName}</p>
               </div>

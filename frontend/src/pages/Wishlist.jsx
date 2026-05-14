@@ -7,6 +7,7 @@ import {
   getWishlist, createWishlist, updateWishlist,
   deleteWishlist, reorderWishlistBulk, getRandomWishlist,
 } from '../api/placesWishlist';
+import { thumbUrl } from '../utils/cloudinary';
 import { uploadWishlistPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
@@ -290,18 +291,22 @@ export default function Wishlist() {
   const [randomPlace, setRandomPlace] = useState(null);
   const [rolling, setRolling] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal) => {
     try {
-      const data = await getWishlist({ search: search || undefined });
+      const data = await getWishlist({ search: search || undefined }, signal);
       setPlaces(data);
     } catch (err) {
-      console.error(err);
+      if (err.name !== 'AbortError') console.error(err);
     } finally {
       setLoading(false);
     }
   }, [search]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   const handleOrderChange = async (orderedIds) => {
     try {
@@ -375,7 +380,7 @@ export default function Wishlist() {
         <div className="random-card fade-in">
           {randomPlace.photos?.[0]?.cloudinary_url && (
             <img
-              src={randomPlace.photos[0].cloudinary_url}
+              src={thumbUrl(randomPlace.photos[0].cloudinary_url)}
               alt={randomPlace.name}
               className="random-card__photo"
             />

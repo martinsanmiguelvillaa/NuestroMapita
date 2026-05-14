@@ -1,9 +1,11 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from sqlalchemy import func
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import get_current_user
+from app.models.letter import Letter
 from app.models.place_visited import PlaceVisited
 from app.models.place_wishlist import PlaceWishlist
 from app.models.photo import Photo
@@ -12,6 +14,46 @@ from app.services.cloudinary_service import upload_image, upload_video, delete_m
 from app.services.upload_validation import MAX_PLACE_PHOTOS_PER_REQUEST, read_valid_media_upload
 
 router = APIRouter(tags=["Fotos"])
+
+
+@router.get("/photos/stats")
+def get_stats(
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Conteo rápido de lugares visitados, por visitar y cartitas."""
+    visited = db.query(func.count(PlaceVisited.id)).scalar()
+    wishlist = db.query(func.count(PlaceWishlist.id)).scalar()
+    letters = db.query(func.count(Letter.id)).scalar()
+    return {"visited": visited, "wishlist": wishlist, "letters": letters}
+
+
+@router.get("/photos/recent")
+def get_recent_photos(
+    limit: int = Query(16, ge=1, le=50),
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Devuelve las fotos más recientes de lugares visitados para la galería del home."""
+    photos = (
+        db.query(Photo)
+        .options(joinedload(Photo.place_visited))
+        .filter(Photo.place_visited_id.isnot(None))
+        .order_by(Photo.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id": p.id,
+            "cloudinary_url": p.cloudinary_url,
+            "resource_type": p.resource_type,
+            "position_x": p.position_x,
+            "position_y": p.position_y,
+            "place_name": p.place_visited.name if p.place_visited else "",
+        }
+        for p in photos
+    ]
 
 
 @router.post("/places/visited/{place_id}/photos", response_model=List[PhotoResponse], status_code=201)

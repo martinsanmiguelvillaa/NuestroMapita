@@ -1,6 +1,7 @@
+from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import or_
 
 from app.database import get_db
@@ -23,7 +24,7 @@ def list_visited(
     _: bool = Depends(get_current_user),
 ):
     """Lista todos los lugares visitados con filtros opcionales."""
-    query = db.query(PlaceVisited)
+    query = db.query(PlaceVisited).options(selectinload(PlaceVisited.photos))
 
     if search:
         s = f"%{search}%"
@@ -108,14 +109,20 @@ def delete_visited(
     if not place:
         raise HTTPException(status_code=404, detail="Lugar no encontrado")
 
-    for photo in place.photos:
+    media_to_delete = [(p.cloudinary_public_id, p.resource_type) for p in place.photos]
+    db.delete(place)
+    db.commit()
+
+    def _del(args):
         try:
-            delete_image(photo.cloudinary_public_id)
+            from app.services.cloudinary_service import delete_media
+            delete_media(args[0], resource_type=args[1])
         except Exception:
             pass
 
-    db.delete(place)
-    db.commit()
+    if media_to_delete:
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            ex.map(_del, media_to_delete)
 
 
 @router.post("/{place_id}/convert-back", response_model=PlaceWishlistResponse, status_code=201)

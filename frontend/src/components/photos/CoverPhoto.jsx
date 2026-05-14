@@ -4,17 +4,18 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
+import { coverUrl } from '../../utils/cloudinary';
 
 function videoThumb(url) {
   return url
-    .replace('/video/upload/', '/video/upload/so_0,w_800/')
+    .replace('/video/upload/', '/video/upload/so_0,w_800,q_auto/')
     .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
 }
 
 function photoSrc(photo) {
   return photo.resource_type === 'video'
     ? videoThumb(photo.cloudinary_url)
-    : photo.cloudinary_url;
+    : coverUrl(photo.cloudinary_url);
 }
 
 export default function CoverPhoto({
@@ -201,7 +202,7 @@ export default function CoverPhoto({
       ) : (
         <img
           key={enterKey}
-          src={photo.cloudinary_url}
+          src={coverUrl(photo.cloudinary_url)}
           alt=""
           className={`cover-photo__img ${enterClass}`}
           style={{ objectPosition: `${pos.x}% ${pos.y}%` }}

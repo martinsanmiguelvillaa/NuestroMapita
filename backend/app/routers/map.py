@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -20,6 +20,7 @@ def get_map_pins(
     """
     visited = (
         db.query(PlaceVisited)
+        .options(selectinload(PlaceVisited.photos))
         .filter(PlaceVisited.latitude.isnot(None), PlaceVisited.longitude.isnot(None))
         .all()
     )

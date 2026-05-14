@@ -56,7 +56,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   };
 
   const handleConvertBack = async () => {
-    if (!window.confirm(`¿Devolver "${place.name}" a Por visitar? Se perderán las fotos, rating y fecha.`)) return;
+    if (!window.confirm(`¿Devolver "${place.name}" a Por visitar? Se moverán las fotos pero se perderán el rating y la fecha.`)) return;
     setConvertingBack(true);
     try {
       await convertBackToWishlist(place.id);
@@ -170,22 +170,26 @@ export default function Visited() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal) => {
     try {
       const data = await getVisited({
         sort,
         search: search || undefined,
         revisit: revisitFilter ?? undefined,
-      });
+      }, signal);
       setPlaces(data);
     } catch (err) {
-      console.error(err);
+      if (err.name !== 'AbortError') console.error(err);
     } finally {
       setLoading(false);
     }
   }, [sort, search, revisitFilter]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   const handleCreate = async (data, files) => {
     setSaving(true);

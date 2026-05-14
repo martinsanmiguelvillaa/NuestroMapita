@@ -2,12 +2,12 @@ import apiFetch from './client';
 
 const BASE = '/places/wishlist';
 
-export const getWishlist = (params = {}) => {
+export const getWishlist = (params = {}, signal) => {
   const clean = Object.fromEntries(
     Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
   );
   const qs = new URLSearchParams(clean).toString();
-  return apiFetch(`${BASE}${qs ? '?' + qs : ''}`);
+  return apiFetch(`${BASE}${qs ? '?' + qs : ''}`, { signal });
 };
 
 export const getWishlistById = (id) => apiFetch(`${BASE}/${id}`);

@@ -1,5 +1,10 @@
 import apiFetch from './client';
 
+export const getRecentPhotos = (limit = 16) =>
+  apiFetch(`/photos/recent?limit=${limit}`);
+
+export const getStats = () => apiFetch('/photos/stats');
+
 async function uploadWithTimeout(url, files, timeoutMs = 180000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
