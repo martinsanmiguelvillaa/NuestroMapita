@@ -82,6 +82,11 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
         <p className="place-card__date">{formatDate(place.visit_date)}</p>
         {place.address && <p className="place-card__address">📍 {place.address}</p>}
         {place.rating && <StarRating value={place.rating} readOnly small />}
+        {place.would_revisit != null && (
+          <span className={`place-card__revisit-badge ${place.would_revisit ? 'place-card__revisit-badge--yes' : 'place-card__revisit-badge--no'}`}>
+            {place.would_revisit ? '↩ Volvería' : '↩ No volvería'}
+          </span>
+        )}
         {place.comment && <p className="place-card__comment">"{place.comment}"</p>}
 
         {place.google_maps_url && (
@@ -140,20 +145,25 @@ export default function Visited() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
+  const [revisitFilter, setRevisitFilter] = useState(null); // null | true
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const data = await getVisited({ sort, search: search || undefined });
+      const data = await getVisited({
+        sort,
+        search: search || undefined,
+        revisit: revisitFilter ?? undefined,
+      });
       setPlaces(data);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [sort, search]);
+  }, [sort, search, revisitFilter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -188,6 +198,12 @@ export default function Visited() {
         <h1 className="section-header__title">Lugares visitados</h1>
         <div className="section-controls">
           <SearchBar value={search} onChange={setSearch} placeholder="Buscar lugar..." />
+          <button
+            className={`btn btn-sm ${revisitFilter === true ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => setRevisitFilter(revisitFilter === true ? null : true)}
+          >
+            ↩ Volvería a visitar
+          </button>
           <select
             className="form-select"
             value={sort}
@@ -243,6 +259,7 @@ export default function Visited() {
               visit_date: editing.visit_date || '',
               google_maps_url: editing.google_maps_url || '',
               comment: editing.comment || '',
+              would_revisit: editing.would_revisit ?? null,
             }}
             onSubmit={handleUpdate}
             onCancel={() => setEditing(null)}

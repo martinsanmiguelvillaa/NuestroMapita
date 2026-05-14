@@ -16,6 +16,7 @@ router = APIRouter(prefix="/places/visited", tags=["Lugares visitados"])
 def list_visited(
     sort: str = Query("newest", description="newest | oldest | rating"),
     search: Optional[str] = Query(None),
+    revisit: Optional[bool] = Query(None, description="true = solo los que volvería a visitar"),
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
@@ -31,6 +32,9 @@ def list_visited(
                 PlaceVisited.comment.ilike(s),
             )
         )
+
+    if revisit is not None:
+        query = query.filter(PlaceVisited.would_revisit == revisit)
 
     if sort == "oldest":
         query = query.order_by(PlaceVisited.visit_date.asc())

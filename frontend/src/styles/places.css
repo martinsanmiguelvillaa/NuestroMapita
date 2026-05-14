@@ -193,6 +193,25 @@
   gap: var(--space-1);
 }
 
+.place-card__revisit-badge {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.place-card__revisit-badge--yes {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.place-card__revisit-badge--no {
+  background: #fce4e4;
+  color: #b71c1c;
+}
+
 .place-card__comment {
   font-size: var(--text-sm);
   color: var(--color-text-mid);

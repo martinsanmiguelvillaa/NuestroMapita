@@ -10,6 +10,7 @@ const EMPTY_FORM = {
   comment: '',
   rating: null,
   google_maps_url: '',
+  would_revisit: null,
   latitude: null,
   longitude: null,
 };
@@ -44,6 +45,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
       comment: form.comment.trim() || null,
       rating: form.rating || null,
       google_maps_url: form.google_maps_url.trim() || null,
+      would_revisit: form.would_revisit,
       latitude: form.latitude ?? null,
       longitude: form.longitude ?? null,
     };
@@ -120,6 +122,22 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
               }}
             >
               ★
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">¿Volvería a visitar?</label>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {[{ val: true, label: '✓ Sí' }, { val: false, label: '✗ No' }].map(({ val, label }) => (
+            <button
+              key={String(val)}
+              type="button"
+              onClick={() => set('would_revisit', form.would_revisit === val ? null : val)}
+              className={`btn btn-sm ${form.would_revisit === val ? (val ? 'btn-primary' : 'btn-danger') : 'btn-outline'}`}
+            >
+              {label}
             </button>
           ))}
         </div>

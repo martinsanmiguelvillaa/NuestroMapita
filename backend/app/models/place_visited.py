@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date, SmallInteger, Numeric, DateTime
+from sqlalchemy import Column, Integer, String, Text, Date, SmallInteger, Numeric, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -14,6 +14,7 @@ class PlaceVisited(Base):
     comment = Column(Text, nullable=True)
     rating = Column(SmallInteger, nullable=True)          # 1 a 5
     google_maps_url = Column(String(500), nullable=True)
+    would_revisit = Column(Boolean, nullable=True)
     latitude = Column(Numeric(10, 7), nullable=True)
     longitude = Column(Numeric(10, 7), nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)

@@ -13,6 +13,7 @@ class PlaceVisitedCreate(BaseModel):
     comment: Optional[str] = None
     rating: Optional[int] = None
     google_maps_url: Optional[str] = None
+    would_revisit: Optional[bool] = None
     latitude: Optional[Decimal] = None
     longitude: Optional[Decimal] = None
 
@@ -38,6 +39,7 @@ class PlaceVisitedUpdate(BaseModel):
     comment: Optional[str] = None
     rating: Optional[int] = None
     google_maps_url: Optional[str] = None
+    would_revisit: Optional[bool] = None
     latitude: Optional[Decimal] = None
     longitude: Optional[Decimal] = None
 
@@ -57,6 +59,7 @@ class PlaceVisitedResponse(BaseModel):
     comment: Optional[str]
     rating: Optional[int]
     google_maps_url: Optional[str]
+    would_revisit: Optional[bool]
     latitude: Optional[Decimal]
     longitude: Optional[Decimal]
     created_at: datetime
