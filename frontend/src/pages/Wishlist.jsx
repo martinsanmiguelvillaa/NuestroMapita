@@ -8,6 +8,18 @@ import {
   deleteWishlist, reorderWishlistBulk, getRandomWishlist,
 } from '../api/placesWishlist';
 import { thumbUrl } from '../utils/cloudinary';
+
+function videoThumb(url) {
+  return url
+    .replace('/video/upload/', '/video/upload/so_0,w_400,q_auto/')
+    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+}
+
+function mediaSrc(photo) {
+  return photo.resource_type === 'video'
+    ? videoThumb(photo.cloudinary_url)
+    : thumbUrl(photo.cloudinary_url);
+}
 import { uploadWishlistPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
@@ -381,7 +393,7 @@ export default function Wishlist() {
         <div className="random-card fade-in">
           {randomPlace.photos?.[0]?.cloudinary_url && (
             <img
-              src={thumbUrl(randomPlace.photos[0].cloudinary_url)}
+              src={mediaSrc(randomPlace.photos[0])}
               alt={randomPlace.name}
               className="random-card__photo"
             />
