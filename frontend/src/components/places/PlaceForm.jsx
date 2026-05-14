@@ -159,7 +159,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
         <input
           ref={photoInputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           hidden
           onChange={(e) => setPhotoFiles(Array.from(e.target.files))}

@@ -178,9 +178,10 @@ export default function Visited() {
         revisit: revisitFilter ?? undefined,
       }, signal);
       setPlaces(data);
+      setLoading(false);
     } catch (err) {
-      if (err.name !== 'AbortError') console.error(err);
-    } finally {
+      if (err.name === 'AbortError') return;
+      console.error(err);
       setLoading(false);
     }
   }, [sort, search, revisitFilter]);

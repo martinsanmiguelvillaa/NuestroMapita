@@ -95,10 +95,17 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     setDeleting(photo.id);
     try {
       await deletePhoto(photo.id);
+      // Remover localmente de inmediato sin esperar reload del padre
+      setLocalPhotos((prev) => {
+        const next = prev.filter((p) => p.id !== photo.id);
+        if (lightboxIndex !== null) {
+          const newLen = next.length;
+          if (newLen === 0) setLightboxIndex(null);
+          else if (lightboxIndex >= newLen) setLightboxIndex(newLen - 1);
+        }
+        return next;
+      });
       onDelete?.();
-      if (lightboxIndex >= localPhotos.length - 1) {
-        setLightboxIndex(localPhotos.length > 1 ? localPhotos.length - 2 : null);
-      }
     } catch (err) {
       alert('No se pudo eliminar la foto: ' + err.message);
     } finally {
@@ -294,7 +301,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               {localPhotos.map((p, i) => (
                 <img
                   key={p.id}
-                  src={thumbUrl(p.cloudinary_url)}
+                  src={p.resource_type === 'video' ? videoThumb(p.cloudinary_url) : thumbUrl(p.cloudinary_url)}
                   alt=""
                   className={`lightbox__thumb${i === lightboxIndex ? ' lightbox__thumb--active' : ''}`}
                   onClick={() => setLightboxIndex(i)}

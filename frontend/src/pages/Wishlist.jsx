@@ -295,9 +295,10 @@ export default function Wishlist() {
     try {
       const data = await getWishlist({ search: search || undefined }, signal);
       setPlaces(data);
+      setLoading(false);
     } catch (err) {
-      if (err.name !== 'AbortError') console.error(err);
-    } finally {
+      if (err.name === 'AbortError') return;
+      console.error(err);
       setLoading(false);
     }
   }, [search]);

@@ -151,7 +151,7 @@ export default function CoverPhoto({
     );
   }
 
-  const enterClass = enterKey > 0 ? `cover-photo__img--enter-${enterDir}` : '';
+  const enterClass = enterKey > 0 ? ` cover-photo__img--enter-${enterDir}` : '';
 
   return (
     <div
@@ -178,7 +178,7 @@ export default function CoverPhoto({
               key={enterKey}
               src={videoThumb(photo.cloudinary_url)}
               alt=""
-              className={`cover-photo__img ${enterClass}`}
+              className={`cover-photo__img${enterClass}`}
               style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
               onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             />
@@ -187,7 +187,7 @@ export default function CoverPhoto({
             key={`v-${enterKey}`}
             ref={videoRef}
             src={photo.cloudinary_url}
-            className={`cover-photo__img ${enterClass}`}
+            className={`cover-photo__img${enterClass}`}
             style={{ objectPosition: `${pos.x}% ${pos.y}%`, display: videoPlaying ? 'block' : 'none' }}
             onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             muted
@@ -204,7 +204,7 @@ export default function CoverPhoto({
           key={enterKey}
           src={coverUrl(photo.cloudinary_url)}
           alt=""
-          className={`cover-photo__img ${enterClass}`}
+          className={`cover-photo__img${enterClass}`}
           style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
           onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
         />

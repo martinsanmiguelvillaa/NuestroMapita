@@ -74,10 +74,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
   z-index: 2;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, background 0.15s;
 }
 .place-card__photo-wrapper:hover .place-card__cover-arrow {
   opacity: 1;
