@@ -15,7 +15,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.6);
+  background: rgba(253, 246, 236, 0.82);
   pointer-events: none;
   z-index: 0;
 }
@@ -24,7 +24,7 @@
 .home__hero {
   text-align: center;
   padding: var(--space-12) var(--space-4) var(--space-8);
-  background: linear-gradient(160deg, rgba(245, 224, 224, 0.75) 0%, rgba(253, 246, 236, 0.6) 60%);
+  background: transparent;
   position: relative;
   z-index: 1;
 }
