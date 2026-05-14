@@ -16,6 +16,24 @@
   cursor: pointer;
 }
 
+.cover-photo__img--next {
+  animation: slideInFromRight 0.3s ease;
+}
+
+.cover-photo__img--prev {
+  animation: slideInFromLeft 0.3s ease;
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
 .cover-photo--adjusting .cover-photo__img {
   cursor: default;
 }

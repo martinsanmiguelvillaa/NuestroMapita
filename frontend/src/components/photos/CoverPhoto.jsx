@@ -25,6 +25,7 @@ export default function CoverPhoto({
   const [pendingPos, setPendingPos] = useState(null);
   const [saving, setSaving] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [direction, setDirection] = useState('next');
   const dragState = useRef(null); // { startX, startY, startPos, rect }
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -139,17 +140,19 @@ export default function CoverPhoto({
           {/* Thumbnail estático hasta que el video empiece — evita botón de play nativo */}
           {!videoPlaying && (
             <img
+              key={photo.id}
               src={videoThumb(photo.cloudinary_url)}
               alt=""
-              className="cover-photo__img"
+              className={`cover-photo__img cover-photo__img--${direction}`}
               style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
               onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             />
           )}
           <video
+            key={`v-${photo.id}`}
             ref={videoRef}
             src={photo.cloudinary_url}
-            className="cover-photo__img"
+            className={`cover-photo__img cover-photo__img--${direction}`}
             style={{ objectPosition: `${pos.x}% ${pos.y}%`, display: videoPlaying ? 'block' : 'none' }}
             onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             muted
@@ -163,9 +166,10 @@ export default function CoverPhoto({
         </>
       ) : (
         <img
+          key={photo.id}
           src={photo.cloudinary_url}
           alt=""
-          className="cover-photo__img"
+          className={`cover-photo__img cover-photo__img--${direction}`}
           style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
           onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
         />
@@ -185,11 +189,11 @@ export default function CoverPhoto({
         <>
           <button
             className="cover-photo__arrow cover-photo__arrow--prev"
-            onClick={(e) => { e.stopPropagation(); onCoverIndexChange((safeIndex - 1 + photoCount) % photoCount); }}
+            onClick={(e) => { e.stopPropagation(); setDirection('prev'); onCoverIndexChange((safeIndex - 1 + photoCount) % photoCount); }}
           >‹</button>
           <button
             className="cover-photo__arrow cover-photo__arrow--next"
-            onClick={(e) => { e.stopPropagation(); onCoverIndexChange((safeIndex + 1) % photoCount); }}
+            onClick={(e) => { e.stopPropagation(); setDirection('next'); onCoverIndexChange((safeIndex + 1) % photoCount); }}
           >›</button>
           <span className="cover-photo__counter">{safeIndex + 1}/{photoCount}</span>
         </>
