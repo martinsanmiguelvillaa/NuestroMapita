@@ -1,6 +1,6 @@
 import apiFetch from './client';
 
-async function uploadWithTimeout(url, files, timeoutMs = 30000) {
+async function uploadWithTimeout(url, files, timeoutMs = 180000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
