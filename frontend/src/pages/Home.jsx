@@ -15,6 +15,13 @@ import { getWishlist } from '../api/placesWishlist';
 import { getLetters } from '../api/letters';
 import '../styles/home.css';
 
+function photoSrc(photo) {
+  if (photo.resource_type !== 'video') return photo.cloudinary_url;
+  return photo.cloudinary_url
+    .replace('/video/upload/', '/video/upload/so_0,w_800/')
+    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+}
+
 export default function Home() {
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
@@ -132,7 +139,7 @@ export default function Home() {
             {recentPhotos.map((photo) => (
               <div key={photo.id} className="polaroid">
                 <img
-                  src={photo.cloudinary_url}
+                  src={photoSrc(photo)}
                   alt={photo.placeName}
                   className="polaroid__img"
                   loading="lazy"
