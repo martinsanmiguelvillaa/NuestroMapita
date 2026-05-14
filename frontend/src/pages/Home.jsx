@@ -68,10 +68,13 @@ export default function Home() {
 
         setPreviewLetters(letters.slice(0, 3));
 
-        // Juntar todas las fotos de todos los lugares visitados, tomar las últimas 8
-        const photos = visited
-          .flatMap((p) => p.photos.map((ph) => ({ ...ph, placeName: p.name })))
-          .slice(0, 8);
+        const all = visited.flatMap((p) => p.photos.map((ph) => ({ ...ph, placeName: p.name })));
+        // Orden aleatorio
+        for (let i = all.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [all[i], all[j]] = [all[j], all[i]];
+        }
+        const photos = all.slice(0, 8);
         setRecentPhotos(photos);
       } catch (err) {
         console.error('Error cargando home:', err);
@@ -157,7 +160,7 @@ export default function Home() {
       {/* Álbum de fotos recientes */}
       {recentPhotos.length > 0 && (
         <section className="home__recent">
-          <h2 className="home__section-title" style={{ marginTop: '40px' }}>Recuerdos recientes</h2>
+          <h2 className="home__section-title" style={{ marginTop: '40px' }}>Galería</h2>
           <div className="home__polaroids">
             {recentPhotos.map((photo) => (
               <div key={photo.id} className="polaroid">
