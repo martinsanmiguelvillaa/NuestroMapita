@@ -222,18 +222,37 @@
   -webkit-box-orient: vertical;
 }
 
+.place-card__convert-back {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--color-text-light);
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.place-card__convert-back:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 .place-card__footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-4);
+  flex-direction: column;
+  padding: 0;
   border-top: 1px solid var(--color-beige-mid);
-  gap: var(--space-2);
+  gap: 0;
 }
 
 .place-card__actions {
   display: flex;
   gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
 }
 
 /* --- Tarjeta de lugar por visitar --- */

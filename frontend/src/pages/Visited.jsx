@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getVisited, createVisited, updateVisited, deleteVisited } from '../api/placesVisited';
+import { getVisited, createVisited, updateVisited, deleteVisited, convertBackToWishlist } from '../api/placesVisited';
 import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
@@ -21,6 +21,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [convertingBack, setConvertingBack] = useState(false);
   const [coverIndex, setCoverIndex] = useState(0);
   const galleryRef = useRef(null);
   const pendingOpen = useRef(null);
@@ -51,6 +52,18 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
       onPhotosChanged?.();
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleConvertBack = async () => {
+    if (!window.confirm(`¿Devolver "${place.name}" a Por visitar? Se perderán las fotos, rating y fecha.`)) return;
+    setConvertingBack(true);
+    try {
+      await convertBackToWishlist(place.id);
+      onDelete?.();
+    } catch (err) {
+      alert('Error: ' + err.message);
+      setConvertingBack(false);
     }
   };
 
@@ -135,6 +148,13 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
             {deleting ? '...' : 'Eliminar'}
           </button>
         </div>
+        <button
+          className="place-card__convert-back"
+          onClick={handleConvertBack}
+          disabled={convertingBack}
+        >
+          {convertingBack ? '...' : '↩ Mover a por visitar'}
+        </button>
       </div>
     </div>
   );

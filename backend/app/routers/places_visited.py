@@ -6,7 +6,9 @@ from sqlalchemy import or_
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.place_visited import PlaceVisited
+from app.models.place_wishlist import PlaceWishlist
 from app.schemas.place_visited import PlaceVisitedCreate, PlaceVisitedUpdate, PlaceVisitedResponse
+from app.schemas.place_wishlist import PlaceWishlistResponse
 from app.services.cloudinary_service import delete_image
 
 router = APIRouter(prefix="/places/visited", tags=["Lugares visitados"])
@@ -114,3 +116,36 @@ def delete_visited(
 
     db.delete(place)
     db.commit()
+
+
+@router.post("/{place_id}/convert-back", response_model=PlaceWishlistResponse, status_code=201)
+def convert_back_to_wishlist(
+    place_id: int,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Devuelve un lugar visitado a la lista de por visitar."""
+    place = db.query(PlaceVisited).filter(PlaceVisited.id == place_id).first()
+    if not place:
+        raise HTTPException(status_code=404, detail="Lugar no encontrado")
+
+    wish = PlaceWishlist(
+        name=place.name,
+        description=place.comment,
+        address=place.address,
+        google_maps_url=place.google_maps_url,
+        latitude=place.latitude,
+        longitude=place.longitude,
+    )
+    db.add(wish)
+
+    for photo in place.photos:
+        try:
+            delete_image(photo.cloudinary_public_id)
+        except Exception:
+            pass
+
+    db.delete(place)
+    db.commit()
+    db.refresh(wish)
+    return wish
