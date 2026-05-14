@@ -13,7 +13,6 @@ import { Link } from 'react-router-dom';
 import { getVisited } from '../api/placesVisited';
 import { getWishlist } from '../api/placesWishlist';
 import { getLetters } from '../api/letters';
-import { updatePhotoPosition } from '../api/photos';
 import '../styles/home.css';
 import '../styles/photos.css';
 
@@ -51,69 +50,13 @@ function VideoPolaroid({ photo, onClick }) {
 }
 
 // ── Lightbox de la galería home ────────────────────────────────────
-function HomeLightbox({ photo, onClose, onPositionSaved }) {
-  const [adjusting, setAdjusting] = useState(false);
-  const [pendingPos, setPendingPos] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const dragState = useRef(null);
-
-  const storedPos = { x: photo.position_x ?? 50, y: photo.position_y ?? 50 };
-  const pos = pendingPos ?? storedPos;
-
-  // Cerrar con Escape
+function HomeLightbox({ photo, onClose }) {
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // ── Drag ──────────────────────────────────────────────────────────
-  const startDrag = (clientX, clientY, rect) => {
-    dragState.current = { startX: clientX, startY: clientY, startPos: { ...pos }, rect };
-  };
-  const moveDrag = (clientX, clientY) => {
-    if (!dragState.current) return;
-    const { startX, startY, startPos, rect } = dragState.current;
-    const newX = Math.round(Math.max(0, Math.min(100, startPos.x - ((clientX - startX) / rect.width) * 100)));
-    const newY = Math.round(Math.max(0, Math.min(100, startPos.y - ((clientY - startY) / rect.height) * 100)));
-    setPendingPos({ x: newX, y: newY });
-  };
-  const endDrag = () => { dragState.current = null; };
-
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    startDrag(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect());
-    const onMove = (e) => moveDrag(e.clientX, e.clientY);
-    const onUp = () => { endDrag(); window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-  };
-  const handleTouchStart = (e) => {
-    const t = e.touches[0];
-    startDrag(t.clientX, t.clientY, e.currentTarget.getBoundingClientRect());
-    const onMove = (e) => { e.preventDefault(); const t = e.touches[0]; moveDrag(t.clientX, t.clientY); };
-    const onEnd = () => { endDrag(); window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onEnd); };
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onEnd);
-  };
-
-  // ── Guardar posición ──────────────────────────────────────────────
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await updatePhotoPosition(photo.id, pos.x, pos.y);
-      setAdjusting(false);
-      setPendingPos(null);
-      onPositionSaved?.();
-    } catch (err) {
-      alert('Error al guardar: ' + err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-  const handleCancel = () => { setPendingPos(null); setAdjusting(false); };
-
-  // ── Descargar ─────────────────────────────────────────────────────
   const handleDownload = async () => {
     try {
       const res = await fetch(photo.cloudinary_url);
@@ -132,68 +75,32 @@ function HomeLightbox({ photo, onClose, onPositionSaved }) {
   const isVideo = photo.resource_type === 'video';
 
   return (
-    <div className="lightbox" onClick={!adjusting ? onClose : undefined}>
+    <div className="lightbox" onClick={onClose}>
       <button className="lightbox__close" onClick={onClose}>×</button>
 
-      {/* Contenedor de la imagen/video con drag overlay */}
-      <div
-        style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {isVideo ? (
-          <video
-            key={photo.id}
-            src={photo.cloudinary_url}
-            className="lightbox__img"
-            controls
-            autoPlay
-            playsInline
-          />
-        ) : (
-          <img
-            src={photo.cloudinary_url}
-            alt={photo.placeName}
-            className="lightbox__img"
-            style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
-          />
-        )}
+      {isVideo ? (
+        <video
+          key={photo.id}
+          src={photo.cloudinary_url}
+          className="lightbox__img"
+          controls
+          autoPlay
+          playsInline
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <img
+          src={photo.cloudinary_url}
+          alt={photo.placeName}
+          className="lightbox__img"
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
 
-        {/* Overlay de arrastre */}
-        {adjusting && (
-          <div
-            style={{ position: 'absolute', inset: 0, cursor: 'grab', zIndex: 10 }}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-          />
-        )}
-      </div>
-
-      {/* Acciones */}
       <div className="lightbox__actions" onClick={(e) => e.stopPropagation()}>
-        {!adjusting ? (
-          <>
-            <button className="lightbox__action-btn" onClick={handleDownload}>
-              ⬇ Descargar
-            </button>
-            {!isVideo && (
-              <button className="lightbox__action-btn" onClick={() => setAdjusting(true)}>
-                ✂ Ajustar marco
-              </button>
-            )}
-          </>
-        ) : (
-          <>
-            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-              Arrastrá la foto para reencuadrar
-            </span>
-            <button className="lightbox__action-btn lightbox__action-btn--active" onClick={handleSave} disabled={saving}>
-              {saving ? '...' : '✓ Guardar'}
-            </button>
-            <button className="lightbox__action-btn" onClick={handleCancel}>
-              Cancelar
-            </button>
-          </>
-        )}
+        <button className="lightbox__action-btn" onClick={handleDownload}>
+          ⬇ Descargar
+        </button>
       </div>
     </div>
   );
@@ -345,10 +252,6 @@ export default function Home() {
         <HomeLightbox
           photo={lightboxPhoto}
           onClose={() => setLightboxPhoto(null)}
-          onPositionSaved={() => {
-            setLightboxPhoto(null);
-            load();
-          }}
         />
       )}
     </div>
