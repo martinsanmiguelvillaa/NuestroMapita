@@ -8,53 +8,35 @@ function videoThumb(url) {
     .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
 }
 
-function LazyVideo({ src, className, onClick }) {
-  const [active, setActive] = useState(false);   // IntersectionObserver dice que es visible
-  const [started, setStarted] = useState(false); // el video ya empezó a reproducirse
-  const containerRef = useRef(null);
-  const videoRef = useRef(null);
+function GalleryVideo({ src, className, onClick }) {
+  const [started, setStarted] = useState(false);
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setActive(true);
-        } else {
-          setActive(false);
-          setStarted(false);
-        }
-      },
-      { threshold: 0.3 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [src]);
+  // Reproduce una vez al montar (la sección de fotos se monta cuando la abrís)
+  // onEnded vuelve a la imagen; hover reinicia solo si está pausado
+  const handleMouseEnter = (e) => {
+    const v = e.currentTarget.querySelector('video');
+    if (v && v.paused) { v.currentTime = 0; v.play().catch(() => {}); }
+  };
 
   return (
     <div
-      ref={containerRef}
       style={{ position: 'relative', width: '100%', height: '100%' }}
       onClick={onClick}
+      onMouseEnter={handleMouseEnter}
     >
-      {/* Imagen hasta que el video realmente empiece — nunca hay video pausado visible */}
-      {(!active || !started) && (
+      {!started && (
         <img src={videoThumb(src)} className={className} alt="" loading="lazy" />
       )}
-      {active && (
-        <video
-          ref={videoRef}
-          src={src}
-          className={className}
-          style={{ display: started ? 'block' : 'none' }}
-          muted
-          playsInline
-          autoPlay
-          onPlay={() => setStarted(true)}
-          onEnded={() => { setStarted(false); setActive(false); }}
-        />
-      )}
+      <video
+        src={src}
+        className={className}
+        style={{ display: started ? 'block' : 'none' }}
+        muted
+        playsInline
+        autoPlay
+        onPlay={() => setStarted(true)}
+        onEnded={() => setStarted(false)}
+      />
     </div>
   );
 }
@@ -173,7 +155,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         {localPhotos.map((photo, i) => (
           <div key={photo.id} className="photo-gallery__item">
             {photo.resource_type === 'video' ? (
-              <LazyVideo
+              <GalleryVideo
                 src={photo.cloudinary_url}
                 className="photo-gallery__img"
                 onClick={() => setLightboxIndex(i)}
