@@ -343,6 +343,16 @@
   font-weight: 700;
 }
 
+/* background-attachment: fixed no funciona en iOS — usar scroll en mobile */
+@media (max-width: 768px) {
+  .home {
+    background-attachment: scroll;
+  }
+  .home::before {
+    position: absolute;
+  }
+}
+
 @media (max-width: 768px) {
   .home__hero {
     padding: var(--space-8) var(--space-4) var(--space-6);
