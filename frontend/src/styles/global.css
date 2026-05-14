@@ -272,11 +272,21 @@ img {
 
 /* --- Grilla de tarjetas --- */
 .cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  column-gap: var(--space-6);
-  row-gap: var(--space-4);
-  align-items: start;
+  columns: 3;
+  column-gap: 24px;
+}
+
+.cards-grid > * {
+  break-inside: avoid;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .cards-grid { columns: 2; }
+}
+
+@media (max-width: 580px) {
+  .cards-grid { columns: 1; }
 }
 
 /* --- Animación fade in --- */
