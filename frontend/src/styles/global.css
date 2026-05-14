@@ -275,7 +275,7 @@ img {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   column-gap: var(--space-6);
-  row-gap: 0;
+  row-gap: var(--space-4);
   align-items: start;
 }
 
