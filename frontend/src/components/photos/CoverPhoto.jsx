@@ -11,6 +11,11 @@ function videoThumb(url) {
     .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
 }
 
+function photoSrc(photo) {
+  return photo.resource_type === 'video'
+    ? videoThumb(photo.cloudinary_url)
+    : photo.cloudinary_url;
+}
 
 export default function CoverPhoto({
   photos = [],
@@ -25,8 +30,12 @@ export default function CoverPhoto({
   const [pendingPos, setPendingPos] = useState(null);
   const [saving, setSaving] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
-  const [direction, setDirection] = useState('next');
-  const dragState = useRef(null); // { startX, startY, startPos, rect }
+  // Animación: imagen anterior saliendo mientras la nueva entra
+  const [prevSlide, setPrevSlide] = useState(null); // { src, pos, dir }
+  const [enterDir, setEnterDir] = useState('next');
+  const [enterKey, setEnterKey] = useState(0);
+
+  const dragState = useRef(null);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -57,6 +66,19 @@ export default function CoverPhoto({
   const storedPos = { x: photo?.position_x ?? 50, y: photo?.position_y ?? 50 };
   const pos = pendingPos ?? storedPos;
 
+  // ── Navegación con animación de transición ─────────────────────────
+  const navigate = (dir, nextIndex) => {
+    if (!photo) return;
+    setPrevSlide({
+      src: photoSrc(photo),
+      pos: { x: storedPos.x, y: storedPos.y },
+      dir,
+    });
+    setEnterDir(dir);
+    setEnterKey(k => k + 1);
+    onCoverIndexChange(nextIndex);
+  };
+
   // ── Drag (mouse) ──────────────────────────────────────────────────
   const startDrag = (clientX, clientY, rect) => {
     dragState.current = { startX: clientX, startY: clientY, startPos: { ...pos }, rect };
@@ -67,7 +89,6 @@ export default function CoverPhoto({
     const { startX, startY, startPos, rect } = dragState.current;
     const dx = clientX - startX;
     const dy = clientY - startY;
-    // Sensitivity: dragging the full container width goes from 0→100%
     const newX = Math.round(Math.max(0, Math.min(100, startPos.x - (dx / rect.width) * 100)));
     const newY = Math.round(Math.max(0, Math.min(100, startPos.y - (dy / rect.height) * 100)));
     setPendingPos({ x: newX, y: newY });
@@ -90,7 +111,7 @@ export default function CoverPhoto({
   };
 
   const handleTouchStart = (e) => {
-    e.stopPropagation(); // evita activar el drag de reordenar en wishlist
+    e.stopPropagation();
     const t = e.touches[0];
     startDrag(t.clientX, t.clientY, e.currentTarget.getBoundingClientRect());
     const onMove = (e) => { e.preventDefault(); const t = e.touches[0]; moveDrag(t.clientX, t.clientY); };
@@ -129,30 +150,43 @@ export default function CoverPhoto({
     );
   }
 
+  const enterClass = enterKey > 0 ? `cover-photo__img--enter-${enterDir}` : '';
+
   return (
     <div
       ref={containerRef}
       className={`cover-photo${adjusting ? ' cover-photo--adjusting' : ''}`}
       style={{ aspectRatio }}
     >
+      {/* Imagen anterior saliendo (absoluta, encima, se desvanece) */}
+      {prevSlide && (
+        <img
+          src={prevSlide.src}
+          alt=""
+          className={`cover-photo__img cover-photo__img--exit cover-photo__img--exit-${prevSlide.dir}`}
+          style={{ objectPosition: `${prevSlide.pos.x}% ${prevSlide.pos.y}%` }}
+          onAnimationEnd={() => setPrevSlide(null)}
+        />
+      )}
+
+      {/* Imagen/video entrante */}
       {photo.resource_type === 'video' ? (
         <>
-          {/* Thumbnail estático hasta que el video empiece — evita botón de play nativo */}
           {!videoPlaying && (
             <img
-              key={photo.id}
+              key={enterKey}
               src={videoThumb(photo.cloudinary_url)}
               alt=""
-              className={`cover-photo__img cover-photo__img--${direction}`}
+              className={`cover-photo__img ${enterClass}`}
               style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
               onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             />
           )}
           <video
-            key={`v-${photo.id}`}
+            key={`v-${enterKey}`}
             ref={videoRef}
             src={photo.cloudinary_url}
-            className={`cover-photo__img cover-photo__img--${direction}`}
+            className={`cover-photo__img ${enterClass}`}
             style={{ objectPosition: `${pos.x}% ${pos.y}%`, display: videoPlaying ? 'block' : 'none' }}
             onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             muted
@@ -166,10 +200,10 @@ export default function CoverPhoto({
         </>
       ) : (
         <img
-          key={photo.id}
+          key={enterKey}
           src={photo.cloudinary_url}
           alt=""
-          className={`cover-photo__img cover-photo__img--${direction}`}
+          className={`cover-photo__img ${enterClass}`}
           style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
           onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
         />
@@ -189,11 +223,11 @@ export default function CoverPhoto({
         <>
           <button
             className="cover-photo__arrow cover-photo__arrow--prev"
-            onClick={(e) => { e.stopPropagation(); setDirection('prev'); onCoverIndexChange((safeIndex - 1 + photoCount) % photoCount); }}
+            onClick={(e) => { e.stopPropagation(); navigate('prev', (safeIndex - 1 + photoCount) % photoCount); }}
           >‹</button>
           <button
             className="cover-photo__arrow cover-photo__arrow--next"
-            onClick={(e) => { e.stopPropagation(); setDirection('next'); onCoverIndexChange((safeIndex + 1) % photoCount); }}
+            onClick={(e) => { e.stopPropagation(); navigate('next', (safeIndex + 1) % photoCount); }}
           >›</button>
           <span className="cover-photo__counter">{safeIndex + 1}/{photoCount}</span>
         </>
