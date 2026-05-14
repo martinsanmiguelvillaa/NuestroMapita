@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import or_
+from app.models.photo import Photo
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -147,9 +148,14 @@ def convert_back_to_wishlist(
     db.add(wish)
     db.flush()  # obtener wish.id antes del commit
 
-    for photo in place.photos:
-        photo.place_visited_id = None
-        photo.place_wishlist_id = wish.id
+    # Reasignar fotos directamente en la BD para evitar que el cascade="delete-orphan"
+    # de la relación PlaceVisited.photos las borre al hacer db.delete(place).
+    db.query(Photo).filter(Photo.place_visited_id == place_id).update(
+        {"place_visited_id": None, "place_wishlist_id": wish.id},
+        synchronize_session=False,
+    )
+    # Limpiar la colección en memoria para que el cascade no encuentre fotos que borrar.
+    db.expire(place, ["photos"])
 
     db.delete(place)
     db.commit()
