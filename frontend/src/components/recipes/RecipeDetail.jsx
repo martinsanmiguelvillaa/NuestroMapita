@@ -156,7 +156,7 @@ function RecipeComments({ recipe, onUpdated }) {
 
       {/* Lista de comentarios */}
       {recipe.comments.length === 0 ? (
-        <p className="recipe-comments__empty">Todavía no hay comentarios. ¡Sé la primera!</p>
+        <p className="recipe-comments__empty">Todavía no hay comentarios.</p>
       ) : (
         <div className="recipe-comments__list">
           {recipe.comments.map((c) => (
@@ -184,15 +184,6 @@ function RecipeComments({ recipe, onUpdated }) {
         {error && <div className="alert alert-error">{error}</div>}
 
         <div className="recipe-comment-form__row">
-          <div className="form-group" style={{ flex: 1 }}>
-            <label className="form-label">¿Quién prueba?</label>
-            <input
-              className="form-input"
-              value={form.author}
-              onChange={(e) => setField('author', e.target.value)}
-              placeholder="Van, mi amor..."
-            />
-          </div>
           <div className="form-group">
             <label className="form-label">Puntaje</label>
             <div className="recipe-comment-form__stars">
