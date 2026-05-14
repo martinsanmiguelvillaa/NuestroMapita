@@ -8,6 +8,7 @@ const links = [
   { to: '/visitados',  label: 'Visitados',   icon: '✓' },
   { to: '/por-visitar',label: 'Por visitar', icon: '★' },
   { to: '/cartitas',   label: 'Cartitas',    icon: '💌' },
+  { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
 ];
 
 export default function Navbar() {

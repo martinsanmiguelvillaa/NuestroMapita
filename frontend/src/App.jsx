@@ -16,6 +16,7 @@ import MapPage from './pages/Map';
 import Visited from './pages/Visited';
 import Wishlist from './pages/Wishlist';
 import Letters from './pages/Letters';
+import Recipes from './pages/Recipes';
 
 // Ruta protegida: si no hay sesión, manda al login
 function ProtectedRoute() {
@@ -39,6 +40,7 @@ export default function App() {
               <Route path="/visitados" element={<Visited />} />
               <Route path="/por-visitar" element={<Wishlist />} />
               <Route path="/cartitas" element={<Letters />} />
+              <Route path="/recetas" element={<Recipes />} />
             </Route>
           </Route>
 
