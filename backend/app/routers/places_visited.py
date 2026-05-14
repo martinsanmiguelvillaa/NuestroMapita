@@ -138,12 +138,11 @@ def convert_back_to_wishlist(
         longitude=place.longitude,
     )
     db.add(wish)
+    db.flush()  # obtener wish.id antes del commit
 
     for photo in place.photos:
-        try:
-            delete_image(photo.cloudinary_public_id)
-        except Exception:
-            pass
+        photo.place_visited_id = None
+        photo.place_wishlist_id = wish.id
 
     db.delete(place)
     db.commit()
