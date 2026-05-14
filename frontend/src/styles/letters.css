@@ -27,9 +27,21 @@
 }
 
 .letters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-6);
+  columns: 3;
+  column-gap: 24px;
+}
+
+.letters-grid > * {
+  break-inside: avoid;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .letters-grid { columns: 2; }
+}
+
+@media (max-width: 480px) {
+  .letters-grid { columns: 1; }
 }
 
 /* Tarjeta de carta - estilo papelito / nota */
@@ -135,8 +147,3 @@
   margin-top: var(--space-4);
 }
 
-@media (max-width: 480px) {
-  .letters-grid {
-    grid-template-columns: 1fr;
-  }
-}
