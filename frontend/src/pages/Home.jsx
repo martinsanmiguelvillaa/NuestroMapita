@@ -49,6 +49,70 @@ function VideoPolaroid({ photo, onClick }) {
   );
 }
 
+// ── Reproductor de video con controles custom ──────────────────────
+function VideoPlayer({ src }) {
+  const videoRef = useRef(null);
+  const [playing, setPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  const fmt = (s) => {
+    const m = Math.floor(s / 60);
+    const ss = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${ss}`;
+  };
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else { v.pause(); setPlaying(false); }
+  };
+
+  const handleTimeUpdate = () => {
+    const v = videoRef.current;
+    if (!v || !v.duration) return;
+    setCurrentTime(v.currentTime);
+    setProgress(v.currentTime / v.duration);
+  };
+
+  const handleSeek = (e) => {
+    const v = videoRef.current;
+    if (!v) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    v.currentTime = ratio * v.duration;
+  };
+
+  return (
+    <div className="home-video-player" onClick={(e) => e.stopPropagation()}>
+      <video
+        ref={videoRef}
+        src={src}
+        className="lightbox__img"
+        autoPlay
+        playsInline
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
+        onEnded={() => setPlaying(false)}
+        onClick={togglePlay}
+        style={{ cursor: 'pointer' }}
+      />
+      <div className="home-video-controls">
+        <button className="home-video-controls__play" onClick={togglePlay}>
+          {playing ? '⏸' : '▶'}
+        </button>
+        <span className="home-video-controls__time">{fmt(currentTime)}</span>
+        <div className="home-video-controls__bar" onClick={handleSeek}>
+          <div className="home-video-controls__fill" style={{ width: `${progress * 100}%` }} />
+        </div>
+        <span className="home-video-controls__time">{fmt(duration)}</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Lightbox de la galería home ────────────────────────────────────
 function HomeLightbox({ photo, onClose }) {
   useEffect(() => {
@@ -79,15 +143,7 @@ function HomeLightbox({ photo, onClose }) {
       <button className="lightbox__close" onClick={onClose}>×</button>
 
       {isVideo ? (
-        <video
-          key={photo.id}
-          src={photo.cloudinary_url}
-          className="lightbox__img"
-          controls
-          autoPlay
-          playsInline
-          onClick={(e) => e.stopPropagation()}
-        />
+        <VideoPlayer key={photo.id} src={photo.cloudinary_url} />
       ) : (
         <img
           src={photo.cloudinary_url}
