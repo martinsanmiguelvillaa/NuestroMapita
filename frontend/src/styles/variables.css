@@ -84,5 +84,5 @@
   --bg-letters: url('/backgrounds/57ed6300cfbaee1c308801e3e40a6b30.jpg');
   --bg-visited: none;
   --bg-wishlist: none;
-  --bg-home: none;
+  --bg-home: url('/backgrounds/home-bg.png');
 }

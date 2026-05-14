@@ -4,13 +4,29 @@
 
 .home {
   min-height: 100vh;
+  background-image: var(--bg-home);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.home::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 246, 236, 0.6);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* --- Hero --- */
 .home__hero {
   text-align: center;
   padding: var(--space-12) var(--space-4) var(--space-8);
-  background: linear-gradient(160deg, var(--color-rose-light) 0%, var(--color-cream) 60%);
+  background: linear-gradient(160deg, rgba(245, 224, 224, 0.75) 0%, rgba(253, 246, 236, 0.6) 60%);
+  position: relative;
+  z-index: 1;
 }
 
 .home__hero-subtitle {
@@ -43,6 +59,13 @@
 }
 
 /* --- Stats suaves --- */
+.home__stats,
+.home__sections,
+.home__recent {
+  position: relative;
+  z-index: 1;
+}
+
 .home__stats {
   display: flex;
   justify-content: center;
