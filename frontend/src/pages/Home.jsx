@@ -8,18 +8,41 @@
  * - Álbum de fotos recientes (polaroids)
  * - Acceso destacado a cartitas
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { getVisited } from '../api/placesVisited';
 import { getWishlist } from '../api/placesWishlist';
 import { getLetters } from '../api/letters';
 import '../styles/home.css';
 
-function photoSrc(photo) {
-  if (photo.resource_type !== 'video') return photo.cloudinary_url;
-  return photo.cloudinary_url
-    .replace('/video/upload/', '/video/upload/so_0,w_800/')
-    .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+function VideoPolaroid({ photo }) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src={photo.cloudinary_url}
+      className="polaroid__img"
+      muted
+      loop
+      playsInline
+      preload="none"
+    />
+  );
 }
 
 export default function Home() {
@@ -138,12 +161,10 @@ export default function Home() {
           <div className="home__polaroids">
             {recentPhotos.map((photo) => (
               <div key={photo.id} className="polaroid">
-                <img
-                  src={photoSrc(photo)}
-                  alt={photo.placeName}
-                  className="polaroid__img"
-                  loading="lazy"
-                />
+                {photo.resource_type === 'video'
+                  ? <VideoPolaroid photo={photo} />
+                  : <img src={photo.cloudinary_url} alt={photo.placeName} className="polaroid__img" loading="lazy" />
+                }
                 <p className="polaroid__caption">{photo.placeName}</p>
               </div>
             ))}
