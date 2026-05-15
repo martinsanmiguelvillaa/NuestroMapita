@@ -155,6 +155,9 @@ function HoverMarker({ position, icon, children }) {
     mouseover:  (e) => e.target.openPopup(),
     mouseout:   (e) => { if (!pinned.current) e.target.closePopup(); },
     click:      (e) => {
+      // Evitar que el clic burbujee al MapContainer, que tiene
+      // closePopupOnClick=true y cerraría el popup antes de que podamos fijarlo
+      L.DomEvent.stopPropagation(e.originalEvent);
       pinned.current = true;
       e.target.openPopup();
     },
