@@ -1,5 +1,8 @@
+import logging
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+
+logger = logging.getLogger(__name__)
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
@@ -109,8 +112,8 @@ async def upload_photos(
         for public_id, rtype in uploaded:
             try:
                 delete_media(public_id, resource_type=rtype)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("No se pudo eliminar media de Cloudinary en rollback: public_id=%s error=%s", public_id, e)
         raise
 
     for p in created:
@@ -167,8 +170,8 @@ async def upload_wishlist_photos(
         for public_id, rtype in uploaded:
             try:
                 delete_media(public_id, resource_type=rtype)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("No se pudo eliminar media de Cloudinary en rollback: public_id=%s error=%s", public_id, e)
         raise
 
     for p in created:

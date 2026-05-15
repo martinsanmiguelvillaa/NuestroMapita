@@ -17,8 +17,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const data = await login(password);
-      authLogin(data.token);
+      await login(password);
+      authLogin();
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.message || 'Contraseña incorrecta');

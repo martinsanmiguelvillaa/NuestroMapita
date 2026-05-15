@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # CORS: lista separada por comas de orígenes permitidos
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:80"
 
+    # Cookie segura (True en producción HTTPS, False en dev HTTP)
+    COOKIE_SECURE: bool = True
+
     @property
     def DATABASE_URL(self) -> str:
         return (

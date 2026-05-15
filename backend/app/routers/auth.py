@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from secrets import compare_digest
 from threading import Lock
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from jose import jwt
 from app.config import settings
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.dependencies import get_current_user
+from app.schemas.auth import LoginRequest
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -12,6 +13,14 @@ MAX_FAILED_ATTEMPTS = 5
 FAILED_ATTEMPT_WINDOW = timedelta(minutes=15)
 _failed_attempts: dict[str, list[datetime]] = {}
 _failed_attempts_lock = Lock()
+
+COOKIE_NAME = "mapita_token"
+COOKIE_KWARGS = dict(
+    httponly=True,
+    samesite="none",
+    secure=settings.COOKIE_SECURE,
+    max_age=30 * 24 * 3600,
+)
 
 
 def _client_key(request: Request) -> str:
@@ -41,11 +50,10 @@ def _is_blocked(key: str, now: datetime) -> bool:
     return len(active_attempts) >= MAX_FAILED_ATTEMPTS
 
 
-@router.post("/login", response_model=TokenResponse)
-def login(data: LoginRequest, request: Request):
+@router.post("/login")
+def login(data: LoginRequest, request: Request, response: Response):
     """
-    Valida la contraseña compartida y devuelve un JWT con 30 días de vida.
-    El frontend guarda ese token en localStorage y lo envía en cada request.
+    Valida la contraseña compartida y setea un JWT como HttpOnly cookie.
     """
     now = datetime.now(timezone.utc)
     client_key = _client_key(request)
@@ -67,4 +75,22 @@ def login(data: LoginRequest, request: Request):
         "exp": now + timedelta(days=30),
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-    return TokenResponse(token=token)
+    response.set_cookie(key=COOKIE_NAME, value=token, **COOKIE_KWARGS)
+    return {"ok": True}
+
+
+@router.post("/logout")
+def logout(response: Response):
+    """Elimina la cookie de sesión."""
+    response.delete_cookie(
+        key=COOKIE_NAME,
+        samesite="none",
+        secure=settings.COOKIE_SECURE,
+    )
+    return {"ok": True}
+
+
+@router.get("/me")
+def me(_: bool = Depends(get_current_user)):
+    """Verifica que la sesión actual sea válida."""
+    return {"ok": True}

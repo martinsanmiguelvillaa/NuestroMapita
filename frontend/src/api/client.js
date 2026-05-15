@@ -1,7 +1,7 @@
 /**
  * Cliente HTTP base para todas las llamadas al backend.
  *
- * - Agrega el token JWT automáticamente desde localStorage.
+ * - Usa credentials: 'include' para enviar la HttpOnly cookie en cada request.
  * - Si el servidor devuelve 401 (sesión expirada), redirige al login.
  * - Lanza un Error con el mensaje del backend si la respuesta no es exitosa.
  */
@@ -9,16 +9,8 @@
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 async function apiFetch(path, options = {}) {
-  const token = localStorage.getItem('mapita_token');
-
   const headers = { ...options.headers };
 
-  // Agregar autenticación si tenemos token
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  // Solo setear Content-Type JSON si no estamos subiendo archivos (FormData)
   if (!(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
@@ -26,17 +18,15 @@ async function apiFetch(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
+    credentials: 'include',
     signal: options.signal,
   });
 
-  // Sesión expirada o token inválido: ir al login
   if (response.status === 401) {
-    localStorage.removeItem('mapita_token');
     window.location.href = '/login';
     return;
   }
 
-  // Sin contenido (ej: DELETE exitoso)
   if (response.status === 204) {
     return null;
   }

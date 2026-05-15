@@ -1,36 +1,44 @@
 /**
  * AuthContext: maneja la sesión de la app.
  *
- * - El token JWT se guarda en localStorage ('mapita_token').
- * - Al recargar la página, se lee del localStorage automáticamente.
- * - logout() limpia el token y redirige al login.
+ * - El JWT viaja como HttpOnly cookie (el JS nunca lo toca).
+ * - Al cargar la app, verifica la sesión con GET /auth/me.
+ * - logout() llama a POST /auth/logout para que el servidor borre la cookie.
  */
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { checkAuth, logout as logoutApi } from '../api/auth';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  // Inicializar desde localStorage (persiste entre recargas)
-  const [token, setToken] = useState(() => localStorage.getItem('mapita_token'));
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = (newToken) => {
-    localStorage.setItem('mapita_token', newToken);
-    setToken(newToken);
-  };
+  useEffect(() => {
+    checkAuth()
+      .then(() => setIsAuthenticated(true))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setIsLoading(false));
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('mapita_token');
-    setToken(null);
+  const login = () => setIsAuthenticated(true);
+
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // Si falla el endpoint, igual limpiamos el estado local
+    }
+    setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Hook para usar el contexto fácilmente en cualquier componente
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth debe usarse dentro de <AuthProvider>');

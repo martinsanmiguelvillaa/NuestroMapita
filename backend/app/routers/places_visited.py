@@ -115,11 +115,14 @@ def delete_visited(
     db.commit()
 
     def _del(args):
+        import logging
         try:
             from app.services.cloudinary_service import delete_media
             delete_media(args[0], resource_type=args[1])
-        except Exception:
-            pass
+        except Exception as e:
+            logging.getLogger(__name__).warning(
+                "No se pudo eliminar media de Cloudinary: public_id=%s error=%s", args[0], e
+            )
 
     if media_to_delete:
         with ThreadPoolExecutor(max_workers=6) as ex:

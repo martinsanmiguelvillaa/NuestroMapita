@@ -1,23 +1,22 @@
-from fastapi import Depends, HTTPException, Header
+from typing import Optional
+from fastapi import Cookie, HTTPException
 from jose import jwt, JWTError, ExpiredSignatureError
 from app.config import settings
 
 
-def get_current_user(authorization: str = Header(default=None)) -> bool:
+def get_current_user(mapita_token: Optional[str] = Cookie(default=None)) -> bool:
     """
-    Dependency que valida el JWT en el header Authorization.
-    Si el token es inválido o expiró, devuelve 401.
+    Dependency que valida el JWT en la HttpOnly cookie.
+    Si la cookie no existe o el token es inválido, devuelve 401.
     """
-    if not authorization or not authorization.startswith("Bearer "):
+    if not mapita_token:
         raise HTTPException(
             status_code=401,
             detail="No autorizado. Iniciá sesión primero.",
         )
 
-    token = authorization.split(" ", 1)[1]
-
     try:
-        jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        jwt.decode(mapita_token, settings.SECRET_KEY, algorithms=["HS256"])
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="La sesión expiró. Iniciá sesión de nuevo.")
     except JWTError:

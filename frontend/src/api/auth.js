@@ -6,3 +6,11 @@ export async function login(password) {
     body: JSON.stringify({ password }),
   });
 }
+
+export async function logout() {
+  return apiFetch('/auth/logout', { method: 'POST' });
+}
+
+export async function checkAuth() {
+  return apiFetch('/auth/me');
+}

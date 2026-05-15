@@ -21,7 +21,8 @@ import ShareTarget from './pages/ShareTarget';
 
 // Ruta protegida: si no hay sesión, manda al login
 function ProtectedRoute() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null;
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
