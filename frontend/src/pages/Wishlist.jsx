@@ -432,7 +432,7 @@ export default function Wishlist() {
         <div className="loading-state">Cargando...</div>
       ) : places.length === 0 ? (
         <div className="empty-state">
-          <p>No hay lugares por visitar todavía.</p>
+          <p>Todavía no hay nada en la lista.</p>
           <button className="btn btn-rose" onClick={() => setShowForm(true)}>
             Agregar el primero
           </button>
@@ -456,7 +456,7 @@ export default function Wishlist() {
       )}
 
       {/* Modal crear */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo lugar por visitar">
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Agregar a Por hacer">
         <WishlistForm
           onSubmit={handleCreate}
           onCancel={() => setShowForm(false)}

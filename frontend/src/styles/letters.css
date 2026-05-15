@@ -36,6 +36,16 @@
   margin-bottom: 24px;
 }
 
+/* background-attachment: fixed no funciona en iOS */
+@media (max-width: 768px) {
+  .letters-bg {
+    background-attachment: scroll;
+  }
+  .letters-bg::before {
+    position: absolute;
+  }
+}
+
 @media (max-width: 900px) {
   .letters-grid { columns: 2; }
 }

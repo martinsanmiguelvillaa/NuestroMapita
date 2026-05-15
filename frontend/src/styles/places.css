@@ -223,6 +223,8 @@
   font-size: var(--text-xl);
   color: var(--color-text);
   line-height: 1.2;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .place-card__date {
@@ -331,6 +333,9 @@
   font-size: var(--text-xl);
   color: var(--color-text);
   flex: 1;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .wish-card--dragging {
@@ -397,6 +402,10 @@
   color: var(--color-text-mid);
   font-style: italic;
   line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .wish-card__address {
@@ -564,7 +573,16 @@
   font-style: italic;
 }
 
+/* background-attachment: fixed no funciona en iOS — usar scroll en mobile */
 @media (max-width: 768px) {
+  .visited-bg,
+  .wishlist-bg {
+    background-attachment: scroll;
+  }
+  .visited-bg::before,
+  .wishlist-bg::before {
+    position: absolute;
+  }
   .section-header { flex-direction: column; align-items: flex-start; }
   .search-bar input { width: 140px; }
 }

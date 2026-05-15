@@ -153,7 +153,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
           onClick={handleConvertBack}
           disabled={convertingBack}
         >
-          {convertingBack ? '...' : '↩ Mover a por visitar'}
+          {convertingBack ? '...' : '↩ Mover a Por hacer'}
         </button>
       </div>
     </div>

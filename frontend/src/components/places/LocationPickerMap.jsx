@@ -50,6 +50,7 @@ const DEFAULT_ZOOM = 12;
 export default function LocationPickerMap({ lat, lng, onChange }) {
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
+  const [searchStatus, setSearchStatus] = useState(null); // 'notfound' | null
   const [flyTo, setFlyTo] = useState(null);
 
   const hasPin = lat != null && lng != null;
@@ -66,6 +67,7 @@ export default function LocationPickerMap({ lat, lng, onChange }) {
   const handleSearch = async () => {
     if (!search.trim()) return;
     setSearching(true);
+    setSearchStatus(null);
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(search)}&limit=1`,
@@ -77,9 +79,12 @@ export default function LocationPickerMap({ lat, lng, onChange }) {
         const newLng = parseFloat(data[0].lon);
         setFlyTo({ lat: newLat, lng: newLng });
         onChange({ lat: newLat, lng: newLng });
+        setSearchStatus(null);
+      } else {
+        setSearchStatus('notfound');
       }
     } catch {
-      // si falla la búsqueda, el usuario puede tocar el mapa igual
+      setSearchStatus('notfound');
     } finally {
       setSearching(false);
     }
@@ -105,6 +110,11 @@ export default function LocationPickerMap({ lat, lng, onChange }) {
           {searching ? '...' : 'Buscar'}
         </button>
       </div>
+      {searchStatus === 'notfound' && (
+        <p className="form-hint" style={{ color: 'var(--color-error)', marginTop: '4px' }}>
+          No se encontró ese lugar. Probá con otro nombre o tocá el mapa directamente.
+        </p>
+      )}
 
       <div className="location-picker__map">
         <MapContainer

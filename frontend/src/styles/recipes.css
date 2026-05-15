@@ -484,6 +484,16 @@
    RESPONSIVE
    ========================================= */
 
+/* background-attachment: fixed no funciona en iOS */
+@media (max-width: 768px) {
+  .recipes-bg {
+    background-attachment: scroll;
+  }
+  .recipes-bg::before {
+    position: absolute;
+  }
+}
+
 @media (max-width: 580px) {
   .recipe-filters {
     flex-direction: column;

@@ -232,7 +232,7 @@ export default function Home() {
           </div>
           <div className="home__stat">
             <div className="home__stat-number">{stats.wishlist}</div>
-            <div className="home__stat-label">por visitar</div>
+            <div className="home__stat-label">por hacer</div>
           </div>
         </div>
       )}
