@@ -196,10 +196,10 @@ function HoverMarker({ position, icon, children }) {
 
       el.removeEventListener('mouseenter', cancelClose);
       el.removeEventListener('mouseleave', scheduleClose);
-      el.removeEventListener('click',      pinFromCard);
+      el.removeEventListener('mousedown',  pinFromCard);
       el.addEventListener('mouseenter', cancelClose);
       el.addEventListener('mouseleave', scheduleClose);
-      el.addEventListener('click',      pinFromCard);
+      el.addEventListener('mousedown',  pinFromCard);
     });
 
     marker.on('popupclose', () => {
