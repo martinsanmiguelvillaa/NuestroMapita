@@ -4,7 +4,7 @@
  * IMPORTANTE: Leaflet necesita un fix especial con Vite para los íconos de marcadores.
  * Este fix se aplica al inicio de este archivo.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StarRating from '../places/StarRating';
 import L from 'leaflet';
@@ -146,6 +146,29 @@ function WishlistPopup({ pin, onConvert }) {
   );
 }
 
+// Marker que abre el popup en hover y lo cierra al salir,
+// salvo que el usuario lo haya fijado con un clic.
+function HoverMarker({ position, icon, children }) {
+  const pinned = useRef(false);
+
+  const handlers = useCallback(() => ({
+    mouseover: (e) => e.target.openPopup(),
+    mouseout:  (e) => { if (!pinned.current) e.target.closePopup(); },
+    click:     (e) => {
+      pinned.current = !pinned.current;
+      if (pinned.current) e.target.openPopup();
+      else e.target.closePopup();
+    },
+    popupclose: () => { pinned.current = false; },
+  }), []);
+
+  return (
+    <Marker position={position} icon={icon} eventHandlers={handlers()}>
+      {children}
+    </Marker>
+  );
+}
+
 /**
  * MapView: componente principal del mapa.
  *
@@ -181,31 +204,21 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {/* Pines de lugares visitados */}
       {showVisited &&
         visitedPins.map((pin) => (
-          <Marker
-            key={`v-${pin.id}`}
-            position={[pin.lat, pin.lon]}
-            icon={visitedIcon}
-            eventHandlers={{ mouseover: (e) => e.target.openPopup() }}
-          >
+          <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={visitedIcon}>
             <Popup minWidth={240} maxWidth={300}>
               <VisitedPopup pin={pin} />
             </Popup>
-          </Marker>
+          </HoverMarker>
         ))}
 
       {/* Pines de lugares por visitar */}
       {showWishlist &&
         wishlistPins.map((pin) => (
-          <Marker
-            key={`w-${pin.id}`}
-            position={[pin.lat, pin.lon]}
-            icon={wishlistIcon}
-            eventHandlers={{ mouseover: (e) => e.target.openPopup() }}
-          >
+          <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={wishlistIcon}>
             <Popup minWidth={240} maxWidth={300}>
               <WishlistPopup pin={pin} onConvert={onConvert} />
             </Popup>
-          </Marker>
+          </HoverMarker>
         ))}
     </MapContainer>
   );
