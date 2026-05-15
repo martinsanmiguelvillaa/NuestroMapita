@@ -110,7 +110,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
       </div>
 
       <div className="form-group">
-        <label className="form-label">¿Volvería a visitar?</label>
+        <label className="form-label">¿Volvería a hacer?</label>
         <div style={{ display: 'flex', gap: '8px' }}>
           {[{ val: true, label: '✓ Sí' }, { val: false, label: '✗ No' }].map(({ val, label }) => (
             <button

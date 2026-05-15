@@ -99,7 +99,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
         {place.rating && <StarRating value={place.rating} readOnly small />}
         {place.would_revisit != null && (
           <span className={`place-card__revisit-badge ${place.would_revisit ? 'place-card__revisit-badge--yes' : 'place-card__revisit-badge--no'}`}>
-            {place.would_revisit ? '↩ Volvería' : '↩ No volvería'}
+            {place.would_revisit ? '↩ Volvería a hacer' : '↩ No volvería a hacer'}
           </span>
         )}
         {place.comment && <p className="place-card__comment">"{place.comment}"</p>}
