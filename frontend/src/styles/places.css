@@ -411,6 +411,7 @@
   display: inline-flex;
   align-items: center;
   gap: 1px;
+  width: fit-content;
   background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-rose-light) 100%);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-full);
