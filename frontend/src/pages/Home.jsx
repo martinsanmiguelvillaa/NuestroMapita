@@ -214,12 +214,11 @@ export default function Home() {
     <div className="home fade-in">
       {/* Hero */}
       <section className="home__hero">
-        <p className="home__hero-subtitle">solo para nosotros</p>
         <h1 className="home__hero-title">
           <em>Nuestro</em> Mapita
         </h1>
         <p className="home__hero-desc">
-          Todos nuestros recuerdos, planes y cartitas en un solo lugar.
+          Un lugar para nuestros plancitos, recuerdos y varias cosas mas..
         </p>
       </section>
 
