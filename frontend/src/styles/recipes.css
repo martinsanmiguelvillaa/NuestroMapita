@@ -2,6 +2,29 @@
    RECETAS
    ========================================= */
 
+.recipes-bg {
+  min-height: calc(100vh - var(--navbar-height));
+  background-image: var(--bg-recipes);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.recipes-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 246, 236, 0.82);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.recipes-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Filtros: tabs + buscador */
 .recipe-filters {
   display: flex;

@@ -79,6 +79,7 @@ export default function Recipes() {
   };
 
   return (
+    <div className="recipes-bg">
     <div className="container">
       {/* Cabecera */}
       <div className="section-header">
@@ -165,6 +166,7 @@ export default function Recipes() {
           }}
         />
       )}
+    </div>
     </div>
   );
 }
