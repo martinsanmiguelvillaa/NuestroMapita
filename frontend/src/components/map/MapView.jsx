@@ -152,14 +152,13 @@ function HoverMarker({ position, icon, children }) {
   const pinned = useRef(false);
 
   const handlers = useCallback(() => ({
-    mouseover:  (e) => e.target.openPopup(),
+    mouseover:  (e) => { if (!e.target.isPopupOpen()) e.target.openPopup(); },
     mouseout:   (e) => { if (!pinned.current) e.target.closePopup(); },
     click:      (e) => {
-      // Evitar que el clic burbujee al MapContainer, que tiene
-      // closePopupOnClick=true y cerraría el popup antes de que podamos fijarlo
+      // Evitar que el clic burbujee al MapContainer (closePopupOnClick=true)
       L.DomEvent.stopPropagation(e.originalEvent);
+      // Solo fijar — no llamar openPopup para no re-disparar la animación
       pinned.current = true;
-      if (!e.target.isPopupOpen()) e.target.openPopup();
     },
     popupclose: () => { pinned.current = false; },
   }), []);
