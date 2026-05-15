@@ -44,14 +44,20 @@ const wishlistIcon = L.divIcon({
   popupAnchor: [0, -34],
 });
 
-// Helper: volar a un pin cuando se selecciona desde el buscador
-function FlyToPin({ pin, onDone }) {
+// Helper: volar a un pin y abrir su popup
+function FlyToPin({ pin, onDone, markersRef }) {
   const map = useMap();
   useEffect(() => {
     if (!pin) return;
     map.flyTo([pin.lat, pin.lon], 16, { duration: 1 });
-    onDone?.();
-  }, [pin, map, onDone]);
+    const timer = setTimeout(() => {
+      const key = `${pin._type}-${pin.id}`;
+      const marker = markersRef?.current?.[key];
+      if (marker) marker.openPopup();
+      onDone?.();
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, [pin, map, onDone, markersRef]);
   return null;
 }
 
@@ -159,10 +165,18 @@ function WishlistPopup({ pin, onConvert }) {
 // - se mantiene abierto si el mouse pasa a la tarjeta
 // - se cierra al sacar el mouse de la tarjeta (o del corazón sin ir a la tarjeta)
 // - se fija con un clic; un segundo clic lo cierra
-function HoverMarker({ position, icon, children }) {
+function HoverMarker({ position, icon, children, markerKey, markersRef }) {
   const pinned    = useRef(false);
   const closeTimer = useRef(null);
   const markerRef  = useRef(null);
+
+  // Registrar la instancia del marker para poder abrir su popup desde fuera
+  useEffect(() => {
+    if (markerKey && markersRef && markerRef.current) {
+      markersRef.current[markerKey] = markerRef.current;
+      return () => { delete markersRef.current[markerKey]; };
+    }
+  }, [markerKey, markersRef]);
 
   useEffect(() => {
     const marker = markerRef.current;
@@ -246,6 +260,7 @@ function HoverMarker({ position, icon, children }) {
  */
 export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert, flyToPin, onFlyToDone }) {
   const allPins = [...visitedPins, ...wishlistPins];
+  const markersRef = useRef({});
   const defaultCenter = [-34.6037, -58.3816]; // Buenos Aires como default
   const defaultZoom = 12;
 
@@ -268,12 +283,12 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {allPins.length > 0 && <MapFitter pins={allPins} />}
 
       {/* Volar al pin seleccionado desde el buscador */}
-      {flyToPin && <FlyToPin pin={flyToPin} onDone={onFlyToDone} />}
+      {flyToPin && <FlyToPin pin={flyToPin} onDone={onFlyToDone} markersRef={markersRef} />}
 
       {/* Pines de lugares visitados */}
       {showVisited &&
         visitedPins.map((pin) => (
-          <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={visitedIcon}>
+          <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={visitedIcon} markerKey={`visited-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300}>
               <VisitedPopup pin={pin} />
             </Popup>
@@ -283,7 +298,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {/* Pines de lugares por visitar */}
       {showWishlist &&
         wishlistPins.map((pin) => (
-          <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={wishlistIcon}>
+          <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={wishlistIcon} markerKey={`wishlist-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300}>
               <WishlistPopup pin={pin} onConvert={onConvert} />
             </Popup>
