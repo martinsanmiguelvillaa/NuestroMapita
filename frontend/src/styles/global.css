@@ -33,7 +33,7 @@ body {
 @media (max-width: 768px) {
   #root {
     padding-top: 0;
-    padding-bottom: var(--mobile-nav-height);
+    padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
   }
 }
 
