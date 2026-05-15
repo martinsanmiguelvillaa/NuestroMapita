@@ -1,0 +1,26 @@
+{
+  "name": "Nuestro Mapita",
+  "short_name": "Mapita",
+  "description": "Un lugar para nuestros plancitos, recuerdos y varias cosas más",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDF6EC",
+  "theme_color": "#A0745A",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

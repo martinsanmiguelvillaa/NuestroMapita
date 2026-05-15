@@ -1,0 +1,93 @@
+/* =========================================
+   SHARE TARGET - Recibir links compartidos
+   ========================================= */
+
+.share-target {
+  min-height: 100vh;
+  padding: var(--space-8) var(--space-4);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.share-target__header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.share-target__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  color: var(--color-brown-dark);
+  margin-bottom: var(--space-3);
+}
+
+.share-target__url {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  word-break: break-all;
+  background: var(--color-beige-light);
+  border: 1px solid var(--color-beige-mid);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  font-family: monospace;
+}
+
+/* --- Opciones --- */
+.share-target__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  width: 100%;
+}
+
+.share-option:hover {
+  border-color: var(--color-rose);
+  background: var(--color-rose-light);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.share-option__icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 2.5rem;
+  text-align: center;
+}
+
+.share-option__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.share-option__label {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.share-option__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+}
+
+.share-option__arrow {
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  flex-shrink: 0;
+}

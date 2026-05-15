@@ -17,6 +17,7 @@ import Visited from './pages/Visited';
 import Wishlist from './pages/Wishlist';
 import Letters from './pages/Letters';
 import Recipes from './pages/Recipes';
+import ShareTarget from './pages/ShareTarget';
 
 // Ruta protegida: si no hay sesión, manda al login
 function ProtectedRoute() {
@@ -31,6 +32,11 @@ export default function App() {
         <Routes>
           {/* Página de login (sin navbar) */}
           <Route path="/login" element={<Login />} />
+
+          {/* Share target: fuera del Layout para pantalla limpia */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/share-target" element={<ShareTarget />} />
+          </Route>
 
           {/* Rutas protegidas: requieren estar autenticado */}
           <Route element={<ProtectedRoute />}>
