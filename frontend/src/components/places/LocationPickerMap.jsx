@@ -136,6 +136,16 @@ export default function LocationPickerMap({ lat, lng, onChange }) {
             Tocá el mapa para marcar el lugar
           </div>
         )}
+        {hasPin && (
+          <button
+            type="button"
+            className="location-picker__clear"
+            onClick={() => onChange({ lat: null, lng: null })}
+            title="Quitar ubicación"
+          >
+            ✕ Quitar ubicación
+          </button>
+        )}
       </div>
     </div>
   );

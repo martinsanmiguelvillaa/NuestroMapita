@@ -376,6 +376,28 @@
   cursor: crosshair;
 }
 
+.location-picker__clear {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-beige-mid);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: var(--text-xs);
+  color: var(--color-text-mid);
+  cursor: pointer;
+  z-index: 1000;
+  font-family: var(--font-body);
+  transition: var(--transition-fast);
+}
+
+.location-picker__clear:hover {
+  background: var(--color-white);
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
 .location-picker__hint {
   position: absolute;
   bottom: 10px;
