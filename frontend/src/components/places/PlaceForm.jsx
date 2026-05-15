@@ -114,14 +114,18 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
               style={{
                 background: 'none',
                 border: 'none',
-                fontSize: '1.6rem',
                 cursor: 'pointer',
-                color: (form.rating || 0) >= s ? 'var(--color-star)' : 'var(--color-beige-dark)',
                 padding: '2px',
                 transition: 'transform 0.1s',
+                display: 'inline-flex',
+                alignItems: 'center',
               }}
             >
-              ★
+              <img
+                src="/icons/alas-puntuacion.png"
+                alt=""
+                style={{ width: '1.6rem', height: '1.6rem', objectFit: 'contain', opacity: (form.rating || 0) >= s ? 1 : 0.45 }}
+              />
             </button>
           ))}
         </div>

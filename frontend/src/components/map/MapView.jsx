@@ -6,6 +6,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import StarRating from '../places/StarRating';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../../styles/map.css';
@@ -76,7 +77,7 @@ function VisitedPopup({ pin, onEdit, onDelete }) {
       {pin.visit_date && <p className="map-popup__info">📅 {formatDate(pin.visit_date)}</p>}
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
       {pin.rating && (
-        <p className="map-popup__info">{'★'.repeat(pin.rating)}{'☆'.repeat(5 - pin.rating)}</p>
+        <div className="map-popup__info"><StarRating value={pin.rating} readOnly small /></div>
       )}
       {pin.comment && (
         <p className="map-popup__info" style={{ fontStyle: 'italic' }}>"{pin.comment}"</p>

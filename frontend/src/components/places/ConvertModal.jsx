@@ -83,13 +83,17 @@ export default function ConvertModal({ place, isOpen, onClose, onConverted }) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  fontSize: '1.6rem',
                   cursor: 'pointer',
-                  color: (rating || 0) >= s ? 'var(--color-star)' : 'var(--color-beige-dark)',
                   padding: '2px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
                 }}
               >
-                ★
+                <img
+                  src="/icons/alas-puntuacion.png"
+                  alt=""
+                  style={{ width: '1.6rem', height: '1.6rem', objectFit: 'contain', opacity: (rating || 0) >= s ? 1 : 0.45 }}
+                />
               </button>
             ))}
           </div>
