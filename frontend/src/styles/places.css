@@ -25,6 +25,29 @@
   z-index: 1;
 }
 
+/* --- Fondo de sección Por hacer --- */
+.wishlist-bg {
+  min-height: calc(100vh - var(--navbar-height));
+  background-image: var(--bg-wishlist);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.wishlist-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 246, 236, 0.82);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wishlist-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* --- Cabecera de sección --- */
 .section-header {
   display: flex;

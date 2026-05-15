@@ -362,6 +362,7 @@ export default function Wishlist() {
   };
 
   return (
+    <div className="wishlist-bg">
     <div className="container">
       {/* Cabecera */}
       <div className="section-header">
@@ -489,6 +490,7 @@ export default function Wishlist() {
           onConverted={() => { setConvertPlace(null); load(); }}
         />
       )}
+    </div>
     </div>
   );
 }
