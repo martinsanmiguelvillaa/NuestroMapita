@@ -50,18 +50,23 @@ export default function CoverPhoto({
     const container = containerRef.current;
     if (!video || !container || photo?.resource_type !== 'video') return;
 
+    let isVisible = false;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+        isVisible = entry.isIntersecting;
+        if (isVisible) video.play().catch(() => {});
+        else video.pause();
       },
       { threshold: 0.3 },
     );
     observer.observe(container);
-    return () => observer.disconnect();
+
+    // Reanudar si el browser pausó el video (cambio de pestaña, bloqueo de pantalla, etc.)
+    const resume = () => { if (!document.hidden && isVisible) video.play().catch(() => {}); };
+    document.addEventListener('visibilitychange', resume);
+
+    return () => { observer.disconnect(); document.removeEventListener('visibilitychange', resume); };
   }, [photo?.resource_type, photo?.cloudinary_url]);
 
   const storedPos = { x: photo?.position_x ?? 50, y: photo?.position_y ?? 50 };

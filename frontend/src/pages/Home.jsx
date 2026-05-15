@@ -23,15 +23,23 @@ function VideoPolaroid({ photo, onClick }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    let isVisible = false;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) video.play().catch(() => {});
+        isVisible = entry.isIntersecting;
+        if (isVisible) video.play().catch(() => {});
         else video.pause();
       },
       { threshold: 0.3 },
     );
     observer.observe(video);
-    return () => observer.disconnect();
+
+    const resume = () => { if (!document.hidden && isVisible) video.play().catch(() => {}); };
+    document.addEventListener('visibilitychange', resume);
+
+    return () => { observer.disconnect(); document.removeEventListener('visibilitychange', resume); };
   }, []);
 
   return (

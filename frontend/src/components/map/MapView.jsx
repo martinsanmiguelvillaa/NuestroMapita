@@ -80,7 +80,16 @@ function MapFitter({ pins }) {
 
 function AutoPlayVideo({ src, className }) {
   const ref = useRef(null);
+
   useEffect(() => { ref.current?.play().catch(() => {}); }, []);
+
+  // Reanudar si el browser pausó el video (cambio de pestaña, bloqueo de pantalla, etc.)
+  useEffect(() => {
+    const resume = () => { if (!document.hidden) ref.current?.play().catch(() => {}); };
+    document.addEventListener('visibilitychange', resume);
+    return () => document.removeEventListener('visibilitychange', resume);
+  }, []);
+
   return <video ref={ref} src={src} className={className} muted loop playsInline />;
 }
 
