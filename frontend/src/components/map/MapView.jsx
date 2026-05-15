@@ -181,7 +181,12 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {/* Pines de lugares visitados */}
       {showVisited &&
         visitedPins.map((pin) => (
-          <Marker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={visitedIcon}>
+          <Marker
+            key={`v-${pin.id}`}
+            position={[pin.lat, pin.lon]}
+            icon={visitedIcon}
+            eventHandlers={{ mouseover: (e) => e.target.openPopup() }}
+          >
             <Popup minWidth={240} maxWidth={300}>
               <VisitedPopup pin={pin} />
             </Popup>
@@ -191,7 +196,12 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {/* Pines de lugares por visitar */}
       {showWishlist &&
         wishlistPins.map((pin) => (
-          <Marker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={wishlistIcon}>
+          <Marker
+            key={`w-${pin.id}`}
+            position={[pin.lat, pin.lon]}
+            icon={wishlistIcon}
+            eventHandlers={{ mouseover: (e) => e.target.openPopup() }}
+          >
             <Popup minWidth={240} maxWidth={300}>
               <WishlistPopup pin={pin} onConvert={onConvert} />
             </Popup>
