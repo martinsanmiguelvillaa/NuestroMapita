@@ -61,6 +61,16 @@ function MapFitter({ pins }) {
   return null;
 }
 
+function photoPreviewUrl(url) {
+  if (!url) return null;
+  if (/\/video\/upload\//.test(url)) {
+    return url
+      .replace('/video/upload/', '/video/upload/so_0,w_400,q_auto/')
+      .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg');
+  }
+  return url;
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-AR', {
@@ -74,7 +84,7 @@ function VisitedPopup({ pin, onEdit, onDelete }) {
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--visited">Visitado</span>
       {pin.first_photo && (
-        <img src={pin.first_photo} alt="" className="map-popup__photo" />
+        <img src={photoPreviewUrl(pin.first_photo)} alt="" className="map-popup__photo" />
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.visit_date && <p className="map-popup__info">📅 {formatDate(pin.visit_date)}</p>}
