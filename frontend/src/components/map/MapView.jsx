@@ -159,7 +159,7 @@ function HoverMarker({ position, icon, children }) {
       // closePopupOnClick=true y cerraría el popup antes de que podamos fijarlo
       L.DomEvent.stopPropagation(e.originalEvent);
       pinned.current = true;
-      e.target.openPopup();
+      if (!e.target.isPopupOpen()) e.target.openPopup();
     },
     popupclose: () => { pinned.current = false; },
   }), []);
