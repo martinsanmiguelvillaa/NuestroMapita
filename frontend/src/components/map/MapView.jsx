@@ -82,7 +82,7 @@ function formatDate(dateStr) {
 function VisitedPopup({ pin, onEdit, onDelete }) {
   return (
     <div className="map-popup">
-      <span className="map-popup__type map-popup__type--visited">Visitado</span>
+      <span className="map-popup__type map-popup__type--visited">Ya hicimos</span>
       {pin.first_photo && (
         /\/video\/upload\//.test(pin.first_photo) ? (
           <video
