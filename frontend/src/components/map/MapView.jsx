@@ -84,7 +84,18 @@ function VisitedPopup({ pin, onEdit, onDelete }) {
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--visited">Visitado</span>
       {pin.first_photo && (
-        <img src={photoPreviewUrl(pin.first_photo)} alt="" className="map-popup__photo" />
+        /\/video\/upload\//.test(pin.first_photo) ? (
+          <video
+            src={pin.first_photo}
+            className="map-popup__photo"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <img src={pin.first_photo} alt="" className="map-popup__photo" />
+        )
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.visit_date && <p className="map-popup__info">📅 {formatDate(pin.visit_date)}</p>}
