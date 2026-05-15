@@ -81,16 +81,28 @@ function MapFitter({ pins }) {
 function AutoPlayVideo({ src, className }) {
   const ref = useRef(null);
 
-  useEffect(() => { ref.current?.play().catch(() => {}); }, []);
-
-  // Reanudar si el browser pausó el video (cambio de pestaña, bloqueo de pantalla, etc.)
   useEffect(() => {
-    const resume = () => { if (!document.hidden) ref.current?.play().catch(() => {}); };
+    const video = ref.current;
+    if (!video) return;
+
+    // IntersectionObserver: play cuando el popup es visible, pause cuando se cierra/oculta
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(video);
+
+    // Reanudar tras cambio de pestaña / bloqueo de pantalla
+    const resume = () => { if (!document.hidden && !video.paused) return; if (!document.hidden) video.play().catch(() => {}); };
     document.addEventListener('visibilitychange', resume);
-    return () => document.removeEventListener('visibilitychange', resume);
+
+    return () => { observer.disconnect(); document.removeEventListener('visibilitychange', resume); };
   }, []);
 
-  return <video ref={ref} src={src} className={className} muted loop playsInline />;
+  return <video ref={ref} src={src} className={className} muted loop playsInline preload="metadata" />;
 }
 
 function photoPreviewUrl(url) {
