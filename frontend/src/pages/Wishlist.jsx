@@ -92,7 +92,7 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
       </div>
 
       {place.description && <p className="wish-card__desc">{place.description}</p>}
-      {place.address && <p className="wish-card__address">📍 {place.address}</p>}
+      {place.address && <p className="wish-card__address">Dirección: {place.address}</p>}
 
       {/* Fotos */}
       <div style={{ margin: '8px 0' }}>
