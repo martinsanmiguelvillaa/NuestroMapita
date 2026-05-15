@@ -187,14 +187,19 @@ function HoverMarker({ position, icon, children }) {
       }
     });
 
-    // Cuando el popup abre, escuchar hover sobre la tarjeta misma
+    // Cuando el popup abre, escuchar hover y clic sobre la tarjeta misma
     marker.on('popupopen', (e) => {
       const el = e.popup?.getElement();
       if (!el) return;
+
+      const pinFromCard = () => { pinned.current = true; cancelClose(); };
+
       el.removeEventListener('mouseenter', cancelClose);
       el.removeEventListener('mouseleave', scheduleClose);
+      el.removeEventListener('click',      pinFromCard);
       el.addEventListener('mouseenter', cancelClose);
       el.addEventListener('mouseleave', scheduleClose);
+      el.addEventListener('click',      pinFromCard);
     });
 
     marker.on('popupclose', () => {
