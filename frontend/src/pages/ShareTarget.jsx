@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
@@ -6,7 +6,7 @@ import PlaceForm from '../components/places/PlaceForm';
 import RecipeForm from '../components/recipes/RecipeForm';
 import { createWishlist } from '../api/placesWishlist';
 import { createVisited } from '../api/placesVisited';
-import { uploadPhotos } from '../api/photos';
+import { uploadPhotos, uploadWishlistPhotos, fetchThumbnailAsFile } from '../api/photos';
 import '../styles/share.css';
 
 function detectType(url) {
@@ -55,6 +55,8 @@ export default function ShareTarget() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
   const sharedUrl   = searchParams.get('url') || '';
   const sharedText  = searchParams.get('text') || '';
@@ -66,6 +68,17 @@ export default function ShareTarget() {
     navigate('/');
     return null;
   }
+
+  // Fetch thumbnail silently on mount (solo para videos/reels, no para maps)
+  useEffect(() => {
+    if (urlType === 'maps') return;
+    fetchThumbnailAsFile(url).then((file) => {
+      if (file) {
+        setThumbnailFile(file);
+        setThumbnailPreview(URL.createObjectURL(file));
+      }
+    });
+  }, [url]);
 
   const wishlistInitial = {
     name: sharedTitle,
@@ -82,10 +95,18 @@ export default function ShareTarget() {
     video_url: url,
   };
 
+  // Si el usuario no eligió fotos manualmente, usamos la thumbnail como portada
+  const mergeWithThumbnail = (files) => {
+    if (files?.length) return files;
+    return thumbnailFile ? [thumbnailFile] : null;
+  };
+
   const handleWishlistSave = async (data, files) => {
     setSaving(true);
     try {
-      await createWishlist(data);
+      const place = await createWishlist(data);
+      const allFiles = mergeWithThumbnail(files);
+      if (allFiles?.length) await uploadWishlistPhotos(place.id, allFiles);
       navigate('/por-visitar');
     } finally {
       setSaving(false);
@@ -96,7 +117,8 @@ export default function ShareTarget() {
     setSaving(true);
     try {
       const place = await createVisited(data);
-      if (files?.length) await uploadPhotos(place.id, files);
+      const allFiles = mergeWithThumbnail(files);
+      if (allFiles?.length) await uploadPhotos(place.id, allFiles);
       navigate('/visitados');
     } finally {
       setSaving(false);
@@ -110,6 +132,13 @@ export default function ShareTarget() {
         <p className="share-target__url">
           {url.length > 60 ? url.slice(0, 60) + '…' : url}
         </p>
+        {thumbnailPreview && (
+          <img
+            src={thumbnailPreview}
+            alt="portada"
+            className="share-target__thumbnail"
+          />
+        )}
       </div>
 
       <div className="share-target__options">
@@ -152,6 +181,7 @@ export default function ShareTarget() {
       <Modal isOpen={selected === 'recipe'} onClose={() => setSelected(null)} title="Nueva receta" wide>
         <RecipeForm
           initialData={recipeInitial}
+          initialPhotoFile={thumbnailFile}
           onSaved={() => navigate('/recetas')}
           onCancel={() => setSelected(null)}
         />

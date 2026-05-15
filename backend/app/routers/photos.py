@@ -1,5 +1,10 @@
+import json
+import re
+import urllib.request
+import urllib.parse
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi.responses import Response as RawResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
@@ -243,3 +248,70 @@ def delete_photo(
 
     db.delete(photo)
     db.commit()
+
+
+# ---------------------------------------------------------------------------
+# Thumbnail proxy — para Share Target (evita CORS al descargar desde el front)
+# ---------------------------------------------------------------------------
+
+_ALLOWED_THUMBNAIL_DOMAINS = (
+    'img.youtube.com',
+    'i.ytimg.com',
+    'tiktokcdn.com',
+    'cdninstagram.com',
+    'fbcdn.net',
+)
+
+
+def _extract_youtube_id(url: str):
+    m = re.search(
+        r'(?:youtube\.com/(?:watch\?v=|shorts/|embed/)|youtu\.be/)([a-zA-Z0-9_-]{11})',
+        url,
+    )
+    return m.group(1) if m else None
+
+
+def _oembed_thumbnail(oembed_url: str):
+    try:
+        req = urllib.request.Request(oembed_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            return json.loads(resp.read()).get('thumbnail_url')
+    except Exception:
+        return None
+
+
+@router.get('/utils/thumbnail')
+def proxy_thumbnail(
+    url: str = Query(...),
+    _: bool = Depends(get_current_user),
+):
+    """Descarga y proxea la thumbnail de un link de YouTube, TikTok o Instagram."""
+    thumbnail_url = None
+
+    yt_id = _extract_youtube_id(url)
+    if yt_id:
+        thumbnail_url = f'https://img.youtube.com/vi/{yt_id}/hqdefault.jpg'
+    elif re.search(r'tiktok\.com', url, re.I):
+        thumbnail_url = _oembed_thumbnail(
+            f'https://www.tiktok.com/oembed?url={urllib.parse.quote(url, safe="")}'
+        )
+    elif re.search(r'instagram\.com|fb\.watch', url, re.I):
+        thumbnail_url = _oembed_thumbnail(
+            f'https://api.instagram.com/oembed/?url={urllib.parse.quote(url, safe="")}'
+        )
+
+    if not thumbnail_url:
+        raise HTTPException(status_code=404, detail='No se encontró thumbnail para esta URL')
+
+    parsed = urllib.parse.urlparse(thumbnail_url)
+    if not any(parsed.netloc.endswith(d) for d in _ALLOWED_THUMBNAIL_DOMAINS):
+        raise HTTPException(status_code=400, detail='Dominio de thumbnail no permitido')
+
+    try:
+        req = urllib.request.Request(thumbnail_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            content = resp.read()
+            content_type = resp.headers.get('Content-Type', 'image/jpeg').split(';')[0]
+        return RawResponse(content=content, media_type=content_type)
+    except Exception:
+        raise HTTPException(status_code=502, detail='No se pudo descargar el thumbnail')
