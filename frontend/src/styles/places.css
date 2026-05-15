@@ -2,6 +2,29 @@
    LUGARES VISITADOS Y POR VISITAR
    ========================================= */
 
+/* --- Fondo de sección Ya hicimos --- */
+.visited-bg {
+  min-height: calc(100vh - var(--navbar-height));
+  background-image: var(--bg-visited);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.visited-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 246, 236, 0.82);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.visited-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* --- Cabecera de sección --- */
 .section-header {
   display: flex;

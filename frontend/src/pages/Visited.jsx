@@ -218,6 +218,7 @@ export default function Visited() {
   };
 
   return (
+    <div className="visited-bg">
     <div className="container">
       <div className="section-header">
         <h1 className="section-header__title">Ya hicimos</h1>
@@ -292,6 +293,7 @@ export default function Visited() {
           />
         )}
       </Modal>
+    </div>
     </div>
   );
 }

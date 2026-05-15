@@ -82,7 +82,7 @@
      Para usar una imagen: url('/backgrounds/letters.jpg')
      Para sin fondo: none                              */
   --bg-letters: url('/backgrounds/fondo-cartitas-nueva.png');
-  --bg-visited: none;
+  --bg-visited: url('/backgrounds/fondo-ya-hicimos.png');
   --bg-wishlist: none;
   --bg-home: url('/backgrounds/fondo-principal.png');
   --bg-recipes: url('/backgrounds/fondo-recetas.png');
