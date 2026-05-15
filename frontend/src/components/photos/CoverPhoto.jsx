@@ -173,31 +173,32 @@ export default function CoverPhoto({
       {/* Imagen/video entrante */}
       {photo.resource_type === 'video' ? (
         <>
-          {!videoPlaying && (
-            <img
-              key={enterKey}
-              src={videoThumb(photo.cloudinary_url)}
-              alt=""
-              className={`cover-photo__img${enterClass}`}
-              style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
-              onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
-            />
-          )}
+          {/* Video siempre visible para que play() no falle en display:none */}
           <video
             key={`v-${enterKey}`}
             ref={videoRef}
             src={photo.cloudinary_url}
             className={`cover-photo__img${enterClass}`}
-            style={{ objectPosition: `${pos.x}% ${pos.y}%`, display: videoPlaying ? 'block' : 'none' }}
+            style={{ objectPosition: `${pos.x}% ${pos.y}%` }}
             onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
             muted
-            autoPlay
             loop
             playsInline
             preload="metadata"
             onPlay={() => setVideoPlaying(true)}
             onPause={() => setVideoPlaying(false)}
           />
+          {/* Thumbnail encima mientras no reproduce */}
+          {!videoPlaying && (
+            <img
+              key={enterKey}
+              src={videoThumb(photo.cloudinary_url)}
+              alt=""
+              className={`cover-photo__img${enterClass}`}
+              style={{ objectPosition: `${pos.x}% ${pos.y}%`, position: 'absolute', inset: 0 }}
+              onClick={!adjusting ? () => onCoverClick?.(safeIndex) : undefined}
+            />
+          )}
         </>
       ) : (
         <img
