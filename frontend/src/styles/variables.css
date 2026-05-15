@@ -81,9 +81,9 @@
   /* --- Fondos de sección (imagen o color) ---
      Para usar una imagen: url('/backgrounds/letters.jpg')
      Para sin fondo: none                              */
-  --bg-letters: url('/backgrounds/fondo%20cartitas.png');
+  --bg-letters: url('/backgrounds/fondo-cartitas.png');
   --bg-visited: none;
   --bg-wishlist: none;
-  --bg-home: url('/backgrounds/fondo%20principal.png');
-  --bg-recipes: url('/backgrounds/fondo%20recetas.png');
+  --bg-home: url('/backgrounds/fondo-principal.png');
+  --bg-recipes: url('/backgrounds/fondo-recetas.png');
 }
