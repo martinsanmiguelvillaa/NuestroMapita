@@ -230,7 +230,7 @@ export default function Visited() {
             className={`btn btn-sm ${revisitFilter === true ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => setRevisitFilter(revisitFilter === true ? null : true)}
           >
-            ↩ Volvería a visitar
+            ↩ Volvería a hacer
           </button>
           <select
             className="form-select"
