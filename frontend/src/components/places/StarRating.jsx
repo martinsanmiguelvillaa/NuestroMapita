@@ -26,9 +26,9 @@ export default function StarRating({ value, onChange, readOnly = false, small = 
           onMouseEnter={() => !readOnly && setHover(star)}
           onMouseLeave={() => !readOnly && setHover(0)}
           disabled={readOnly}
-          aria-label={`${star} estrella${star > 1 ? 's' : ''}`}
+          aria-label={`${star} ala${star > 1 ? 's' : ''}`}
         >
-          ★
+          <img src="/icons/alas-puntuacion.png" alt="" />
         </button>
       ))}
     </div>

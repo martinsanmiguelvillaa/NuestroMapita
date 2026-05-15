@@ -406,33 +406,42 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* --- Estrellas --- */
+/* --- Puntuación con alas --- */
 .star-rating {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
 }
 
 .star-rating .star {
   background: none;
   border: none;
-  font-size: 1.4rem;
-  color: var(--color-beige-dark);
   cursor: pointer;
-  padding: 2px;
+  padding: 1px;
   line-height: 1;
   transition: var(--transition-fast);
   display: inline-flex;
   align-items: center;
 }
 
-.star-rating .star.filled { color: var(--color-star); }
+.star-rating .star img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+  opacity: 0.25;
+  transition: var(--transition-fast);
+}
+
+.star-rating .star.filled img {
+  opacity: 1;
+}
+
 .star-rating .star:hover { transform: scale(1.2); }
 .star-rating.readonly .star { cursor: default; }
 .star-rating.readonly .star:hover { transform: none; }
 
-/* Star rating pequeño (para tarjetas) */
-.star-rating.small .star { font-size: 1rem; padding: 1px; }
+/* Puntuación pequeña (para tarjetas) */
+.star-rating.small .star img { width: 1.1rem; height: 1.1rem; }
 
 /* --- Barra de búsqueda + filtros --- */
 .search-bar {
