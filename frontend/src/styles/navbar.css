@@ -82,6 +82,42 @@
   color: var(--color-error);
 }
 
+/* --- Confirmación de logout --- */
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 55, 40, 0.35);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-dialog {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-6);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 220px;
+}
+
+.logout-dialog__text {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  font-style: italic;
+  text-align: center;
+}
+
+.logout-dialog__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
 /* --- Mobile: bottom nav --- */
 @media (max-width: 768px) {
   .navbar {
