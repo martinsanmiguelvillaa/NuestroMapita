@@ -410,12 +410,12 @@
 .star-rating {
   display: inline-flex;
   align-items: center;
-  gap: 1px;
+  gap: 3px;
   width: fit-content;
   background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-rose-light) 100%);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-full);
-  padding: 5px 8px;
+  padding: 6px 12px;
   box-shadow: var(--shadow-xs);
 }
 
