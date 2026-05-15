@@ -3,6 +3,7 @@
  */
 import { useState, useRef } from 'react';
 import LocationPickerMap from './LocationPickerMap';
+import StarRating from './StarRating';
 
 const EMPTY_FORM = {
   name: '',
@@ -104,31 +105,8 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
       </div>
 
       <div className="form-group">
-        <label className="form-label">Rating</label>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {[1,2,3,4,5].map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => set('rating', form.rating === s ? null : s)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '2px',
-                transition: 'transform 0.1s',
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
-            >
-              <img
-                src="/icons/alas-puntuacion.png"
-                alt=""
-                style={{ width: '1.6rem', height: '1.6rem', objectFit: 'contain', opacity: (form.rating || 0) >= s ? 1 : 0.45 }}
-              />
-            </button>
-          ))}
-        </div>
+        <label className="form-label">¿Cuánto nos gustó?</label>
+        <StarRating value={form.rating} onChange={(val) => set('rating', val)} />
       </div>
 
       <div className="form-group">

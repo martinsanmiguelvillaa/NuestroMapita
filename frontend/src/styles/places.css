@@ -408,40 +408,80 @@
 
 /* --- Puntuación con alas --- */
 .star-rating {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+}
+
+/* Cápsula sutil en modo lectura (cards) */
+.star-rating.readonly {
+  background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-rose-light) 100%);
+  border: 1px solid var(--color-beige-mid);
+  border-radius: var(--radius-full);
+  padding: 5px 10px 5px 8px;
+  gap: 1px;
+  box-shadow: var(--shadow-xs);
 }
 
 .star-rating .star {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 1px;
+  padding: 2px;
   line-height: 1;
   transition: var(--transition-fast);
   display: inline-flex;
   align-items: center;
 }
 
+.star-rating.readonly .star {
+  cursor: default;
+  padding: 1px;
+}
+
 .star-rating .star img {
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 1.8rem;
+  height: 1.8rem;
   object-fit: contain;
-  opacity: 0.45;
+  opacity: 0.32;
+  filter: grayscale(25%);
   transition: var(--transition-fast);
 }
 
 .star-rating .star.filled img {
   opacity: 1;
+  filter: drop-shadow(0 1px 4px rgba(232, 160, 69, 0.55));
 }
 
-.star-rating .star:hover { transform: scale(1.2); }
-.star-rating.readonly .star { cursor: default; }
-.star-rating.readonly .star:hover { transform: none; }
+/* Hover solo en modo interactivo */
+.star-rating:not(.readonly) .star:hover {
+  transform: scale(1.2);
+}
+.star-rating:not(.readonly) .star:hover img {
+  opacity: 0.85;
+  filter: grayscale(0%) drop-shadow(0 1px 3px rgba(232, 160, 69, 0.4));
+}
 
-/* Puntuación pequeña (para tarjetas) */
-.star-rating.small .star img { width: 1.1rem; height: 1.1rem; }
+/* Número X/5 */
+.star-rating__count {
+  font-size: var(--text-xs);
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--color-text-mid);
+  margin-left: 5px;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+/* Tamaño small (para tarjetas) */
+.star-rating.small .star img { width: 1.3rem; height: 1.3rem; }
+.star-rating.small.readonly { padding: 4px 8px 4px 6px; }
+.star-rating.small .star-rating__count { font-size: 0.7rem; }
+
+@media (max-width: 480px) {
+  .star-rating .star img { width: 1.5rem; height: 1.5rem; }
+  .star-rating.small .star img { width: 1.15rem; height: 1.15rem; }
+}
 
 /* --- Barra de búsqueda + filtros --- */
 .search-bar {

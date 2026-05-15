@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import Modal from '../ui/Modal';
 import { convertToVisited } from '../../api/placesWishlist';
+import StarRating from '../places/StarRating';
 
 export default function ConvertModal({ place, isOpen, onClose, onConverted }) {
   const [visitDate, setVisitDate] = useState(new Date().toISOString().slice(0, 10));
@@ -73,30 +74,8 @@ export default function ConvertModal({ place, isOpen, onClose, onConverted }) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Rating</label>
-          <div style={{ display: 'flex', gap: '4px' }}>
-            {[1,2,3,4,5].map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setRating(rating === s ? null : s)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '2px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-              >
-                <img
-                  src="/icons/alas-puntuacion.png"
-                  alt=""
-                  style={{ width: '1.6rem', height: '1.6rem', objectFit: 'contain', opacity: (rating || 0) >= s ? 1 : 0.45 }}
-                />
-              </button>
-            ))}
-          </div>
+          <label className="form-label">¿Cuánto nos gustó?</label>
+          <StarRating value={rating} onChange={setRating} />
         </div>
 
         <p style={{ fontSize: '12px', color: 'var(--color-text-light)', marginBottom: '16px' }}>
