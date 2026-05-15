@@ -214,7 +214,7 @@ export default function Home() {
     <div className="home fade-in">
       {/* Hero */}
       <section className="home__hero">
-        <p className="home__hero-subtitle">Para la princesita preciosa de mi corazon</p>
+        <p className="home__hero-subtitle">Para la princesita preciosa de mi corazon ♡</p>
         <h1 className="home__hero-title">
           <em>Nuestro</em> Mapita
         </h1>

@@ -30,10 +30,11 @@
 }
 
 .home__hero-subtitle {
-  font-size: var(--text-sm);
+  font-family: 'Pacifico', 'Dancing Script', cursive;
+  font-size: var(--text-xs);
   color: var(--color-text-light);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 400;
   margin-bottom: var(--space-3);
 }
 
