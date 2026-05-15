@@ -4,7 +4,7 @@
  * IMPORTANTE: Leaflet necesita un fix especial con Vite para los íconos de marcadores.
  * Este fix se aplica al inicio de este archivo.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StarRating from '../places/StarRating';
 import L from 'leaflet';
@@ -259,7 +259,7 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
  * - onConvert: callback cuando se toca "Ya fuimos" en el popup
  */
 export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert, flyToPin, onFlyToDone }) {
-  const allPins = [...visitedPins, ...wishlistPins];
+  const allPins = useMemo(() => [...visitedPins, ...wishlistPins], [visitedPins, wishlistPins]);
   const markersRef = useRef({});
   const defaultCenter = [-34.6037, -58.3816]; // Buenos Aires como default
   const defaultZoom = 12;
