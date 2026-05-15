@@ -25,19 +25,11 @@ L.Icon.Default.mergeOptions({
 });
 
 // Íconos de corazón con SVG inline
-const heartSvg = (colorClass) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" class="map-heart ${colorClass}"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>`;
+const heartSvg = (colorClass, delayMs = 0) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" class="map-heart ${colorClass}" style="animation-delay:${delayMs}ms"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>`;
 
-const visitedIcon = L.divIcon({
-  html: heartSvg('map-heart--visited'),
-  className: '',
-  iconSize: [34, 34],
-  iconAnchor: [17, 30],
-  popupAnchor: [0, -34],
-});
-
-const wishlistIcon = L.divIcon({
-  html: heartSvg('map-heart--wishlist'),
+const makeIcon = (colorClass, delayMs = 0) => L.divIcon({
+  html: heartSvg(colorClass, delayMs),
   className: '',
   iconSize: [34, 34],
   iconAnchor: [17, 30],
@@ -308,8 +300,8 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
 
       {/* Pines de lugares visitados */}
       {showVisited &&
-        visitedPins.map((pin) => (
-          <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={visitedIcon} markerKey={`visited-${pin.id}`} markersRef={markersRef}>
+        visitedPins.map((pin, i) => (
+          <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--visited', i * 35)} markerKey={`visited-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300}>
               <VisitedPopup pin={pin} />
             </Popup>
@@ -318,8 +310,8 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
 
       {/* Pines de lugares por visitar */}
       {showWishlist &&
-        wishlistPins.map((pin) => (
-          <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={wishlistIcon} markerKey={`wishlist-${pin.id}`} markersRef={markersRef}>
+        wishlistPins.map((pin, i) => (
+          <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--wishlist', i * 35)} markerKey={`wishlist-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300}>
               <WishlistPopup pin={pin} onConvert={onConvert} />
             </Popup>
