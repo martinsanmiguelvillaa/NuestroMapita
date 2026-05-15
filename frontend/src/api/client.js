@@ -23,8 +23,11 @@ async function apiFetch(path, options = {}) {
   });
 
   if (response.status === 401) {
-    window.location.href = '/login';
-    return;
+    // Redirigir solo si no es la verificación inicial de sesión
+    if (!options.skipRedirect) {
+      window.location.href = '/login';
+    }
+    throw new Error('Unauthorized');
   }
 
   if (response.status === 204) {

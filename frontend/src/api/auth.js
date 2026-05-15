@@ -12,5 +12,5 @@ export async function logout() {
 }
 
 export async function checkAuth() {
-  return apiFetch('/auth/me');
+  return apiFetch('/auth/me', { skipRedirect: true });
 }
