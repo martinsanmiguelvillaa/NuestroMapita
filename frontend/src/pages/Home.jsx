@@ -219,7 +219,7 @@ export default function Home() {
           <em>Nuestro</em> Mapita
         </h1>
         <p className="home__hero-desc">
-          Un lugar para nuestros plancitos, recuerdos y varias cosas mas..
+          Un lugar para nuestros plancitos, recuerdos y varias cosas mas...
         </p>
       </section>
 
