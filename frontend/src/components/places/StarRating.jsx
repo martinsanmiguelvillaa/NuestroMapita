@@ -11,7 +11,7 @@ import '../../styles/places.css';
  * - small: tamaño reducido para tarjetas
  * - showCount: muestra "X/5" junto a las alas (útil en readOnly)
  */
-export default function StarRating({ value, onChange, readOnly = false, small = false, showCount = false }) {
+export default function StarRating({ value, onChange, readOnly = false, small = false }) {
   const [hover, setHover] = useState(0);
 
   const ratingClass = `star-rating${readOnly ? ' readonly' : ''}${small ? ' small' : ''}`;
@@ -33,9 +33,6 @@ export default function StarRating({ value, onChange, readOnly = false, small = 
           <img src="/icons/alas-puntuacion.png" alt="" />
         </button>
       ))}
-      {showCount && value && (
-        <span className="star-rating__count">{value}/5</span>
-      )}
     </div>
   );
 }

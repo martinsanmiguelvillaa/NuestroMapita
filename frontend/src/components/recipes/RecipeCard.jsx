@@ -39,10 +39,7 @@ export default function RecipeCard({ recipe, onView, onEdit, onDelete }) {
 
         {/* Rating promedio */}
         {recipe.avg_rating && (
-          <div className="recipe-card__rating">
-            <StarRating value={Math.round(recipe.avg_rating)} readOnly small />
-            <span className="recipe-card__rating-num">{recipe.avg_rating}</span>
-          </div>
+          <StarRating value={Math.round(recipe.avg_rating)} readOnly small />
         )}
 
         {/* Primeros ingredientes */}

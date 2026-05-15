@@ -94,7 +94,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
         <h3 className="place-card__name">{place.name}</h3>
         <p className="place-card__date">{formatDate(place.visit_date)}</p>
         {place.address && <p className="place-card__address">📍 {place.address}</p>}
-        {place.rating && <StarRating value={place.rating} readOnly small showCount />}
+        {place.rating && <StarRating value={place.rating} readOnly small />}
         {place.would_revisit != null && (
           <span className={`place-card__revisit-badge ${place.would_revisit ? 'place-card__revisit-badge--yes' : 'place-card__revisit-badge--no'}`}>
             {place.would_revisit ? '↩ Volvería' : '↩ No volvería'}
