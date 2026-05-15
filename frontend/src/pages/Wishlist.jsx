@@ -365,7 +365,7 @@ export default function Wishlist() {
     <div className="container">
       {/* Cabecera */}
       <div className="section-header">
-        <h1 className="section-header__title">Por visitar</h1>
+        <h1 className="section-header__title">Por hacer</h1>
         <div className="section-controls">
           <SearchBar value={search} onChange={setSearch} placeholder="Buscar..." />
           <button className="btn btn-rose" onClick={handleRandom} disabled={rolling || places.length === 0}>

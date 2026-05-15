@@ -5,8 +5,8 @@ import '../../styles/navbar.css';
 const links = [
   { to: '/',           label: 'Inicio',      icon: '🏠' },
   { to: '/mapa',       label: 'Mapa',        icon: '🗺️' },
-  { to: '/visitados',  label: 'Visitados',   icon: '✓' },
-  { to: '/por-visitar',label: 'Por visitar', icon: '★' },
+  { to: '/visitados',  label: 'Ya hicimos',  icon: '✓' },
+  { to: '/por-visitar',label: 'Por hacer',   icon: '★' },
   { to: '/cartitas',   label: 'Cartitas',    icon: '💌' },
   { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
 ];

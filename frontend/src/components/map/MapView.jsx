@@ -97,7 +97,7 @@ function VisitedPopup({ pin, onEdit, onDelete }) {
 function WishlistPopup({ pin, onConvert }) {
   return (
     <div className="map-popup">
-      <span className="map-popup__type map-popup__type--wishlist">Por visitar</span>
+      <span className="map-popup__type map-popup__type--wishlist">Por hacer</span>
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
       {pin.description && (

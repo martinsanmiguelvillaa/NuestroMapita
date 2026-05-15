@@ -60,8 +60,8 @@ export default function MapPage() {
         <div className="map-filter">
           {[
             { value: 'all',      label: 'Todos' },
-            { value: 'visited',  label: 'Visitados' },
-            { value: 'wishlist', label: 'Por visitar' },
+            { value: 'visited',  label: 'Ya hicimos' },
+            { value: 'wishlist', label: 'Por hacer' },
           ].map(({ value, label }) => (
             <button
               key={value}
@@ -81,7 +81,7 @@ export default function MapPage() {
           </div>
           <div className="map-legend-item">
             <div className="map-legend-dot map-legend-dot--wishlist" />
-            <span>Por visitar ({wishlist.length})</span>
+            <span>Por hacer ({wishlist.length})</span>
           </div>
         </div>
 

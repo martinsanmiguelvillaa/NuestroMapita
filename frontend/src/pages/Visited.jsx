@@ -56,7 +56,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   };
 
   const handleConvertBack = async () => {
-    if (!window.confirm(`¿Devolver "${place.name}" a Por visitar? Se moverán las fotos pero se perderán el rating y la fecha.`)) return;
+    if (!window.confirm(`¿Devolver "${place.name}" a Por hacer? Se moverán las fotos pero se perderán el rating y la fecha.`)) return;
     setConvertingBack(true);
     try {
       await convertBackToWishlist(place.id);
@@ -220,7 +220,7 @@ export default function Visited() {
   return (
     <div className="container">
       <div className="section-header">
-        <h1 className="section-header__title">Lugares visitados</h1>
+        <h1 className="section-header__title">Ya hicimos</h1>
         <div className="section-controls">
           <SearchBar value={search} onChange={setSearch} placeholder="Buscar lugar..." />
           <button
