@@ -143,42 +143,77 @@ function WishlistPopup({ pin, onConvert }) {
   );
 }
 
-// Marker que abre el popup en hover y lo cierra al salir,
-// salvo que el usuario lo haya fijado con un clic.
-// Un segundo clic lo cierra.
+// Marker con popup que:
+// - se abre al hacer hover sobre el corazón
+// - se mantiene abierto si el mouse pasa a la tarjeta
+// - se cierra al sacar el mouse de la tarjeta (o del corazón sin ir a la tarjeta)
+// - se fija con un clic; un segundo clic lo cierra
 function HoverMarker({ position, icon, children }) {
-  const pinned = useRef(false);
-  const markerRef = useRef(null);
+  const pinned    = useRef(false);
+  const closeTimer = useRef(null);
+  const markerRef  = useRef(null);
 
   useEffect(() => {
     const marker = markerRef.current;
     if (!marker) return;
-    // Remover TODOS los handlers de click de Leaflet (incluido el binding
-    // interno del Popup que llama openPopup/togglePopup y causa la re-animación)
+
+    const cancelClose = () => clearTimeout(closeTimer.current);
+
+    const scheduleClose = () => {
+      cancelClose();
+      closeTimer.current = setTimeout(() => {
+        if (!pinned.current) marker.closePopup();
+      }, 150);
+    };
+
+    marker.on('mouseover', () => {
+      cancelClose();
+      if (!marker.isPopupOpen()) marker.openPopup();
+    });
+
+    marker.on('mouseout', scheduleClose);
+
+    // Remover el binding de click interno de Leaflet y reemplazar con el nuestro
     marker.off('click');
-    // Agregar solo nuestro handler con la lógica completa
     marker.on('click', (e) => {
       L.DomEvent.stopPropagation(e.originalEvent);
       if (pinned.current) {
         pinned.current = false;
+        cancelClose();
         marker.closePopup();
       } else {
         pinned.current = true;
+        cancelClose();
       }
     });
+
+    // Cuando el popup abre, escuchar hover sobre la tarjeta misma
+    marker.on('popupopen', (e) => {
+      const el = e.popup?.getElement();
+      if (!el) return;
+      el.removeEventListener('mouseenter', cancelClose);
+      el.removeEventListener('mouseleave', scheduleClose);
+      el.addEventListener('mouseenter', cancelClose);
+      el.addEventListener('mouseleave', scheduleClose);
+    });
+
+    marker.on('popupclose', () => {
+      pinned.current = false;
+      cancelClose();
+    });
+
+    return () => {
+      cancelClose();
+      marker.off('mouseover');
+      marker.off('mouseout');
+      marker.off('click');
+      marker.off('popupopen');
+      marker.off('popupclose');
+    };
   }, []);
 
   return (
-    <Marker
-      ref={markerRef}
-      position={position}
-      icon={icon}
-      eventHandlers={{
-        mouseover:  (e) => { if (!e.target.isPopupOpen()) e.target.openPopup(); },
-        mouseout:   (e) => { if (!pinned.current) e.target.closePopup(); },
-        popupclose: () => { pinned.current = false; },
-      }}
-    >
+    <Marker ref={markerRef} position={position} icon={icon}>
       {children}
     </Marker>
   );
