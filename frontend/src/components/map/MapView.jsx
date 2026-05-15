@@ -44,6 +44,17 @@ const wishlistIcon = L.divIcon({
   popupAnchor: [0, -34],
 });
 
+// Helper: volar a un pin cuando se selecciona desde el buscador
+function FlyToPin({ pin, onDone }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!pin) return;
+    map.flyTo([pin.lat, pin.lon], 16, { duration: 1 });
+    onDone?.();
+  }, [pin, map, onDone]);
+  return null;
+}
+
 // Helper: centrar el mapa cuando cambian los pines
 function MapFitter({ pins }) {
   const map = useMap();
@@ -233,7 +244,7 @@ function HoverMarker({ position, icon, children }) {
  * - filter: 'all' | 'visited' | 'wishlist'
  * - onConvert: callback cuando se toca "Ya fuimos" en el popup
  */
-export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert }) {
+export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert, flyToPin, onFlyToDone }) {
   const allPins = [...visitedPins, ...wishlistPins];
   const defaultCenter = [-34.6037, -58.3816]; // Buenos Aires como default
   const defaultZoom = 12;
@@ -255,6 +266,9 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
 
       {/* Ajustar el mapa a los pines visibles */}
       {allPins.length > 0 && <MapFitter pins={allPins} />}
+
+      {/* Volar al pin seleccionado desde el buscador */}
+      {flyToPin && <FlyToPin pin={flyToPin} onDone={onFlyToDone} />}
 
       {/* Pines de lugares visitados */}
       {showVisited &&

@@ -168,6 +168,136 @@
   flex-wrap: wrap;
 }
 
+/* --- Buscador del mapa --- */
+.map-search {
+  position: relative;
+  flex: 1;
+  max-width: 280px;
+}
+
+.map-search__input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-full);
+  padding: 0 var(--space-3);
+  gap: var(--space-2);
+  transition: border-color var(--transition-fast);
+}
+
+.map-search__input-wrap:focus-within {
+  border-color: var(--color-brown);
+}
+
+.map-search__icon {
+  font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.map-search__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  color: var(--color-text);
+  padding: var(--space-2) 0;
+  min-width: 0;
+}
+
+.map-search__input::placeholder {
+  color: var(--color-text-light);
+}
+
+.map-search__clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--color-text-light);
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.map-search__results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  z-index: 1000;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.map-search__result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.map-search__result:hover {
+  background: var(--color-beige-light);
+}
+
+.map-search__result-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-search__result-dot--visited  { background: var(--color-brown); }
+.map-search__result-dot--wishlist { background: var(--color-rose-dark); }
+
+.map-search__result-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-search__result-addr {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 90px;
+}
+
+.map-search__empty {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  font-style: italic;
+  z-index: 1000;
+}
+
 /* Leyenda del mapa */
 .map-legend {
   display: flex;
