@@ -438,23 +438,12 @@
   width: 1.8rem;
   height: 1.8rem;
   object-fit: contain;
-  opacity: 0.32;
-  filter: grayscale(25%);
   transition: var(--transition-fast);
-}
-
-.star-rating .star.filled img {
-  opacity: 1;
-  filter: drop-shadow(0 1px 4px rgba(232, 160, 69, 0.55));
 }
 
 /* Hover solo en modo interactivo */
 .star-rating:not(.readonly) .star:hover {
-  transform: scale(1.2);
-}
-.star-rating:not(.readonly) .star:hover img {
-  opacity: 0.85;
-  filter: grayscale(0%) drop-shadow(0 1px 3px rgba(232, 160, 69, 0.4));
+  transform: scale(1.15);
 }
 
 /* Tamaño small (para tarjetas) */

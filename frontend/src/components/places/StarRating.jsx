@@ -30,7 +30,10 @@ export default function StarRating({ value, onChange, readOnly = false, small = 
           disabled={readOnly}
           aria-label={`${star} ala${star > 1 ? 's' : ''}`}
         >
-          <img src="/icons/alas-puntuacion.png" alt="" />
+          <img
+            src={active >= star ? '/icons/alas-puntuacion-seleccionado.png' : '/icons/alas-puntuacion-no-selccionado.png'}
+            alt=""
+          />
         </button>
       ))}
     </div>
