@@ -194,7 +194,7 @@ export default function CoverPhoto({
             autoPlay
             loop
             playsInline
-            preload="none"
+            preload="metadata"
             onPlay={() => setVideoPlaying(true)}
             onPause={() => setVideoPlaying(false)}
           />

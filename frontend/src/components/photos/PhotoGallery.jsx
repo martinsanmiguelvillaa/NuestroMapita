@@ -11,11 +11,15 @@ function videoThumb(url) {
 
 function GalleryVideo({ src, className, onClick }) {
   const [started, setStarted] = useState(false);
+  const videoRef = useRef(null);
 
-  // Reproduce una vez al montar (la sección de fotos se monta cuando la abrís)
-  // onEnded vuelve a la imagen; hover reinicia solo si está pausado
-  const handleMouseEnter = (e) => {
-    const v = e.currentTarget.querySelector('video');
+  // Llamada programática: más confiable que el atributo autoPlay en móviles
+  useEffect(() => {
+    videoRef.current?.play().catch(() => {});
+  }, []);
+
+  const handleMouseEnter = () => {
+    const v = videoRef.current;
     if (v && v.paused) { v.currentTime = 0; v.play().catch(() => {}); }
   };
 
@@ -29,12 +33,12 @@ function GalleryVideo({ src, className, onClick }) {
         <img src={videoThumb(src)} className={className} alt="" loading="lazy" />
       )}
       <video
+        ref={videoRef}
         src={src}
         className={className}
         style={{ display: started ? 'block' : 'none' }}
         muted
         playsInline
-        autoPlay
         onPlay={() => setStarted(true)}
         onEnded={() => setStarted(false)}
       />
@@ -238,10 +242,10 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           {current.resource_type === 'video' ? (
             <video
               key={current.id}
+              ref={(node) => node?.play().catch(() => {})}
               src={current.cloudinary_url}
               className="lightbox__img"
               controls
-              autoPlay
               playsInline
               onClick={(e) => e.stopPropagation()}
             />
