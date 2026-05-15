@@ -4,7 +4,7 @@
  * IMPORTANTE: Leaflet necesita un fix especial con Vite para los íconos de marcadores.
  * Este fix se aplica al inicio de este archivo.
  */
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StarRating from '../places/StarRating';
 import L from 'leaflet';
@@ -148,23 +148,40 @@ function WishlistPopup({ pin, onConvert }) {
 
 // Marker que abre el popup en hover y lo cierra al salir,
 // salvo que el usuario lo haya fijado con un clic.
+// Un segundo clic lo cierra.
 function HoverMarker({ position, icon, children }) {
   const pinned = useRef(false);
+  const markerRef = useRef(null);
 
-  const handlers = useCallback(() => ({
-    mouseover:  (e) => { if (!e.target.isPopupOpen()) e.target.openPopup(); },
-    mouseout:   (e) => { if (!pinned.current) e.target.closePopup(); },
-    click:      (e) => {
-      // Evitar que el clic burbujee al MapContainer (closePopupOnClick=true)
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+    // Remover TODOS los handlers de click de Leaflet (incluido el binding
+    // interno del Popup que llama openPopup/togglePopup y causa la re-animación)
+    marker.off('click');
+    // Agregar solo nuestro handler con la lógica completa
+    marker.on('click', (e) => {
       L.DomEvent.stopPropagation(e.originalEvent);
-      // Solo fijar — no llamar openPopup para no re-disparar la animación
-      pinned.current = true;
-    },
-    popupclose: () => { pinned.current = false; },
-  }), []);
+      if (pinned.current) {
+        pinned.current = false;
+        marker.closePopup();
+      } else {
+        pinned.current = true;
+      }
+    });
+  }, []);
 
   return (
-    <Marker position={position} icon={icon} eventHandlers={handlers()}>
+    <Marker
+      ref={markerRef}
+      position={position}
+      icon={icon}
+      eventHandlers={{
+        mouseover:  (e) => { if (!e.target.isPopupOpen()) e.target.openPopup(); },
+        mouseout:   (e) => { if (!pinned.current) e.target.closePopup(); },
+        popupclose: () => { pinned.current = false; },
+      }}
+    >
       {children}
     </Marker>
   );
