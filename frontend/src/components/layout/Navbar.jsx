@@ -38,7 +38,7 @@ export default function Navbar() {
 
         {/* Cerrar sesión */}
         <li>
-          <button className="navbar__logout" onClick={logout} title="Cerrar sesión">
+          <button className="navbar__logout" onClick={() => window.confirm('¿Salir?') && logout()} title="Cerrar sesión">
             <span className="navbar__link-icon">↩</span>
             <span>Salir</span>
           </button>
