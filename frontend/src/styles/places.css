@@ -227,6 +227,13 @@
   word-break: break-word;
 }
 
+.card-map-pin {
+  font-size: 0.65em;
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: 0.7;
+}
+
 .place-card__date {
   font-size: var(--text-xs);
   color: var(--color-text-light);

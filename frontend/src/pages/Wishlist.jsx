@@ -85,7 +85,10 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
       )}
 
       <div className="wish-card__header">
-        <h3 className="wish-card__name">{place.name}</h3>
+        <h3 className="wish-card__name">
+          {place.name}
+          {place.latitude != null && <span className="card-map-pin" title="Aparece en el mapa">📍</span>}
+        </h3>
       </div>
 
       {place.description && <p className="wish-card__desc">{place.description}</p>}

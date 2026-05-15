@@ -91,7 +91,10 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
       />
 
       <div className="place-card__body">
-        <h3 className="place-card__name">{place.name}</h3>
+        <h3 className="place-card__name">
+          {place.name}
+          {place.latitude != null && <span className="card-map-pin" title="Aparece en el mapa">📍</span>}
+        </h3>
         <p className="place-card__date">{formatDate(place.visit_date)}</p>
         {place.address && <p className="place-card__address">📍 {place.address}</p>}
         {place.rating && <StarRating value={place.rating} readOnly small />}
