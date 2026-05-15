@@ -5,7 +5,7 @@
  * - Al cargar la app, verifica la sesión con GET /auth/me.
  * - logout() llama a POST /auth/logout para que el servidor borre la cookie.
  */
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { checkAuth, logout as logoutApi } from '../api/auth';
 
 const AuthContext = createContext(null);
@@ -13,15 +13,21 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // Evita que checkAuth() pise el estado si el usuario ya hizo login explícito
+  const explicitLoginRef = useRef(false);
 
   useEffect(() => {
     checkAuth()
-      .then(() => setIsAuthenticated(true))
-      .catch(() => setIsAuthenticated(false))
+      .then(() => { if (!explicitLoginRef.current) setIsAuthenticated(true); })
+      .catch(() => { if (!explicitLoginRef.current) setIsAuthenticated(false); })
       .finally(() => setIsLoading(false));
   }, []);
 
-  const login = () => setIsAuthenticated(true);
+  const login = () => {
+    explicitLoginRef.current = true;
+    setIsAuthenticated(true);
+    setIsLoading(false);
+  };
 
   const logout = async () => {
     try {
