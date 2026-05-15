@@ -156,8 +156,7 @@ function HoverMarker({ position, icon, children }) {
     mouseout:   (e) => { if (!pinned.current) e.target.closePopup(); },
     click:      (e) => {
       pinned.current = true;
-      // setTimeout para ejecutarse después del toggle nativo de Leaflet
-      setTimeout(() => e.target.openPopup(), 0);
+      e.target.openPopup();
     },
     popupclose: () => { pinned.current = false; },
   }), []);
