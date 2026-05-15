@@ -13,7 +13,6 @@ function GalleryVideo({ src, className, onClick }) {
   const [started, setStarted] = useState(false);
   const videoRef = useRef(null);
 
-  // Llamada programática: más confiable que el atributo autoPlay en móviles
   useEffect(() => {
     videoRef.current?.play().catch(() => {});
   }, []);
@@ -29,19 +28,25 @@ function GalleryVideo({ src, className, onClick }) {
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
     >
-      {!started && (
-        <img src={videoThumb(src)} className={className} alt="" loading="lazy" />
-      )}
+      {/* Video siempre visible para que play() funcione; thumbnail encima hasta que arranca */}
       <video
         ref={videoRef}
         src={src}
         className={className}
-        style={{ display: started ? 'block' : 'none' }}
         muted
         playsInline
         onPlay={() => setStarted(true)}
         onEnded={() => setStarted(false)}
       />
+      {!started && (
+        <img
+          src={videoThumb(src)}
+          className={className}
+          alt=""
+          loading="lazy"
+          style={{ position: 'absolute', inset: 0 }}
+        />
+      )}
     </div>
   );
 }
