@@ -47,19 +47,3 @@ export const updatePhotoPosition = (photoId, x, y) =>
 
 export const setCoverPhoto = (photoId) =>
   apiFetch(`/photos/${photoId}/set-cover`, { method: 'PATCH' });
-
-export async function fetchThumbnailAsFile(sharedUrl) {
-  const token = localStorage.getItem('mapita_token');
-  const API_BASE = import.meta.env.VITE_API_URL || '';
-  try {
-    const response = await fetch(
-      `${API_BASE}/utils/thumbnail?url=${encodeURIComponent(sharedUrl)}`,
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-    );
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    return new File([blob], 'thumbnail.jpg', { type: blob.type || 'image/jpeg' });
-  } catch {
-    return null;
-  }
-}

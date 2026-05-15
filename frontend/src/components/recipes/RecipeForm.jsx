@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createRecipe, updateRecipe, uploadRecipePhoto } from '../../api/recipes';
 
 const EMPTY_FORM = {
@@ -15,7 +15,7 @@ const EMPTY_FORM = {
  * Si `initialData` está presente, modo edición.
  * `onSaved(recipe)` se llama con la receta guardada.
  */
-export default function RecipeForm({ initialData = null, onSaved, onCancel, initialPhotoFile = null }) {
+export default function RecipeForm({ initialData = null, onSaved, onCancel }) {
   const [form, setForm] = useState(
     initialData
       ? {
@@ -30,13 +30,6 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, init
   );
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialData?.image_url || null);
-
-  useEffect(() => {
-    if (initialPhotoFile) {
-      setPhotoFile(initialPhotoFile);
-      setPhotoPreview(URL.createObjectURL(initialPhotoFile));
-    }
-  }, [initialPhotoFile]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

@@ -21,14 +21,6 @@
   margin-bottom: var(--space-3);
 }
 
-.share-target__thumbnail {
-  width: 100%;
-  max-height: 180px;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  margin-top: var(--space-3);
-}
-
 .share-target__url {
   font-size: var(--text-sm);
   color: var(--color-text-light);
