@@ -60,33 +60,22 @@
 }
 
 /* --- Pins personalizados --- */
-.map-pin {
-  width: 32px;
-  height: 32px;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 2px 3px 8px rgba(74, 55, 40, 0.3);
+.map-heart {
+  filter: drop-shadow(2px 3px 5px rgba(74, 55, 40, 0.35));
   cursor: pointer;
-  border: 2px solid white;
+  overflow: visible;
 }
 
-.map-pin--visited {
-  background-color: var(--color-brown);
+.map-heart--visited {
+  fill: var(--color-brown);
+  stroke: white;
+  stroke-width: 1;
 }
 
-.map-pin--wishlist {
-  background-color: var(--color-rose-dark);
-}
-
-.map-pin__inner {
-  width: 10px;
-  height: 10px;
-  background: white;
-  border-radius: 50%;
-  transform: rotate(45deg);
+.map-heart--wishlist {
+  fill: var(--color-rose-dark);
+  stroke: white;
+  stroke-width: 1;
 }
 
 /* --- Popup del mapa (tarjeta al tocar un pin) --- */
