@@ -42,7 +42,7 @@ function VideoPolaroid({ photo, onClick }) {
       muted
       loop
       playsInline
-      preload="none"
+      preload="metadata"
       onClick={onClick}
       style={{ cursor: 'pointer' }}
     />
