@@ -6,6 +6,7 @@ import Modal from '../components/ui/Modal';
 import RecipeCard from '../components/recipes/RecipeCard';
 import RecipeForm from '../components/recipes/RecipeForm';
 import RecipeDetail from '../components/recipes/RecipeDetail';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import '../styles/recipes.css';
 
 const CATEGORY_TABS = [
@@ -33,6 +34,8 @@ export default function Recipes() {
   const [editing, setEditing] = useState(null);   // recipe obj
   const [detailId, setDetailId] = useState(null); // recipe id
   const [deleting, setDeleting] = useState(null); // recipe id en proceso
+  const addForm = useDirtyForm();
+  const editForm = useDirtyForm();
 
   const load = useCallback(async () => {
     try {
@@ -144,21 +147,41 @@ export default function Recipes() {
       )}
 
       {/* Modal: nueva receta */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nueva receta" wide>
+      <Modal
+        isOpen={showForm}
+        onClose={() => addForm.handleAttemptClose(() => setShowForm(false))}
+        title="Nueva receta"
+        wide
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
         <RecipeForm
-          onSaved={handleFormSaved}
-          onCancel={() => setShowForm(false)}
+          onSaved={(r) => { addForm.setDirty(false); handleFormSaved(r); }}
+          onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
         />
       </Modal>
+      {addForm.dialog}
 
       {/* Modal: editar receta */}
-      <Modal isOpen={!!editing} onClose={() => setEditing(null)} title="Editar receta" wide>
+      <Modal
+        isOpen={!!editing}
+        onClose={() => editForm.handleAttemptClose(() => setEditing(null))}
+        title="Editar receta"
+        wide
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
         <RecipeForm
           initialData={editing}
-          onSaved={handleFormSaved}
-          onCancel={() => setEditing(null)}
+          onSaved={(r) => { editForm.setDirty(false); handleFormSaved(r); }}
+          onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
+          onDirtyChange={editForm.setDirty}
+          submitRef={editForm.submitRef}
         />
       </Modal>
+      {editForm.dialog}
 
       {/* Modal: detalle con comentarios */}
       {detailId && (

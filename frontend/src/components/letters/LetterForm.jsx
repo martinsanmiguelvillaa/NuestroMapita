@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createLetter, updateLetter, uploadLetterPhoto } from '../../api/letters';
 
 const EMPTY_FORM = { title: '', body: '', letter_date: '' };
 
-export default function LetterForm({ initialData = null, onSaved, onCancel }) {
+export default function LetterForm({ initialData = null, onSaved, onCancel, onDirtyChange, submitRef }) {
+  const formRef = useRef();
+
+  useEffect(() => {
+    if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
+  });
+
   const [form, setForm] = useState(
     initialData
       ? { title: initialData.title, body: initialData.body, letter_date: initialData.letter_date || '' }
@@ -13,7 +19,10 @@ export default function LetterForm({ initialData = null, onSaved, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+  const set = (field, value) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    onDirtyChange?.(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +60,7 @@ export default function LetterForm({ initialData = null, onSaved, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit}>
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="form-group">
@@ -94,7 +103,7 @@ export default function LetterForm({ initialData = null, onSaved, onCancel }) {
             type="file"
             accept="image/*"
             className="form-input"
-            onChange={(e) => setPhotoFile(e.target.files[0] || null)}
+            onChange={(e) => { setPhotoFile(e.target.files[0] || null); onDirtyChange?.(true); }}
             style={{ padding: '8px' }}
           />
         </div>

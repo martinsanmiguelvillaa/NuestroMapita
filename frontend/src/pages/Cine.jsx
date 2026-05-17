@@ -7,6 +7,7 @@ import CineCard from '../components/cine/CineCard';
 import CineForm from '../components/cine/CineForm';
 import CineDetail from '../components/cine/CineDetail';
 import CineRecommendationPanel from '../components/cine/CineRecommendationPanel';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import '../styles/cine.css';
 
 const TYPE_TABS = [
@@ -47,6 +48,8 @@ export default function Cine() {
   const [deleting, setDeleting] = useState(null);
   const [randomPick, setRandomPick] = useState(null);
   const [showRandom, setShowRandom] = useState(false);
+  const addForm = useDirtyForm();
+  const editForm = useDirtyForm();
 
   const load = useCallback(async () => {
     try {
@@ -214,31 +217,41 @@ export default function Cine() {
         {/* Modal: Agregar */}
         <Modal
           isOpen={showForm}
-          onClose={() => setShowForm(false)}
+          onClose={() => addForm.handleAttemptClose(() => setShowForm(false))}
           title="Agregar al cine"
           wide
+          fullscreen
+          isDirty={addForm.isDirty}
         >
           <CineForm
-            onSaved={handleFormSaved}
-            onCancel={() => setShowForm(false)}
+            onSaved={() => { addForm.setDirty(false); handleFormSaved(); }}
+            onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
+            onDirtyChange={addForm.setDirty}
+            submitRef={addForm.submitRef}
           />
         </Modal>
+        {addForm.dialog}
 
         {/* Modal: Editar */}
         <Modal
           isOpen={!!editing}
-          onClose={() => setEditing(null)}
+          onClose={() => editForm.handleAttemptClose(() => setEditing(null))}
           title="Editar"
           wide
+          fullscreen
+          isDirty={editForm.isDirty}
         >
           {editing && (
             <CineForm
               initialData={editing}
-              onSaved={handleFormSaved}
-              onCancel={() => setEditing(null)}
+              onSaved={() => { editForm.setDirty(false); handleFormSaved(); }}
+              onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
+              onDirtyChange={editForm.setDirty}
+              submitRef={editForm.submitRef}
             />
           )}
         </Modal>
+        {editForm.dialog}
 
         {/* Modal: Detalle */}
         {detailId && (

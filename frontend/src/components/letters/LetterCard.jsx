@@ -4,6 +4,7 @@ import LetterForm from './LetterForm';
 import { deleteLetter } from '../../api/letters';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useToast } from '../../context/ToastContext';
+import { useDirtyForm } from '../../hooks/useDirtyForm';
 import '../../styles/letters.css';
 
 function formatDate(dateStr) {
@@ -24,6 +25,7 @@ export default function LetterCard({ letter, onChanged }) {
   const [open, setOpen] = useState(false);      // Ver completa
   const [editing, setEditing] = useState(false); // Formulario de edición
   const [deleting, setDeleting] = useState(false);
+  const editForm = useDirtyForm();
 
   const handleDelete = async () => {
     const ok = await confirm({ title: '¿Eliminar esta cartita?', confirmLabel: 'Eliminar', danger: true });
@@ -92,13 +94,22 @@ export default function LetterCard({ letter, onChanged }) {
       </Modal>
 
       {/* Modal: edición */}
-      <Modal isOpen={editing} onClose={() => setEditing(false)} title="Editar cartita">
+      <Modal
+        isOpen={editing}
+        onClose={() => editForm.handleAttemptClose(() => setEditing(false))}
+        title="Editar cartita"
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
         <LetterForm
           initialData={letter}
-          onSaved={() => { setEditing(false); onChanged?.(); }}
-          onCancel={() => setEditing(false)}
+          onSaved={() => { editForm.setDirty(false); setEditing(false); onChanged?.(); }}
+          onCancel={() => editForm.handleAttemptClose(() => setEditing(false))}
+          onDirtyChange={editForm.setDirty}
+          submitRef={editForm.submitRef}
         />
       </Modal>
+      {editForm.dialog}
     </>
   );
 }

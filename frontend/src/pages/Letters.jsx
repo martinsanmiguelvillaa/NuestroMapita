@@ -3,12 +3,14 @@ import { getLetters } from '../api/letters';
 import Modal from '../components/ui/Modal';
 import LetterCard from '../components/letters/LetterCard';
 import LetterForm from '../components/letters/LetterForm';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import '../styles/letters.css';
 
 export default function Letters() {
   const [letters, setLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const addForm = useDirtyForm();
 
   const load = useCallback(async () => {
     try {
@@ -53,12 +55,21 @@ export default function Letters() {
       )}
 
       {/* Modal nueva cartita */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nueva cartita">
+      <Modal
+        isOpen={showForm}
+        onClose={() => addForm.handleAttemptClose(() => setShowForm(false))}
+        title="Nueva cartita"
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
         <LetterForm
-          onSaved={() => { setShowForm(false); load(); }}
-          onCancel={() => setShowForm(false)}
+          onSaved={() => { addForm.setDirty(false); setShowForm(false); load(); }}
+          onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
         />
       </Modal>
+      {addForm.dialog}
     </div>
     </div>
   );

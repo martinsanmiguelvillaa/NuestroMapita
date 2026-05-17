@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import WishlistForm from '../components/places/WishlistForm';
 import PlaceForm from '../components/places/PlaceForm';
 import RecipeForm from '../components/recipes/RecipeForm';
@@ -66,6 +67,7 @@ export default function ShareTarget() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
+  const { isDirty, setDirty, submitRef, handleAttemptClose, dialog } = useDirtyForm();
 
   const sharedUrl   = searchParams.get('url') || '';
   const sharedText  = searchParams.get('text') || '';
@@ -102,6 +104,7 @@ export default function ShareTarget() {
     try {
       const place = await createWishlist(data);
       if (files?.length) await uploadWishlistPhotos(place.id, files);
+      setDirty(false);
       navigate('/por-visitar');
     } finally {
       setSaving(false);
@@ -113,6 +116,7 @@ export default function ShareTarget() {
     try {
       const place = await createVisited(data);
       if (files?.length) await uploadPhotos(place.id, files);
+      setDirty(false);
       navigate('/visitados');
     } finally {
       setSaving(false);
@@ -147,39 +151,74 @@ export default function ShareTarget() {
         ))}
       </div>
 
-      <Modal isOpen={selected === 'wishlist'} onClose={() => setSelected(null)} title="Agregar a Por hacer">
+      <Modal
+        isOpen={selected === 'wishlist'}
+        onClose={() => handleAttemptClose(() => setSelected(null))}
+        title="Agregar a Por hacer"
+        fullscreen
+        isDirty={isDirty}
+      >
         <WishlistForm
           initialData={wishlistInitial}
           onSubmit={handleWishlistSave}
-          onCancel={() => setSelected(null)}
+          onCancel={() => handleAttemptClose(() => setSelected(null))}
           loading={saving}
+          onDirtyChange={setDirty}
+          submitRef={submitRef}
         />
       </Modal>
 
-      <Modal isOpen={selected === 'visited'} onClose={() => setSelected(null)} title="Registrar en Ya hicimos">
+      <Modal
+        isOpen={selected === 'visited'}
+        onClose={() => handleAttemptClose(() => setSelected(null))}
+        title="Registrar en Ya hicimos"
+        fullscreen
+        isDirty={isDirty}
+      >
         <PlaceForm
           initialData={visitedInitial}
           onSubmit={handleVisitedSave}
-          onCancel={() => setSelected(null)}
+          onCancel={() => handleAttemptClose(() => setSelected(null))}
           loading={saving}
+          onDirtyChange={setDirty}
+          submitRef={submitRef}
         />
       </Modal>
 
-      <Modal isOpen={selected === 'cine'} onClose={() => setSelected(null)} title="Agregar al cine" wide>
+      <Modal
+        isOpen={selected === 'cine'}
+        onClose={() => handleAttemptClose(() => setSelected(null))}
+        title="Agregar al cine"
+        wide
+        fullscreen
+        isDirty={isDirty}
+      >
         <CineForm
           initialData={cineInitial}
-          onSaved={() => navigate('/cine')}
-          onCancel={() => setSelected(null)}
+          onSaved={() => { setDirty(false); navigate('/cine'); }}
+          onCancel={() => handleAttemptClose(() => setSelected(null))}
+          onDirtyChange={setDirty}
+          submitRef={submitRef}
         />
       </Modal>
 
-      <Modal isOpen={selected === 'recipe'} onClose={() => setSelected(null)} title="Nueva receta" wide>
+      <Modal
+        isOpen={selected === 'recipe'}
+        onClose={() => handleAttemptClose(() => setSelected(null))}
+        title="Nueva receta"
+        wide
+        fullscreen
+        isDirty={isDirty}
+      >
         <RecipeForm
           initialData={recipeInitial}
-          onSaved={() => navigate('/recetas')}
-          onCancel={() => setSelected(null)}
+          onSaved={() => { setDirty(false); navigate('/recetas'); }}
+          onCancel={() => handleAttemptClose(() => setSelected(null))}
+          onDirtyChange={setDirty}
+          submitRef={submitRef}
         />
       </Modal>
+      {dialog}
     </div>
   );
 }

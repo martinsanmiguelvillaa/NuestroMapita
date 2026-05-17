@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import LocationPickerMap from './LocationPickerMap';
 
 const EMPTY_FORM = {
@@ -10,7 +10,13 @@ const EMPTY_FORM = {
   longitude: null,
 };
 
-export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading }) {
+export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef }) {
+  const formRef = useRef();
+
+  useEffect(() => {
+    if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
+  });
+
   const [form, setForm] = useState({
     ...EMPTY_FORM,
     ...initialData,
@@ -21,10 +27,14 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
   const [photoFiles, setPhotoFiles] = useState([]);
   const photoInputRef = useRef();
 
-  const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+  const set = (field, value) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    onDirtyChange?.(true);
+  };
 
   const handleLocationChange = ({ lat, lng }) => {
     setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+    onDirtyChange?.(true);
   };
 
   const handleSubmit = async (e) => {
@@ -50,7 +60,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit}>
       {error && <div className="alert alert-error">{error}</div>}
 
       <div className="form-group">
@@ -115,7 +125,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           accept="image/*"
           multiple
           hidden
-          onChange={(e) => setPhotoFiles(Array.from(e.target.files))}
+          onChange={(e) => { setPhotoFiles(Array.from(e.target.files)); onDirtyChange?.(true); }}
         />
         <button
           type="button"

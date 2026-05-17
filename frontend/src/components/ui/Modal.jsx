@@ -4,7 +4,7 @@ import '../../styles/modal.css';
 const DRAG_ZONE_PX = 72;   // px desde el top del sheet donde se activa el drag
 const CLOSE_THRESHOLD = 160; // px arrastrados para cerrar
 
-export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false }) {
+export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false, isDirty = false }) {
   const sheetRef = useRef(null);
   const drag = useRef({ active: false, startY: 0, dy: 0 });
 
@@ -48,7 +48,7 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
     const overlay = el.closest('.modal-overlay');
     const snap = 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
 
-    if (drag.current.dy > CLOSE_THRESHOLD) {
+    if (drag.current.dy > CLOSE_THRESHOLD && !isDirty) {
       el.style.transition = snap;
       el.style.transform = 'translateY(110%)';
       if (overlay) { overlay.style.transition = 'opacity 0.3s'; overlay.style.opacity = '0'; }

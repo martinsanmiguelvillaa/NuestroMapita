@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import StarRating from '../places/StarRating';
 import { searchTmdb, getTmdbDetail, createCineItem, updateCineItem } from '../../api/cine';
 
@@ -36,8 +36,13 @@ function itemToForm(item) {
   };
 }
 
-export default function CineForm({ initialData, onSaved, onCancel }) {
+export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange, submitRef }) {
   const isEdit = !!initialData;
+  const formRef = useRef();
+
+  useEffect(() => {
+    if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
+  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [tmdbResults, setTmdbResults] = useState(null); // null = todavía no buscó
@@ -101,11 +106,13 @@ export default function CineForm({ initialData, onSaved, onCancel }) {
     } finally {
       setIsLoadingDetail(false);
       setShowManual(true);
+      onDirtyChange?.(true);
     }
   };
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    onDirtyChange?.(true);
   };
 
   const handleSubmit = async (e) => {
@@ -219,7 +226,7 @@ export default function CineForm({ initialData, onSaved, onCancel }) {
 
   // ── Formulario de datos (edición o tras seleccionar de TMDB) ──────────────
   return (
-    <form className="cine-form" onSubmit={handleSubmit}>
+    <form ref={formRef} className="cine-form" onSubmit={handleSubmit}>
       {error && <div className="alert alert-error">{error}</div>}
 
       {/* Tipo */}

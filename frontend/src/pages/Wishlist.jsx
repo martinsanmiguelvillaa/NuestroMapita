@@ -12,6 +12,7 @@ import { thumbUrl } from '../utils/cloudinary';
 import { uploadWishlistPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import ConvertModal from '../components/places/ConvertModal';
 import PhotoSection from '../components/photos/PhotoSection';
 import CoverPhoto from '../components/photos/CoverPhoto';
@@ -297,6 +298,8 @@ export default function Wishlist() {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
+  const addForm = useDirtyForm();
+  const editForm = useDirtyForm();
   const [randomPlace, setRandomPlace] = useState(null);
   const [rolling, setRolling] = useState(false);
 
@@ -339,6 +342,7 @@ export default function Wishlist() {
       if (files?.length) {
         await uploadWishlistPhotos(newPlace.id, files);
       }
+      addForm.setDirty(false);
       setShowForm(false);
       load();
     } finally {
@@ -350,6 +354,7 @@ export default function Wishlist() {
     setSaving(true);
     try {
       await updateWishlist(editing.id, data);
+      editForm.setDirty(false);
       setEditing(null);
       load();
     } finally {
@@ -464,16 +469,31 @@ export default function Wishlist() {
       )}
 
       {/* Modal crear */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Agregar a Por hacer">
+      <Modal
+        isOpen={showForm}
+        onClose={() => addForm.handleAttemptClose(() => setShowForm(false))}
+        title="Agregar a Por hacer"
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
         <WishlistForm
           onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
+          onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
           loading={saving}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
         />
       </Modal>
+      {addForm.dialog}
 
       {/* Modal editar */}
-      <Modal isOpen={!!editing} onClose={() => setEditing(null)} title="Editar lugar">
+      <Modal
+        isOpen={!!editing}
+        onClose={() => editForm.handleAttemptClose(() => setEditing(null))}
+        title="Editar lugar"
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
         {editing && (
           <WishlistForm
             initialData={{
@@ -483,11 +503,14 @@ export default function Wishlist() {
               description: editing.description || '',
             }}
             onSubmit={handleUpdate}
-            onCancel={() => setEditing(null)}
+            onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
             loading={saving}
+            onDirtyChange={editForm.setDirty}
+            submitRef={editForm.submitRef}
           />
         )}
       </Modal>
+      {editForm.dialog}
 
       {/* Modal "Ya fuimos" */}
       {convertPlace && (

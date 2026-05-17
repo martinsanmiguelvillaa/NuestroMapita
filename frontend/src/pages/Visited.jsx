@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
+import { useDirtyForm } from '../hooks/useDirtyForm';
 import PhotoSection from '../components/photos/PhotoSection';
 import CoverPhoto from '../components/photos/CoverPhoto';
 import SearchBar from '../components/ui/SearchBar';
@@ -186,6 +187,8 @@ export default function Visited() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const addForm = useDirtyForm();
+  const editForm = useDirtyForm();
 
   const load = useCallback(async (signal) => {
     try {
@@ -216,6 +219,7 @@ export default function Visited() {
       if (files?.length) {
         await uploadPhotos(newPlace.id, files);
       }
+      addForm.setDirty(false);
       setShowForm(false);
       load();
     } finally {
@@ -227,6 +231,7 @@ export default function Visited() {
     setSaving(true);
     try {
       await updateVisited(editing.id, data);
+      editForm.setDirty(false);
       setEditing(null);
       load();
     } finally {
@@ -286,15 +291,30 @@ export default function Visited() {
         </div>
       )}
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo lugar visitado">
+      <Modal
+        isOpen={showForm}
+        onClose={() => addForm.handleAttemptClose(() => setShowForm(false))}
+        title="Nuevo lugar visitado"
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
         <PlaceForm
           onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
+          onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
           loading={saving}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
         />
       </Modal>
+      {addForm.dialog}
 
-      <Modal isOpen={!!editing} onClose={() => setEditing(null)} title="Editar lugar">
+      <Modal
+        isOpen={!!editing}
+        onClose={() => editForm.handleAttemptClose(() => setEditing(null))}
+        title="Editar lugar"
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
         {editing && (
           <PlaceForm
             initialData={{
@@ -305,11 +325,14 @@ export default function Visited() {
               would_revisit: editing.would_revisit ?? null,
             }}
             onSubmit={handleUpdate}
-            onCancel={() => setEditing(null)}
+            onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
             loading={saving}
+            onDirtyChange={editForm.setDirty}
+            submitRef={editForm.submitRef}
           />
         )}
       </Modal>
+      {editForm.dialog}
     </div>
     </div>
   );

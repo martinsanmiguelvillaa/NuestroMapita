@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createRecipe, updateRecipe, uploadRecipePhoto } from '../../api/recipes';
 
 const EMPTY_FORM = {
@@ -15,7 +15,13 @@ const EMPTY_FORM = {
  * Si `initialData` está presente, modo edición.
  * `onSaved(recipe)` se llama con la receta guardada.
  */
-export default function RecipeForm({ initialData = null, onSaved, onCancel }) {
+export default function RecipeForm({ initialData = null, onSaved, onCancel, onDirtyChange, submitRef }) {
+  const formRef = useRef();
+
+  useEffect(() => {
+    if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
+  });
+
   const [form, setForm] = useState(
     initialData
       ? {
@@ -33,13 +39,17 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+  const set = (field, value) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    onDirtyChange?.(true);
+  };
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+    onDirtyChange?.(true);
   };
 
   const handleSubmit = async (e) => {
@@ -84,7 +94,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit}>
       {error && <div className="alert alert-error">{error}</div>}
 
       {/* Título */}

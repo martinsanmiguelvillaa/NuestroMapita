@@ -17,6 +17,45 @@
   to { transform: translateY(0); }
 }
 
+/* ── Diálogo de cambios sin guardar ─────────────── */
+.unsaved-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 55, 40, 0.5);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.15s ease;
+}
+
+.unsaved-dialog {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-lg);
+  max-width: 340px;
+  width: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.unsaved-dialog__text {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  font-style: italic;
+  text-align: center;
+}
+
+.unsaved-dialog__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 /* Handle decorativo para sheets */
 .modal-fullscreen::before {
   content: '';
