@@ -6,42 +6,35 @@ import CineForm from '../components/cine/CineForm';
 import CineDetail from '../components/cine/CineDetail';
 import '../styles/cine.css';
 
-const FILTER_TABS = [
+const TYPE_TABS = [
   { value: 'all',      label: '✦ Todas' },
-  { value: 'to_watch', label: '⏳ Por ver' },
-  { value: 'watched',  label: '✓ Ya vimos' },
   { value: 'movie',    label: '🎬 Películas' },
   { value: 'series',   label: '📺 Series' },
   { value: 'favorite', label: '♥ Favoritas' },
 ];
 
-const EMPTY_MESSAGES = {
-  all:      'Todavía no agregamos pelis ni series.',
-  to_watch: 'No tenemos nada pendiente por ver.',
-  watched:  'Todavía no marcamos ninguna como vista.',
-  movie:    'Todavía no agregamos películas.',
-  series:   'Todavía no agregamos series.',
-  favorite: 'Todavía no elegimos nuestras favoritas.',
-};
+const STATUS_TABS = [
+  { value: 'all',      label: 'Todas' },
+  { value: 'watched',  label: '✓ Ya vimos' },
+  { value: 'to_watch', label: '⏳ Por ver' },
+];
 
-function buildParams(filter, search) {
+function buildParams(typeFilter, statusFilter, search) {
   const params = {};
   if (search) params.search = search;
-  switch (filter) {
-    case 'to_watch': params.status = 'to_watch'; break;
-    case 'watched':  params.status = 'watched';  break;
-    case 'movie':    params.type = 'movie';       break;
-    case 'series':   params.type = 'series';      break;
-    case 'favorite': params.is_favorite = true;   break;
-    default: break;
-  }
+  if (typeFilter === 'movie')    params.type = 'movie';
+  if (typeFilter === 'series')   params.type = 'series';
+  if (typeFilter === 'favorite') params.is_favorite = true;
+  if (statusFilter === 'to_watch') params.status = 'to_watch';
+  if (statusFilter === 'watched')  params.status = 'watched';
   return params;
 }
 
 export default function Cine() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -52,14 +45,14 @@ export default function Cine() {
 
   const load = useCallback(async () => {
     try {
-      const data = await getCineItems(buildParams(filter, search));
+      const data = await getCineItems(buildParams(typeFilter, statusFilter, search));
       setItems(data);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [filter, search]);
+  }, [typeFilter, statusFilter, search]);
 
   useEffect(() => {
     setLoading(true);
@@ -150,23 +143,36 @@ export default function Cine() {
 
         {/* Filtros */}
         <div className="cine-filters">
-          <div className="cine-tabs">
-            {FILTER_TABS.map((tab) => (
+          <div className="cine-filters__row">
+            <div className="cine-tabs">
+              {TYPE_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  className={`cine-tab${typeFilter === tab.value ? ' cine-tab--active' : ''}`}
+                  onClick={() => setTypeFilter(tab.value)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <input
+              className="form-input cine-search"
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="cine-tabs cine-tabs--status">
+            {STATUS_TABS.map((tab) => (
               <button
                 key={tab.value}
-                className={`cine-tab${filter === tab.value ? ' cine-tab--active' : ''}`}
-                onClick={() => setFilter(tab.value)}
+                className={`cine-tab cine-tab--sm${statusFilter === tab.value ? ' cine-tab--active' : ''}`}
+                onClick={() => setStatusFilter(tab.value)}
               >
                 {tab.label}
               </button>
             ))}
           </div>
-          <input
-            className="form-input cine-search"
-            placeholder="Buscar..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
         </div>
 
         {/* Contenido */}
@@ -174,7 +180,7 @@ export default function Cine() {
           <div className="loading-state">Cargando...</div>
         ) : items.length === 0 ? (
           <div className="empty-state">
-            <p>{EMPTY_MESSAGES[filter]}</p>
+            <p>No hay nada con ese filtro todavía.</p>
             <button className="btn btn-primary" onClick={() => setShowForm(true)}>
               Agregar la primera
             </button>
