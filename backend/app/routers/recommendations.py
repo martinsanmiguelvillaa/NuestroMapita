@@ -13,6 +13,7 @@ from app.schemas.recommendation import (
     RecommendationRequest,
 )
 from app.services.openai_service import generate_recommendations
+from app.services.tmdb_service import search as tmdb_search
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
@@ -58,6 +59,23 @@ def generate(
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Error generando recomendación: {exc}") from exc
+
+    # Enrich with TMDB posters if API key is available
+    if settings.TMDB_API_KEY:
+        all_recs = [result["main"]] + result.get("similar", [])
+        for rec in all_recs:
+            try:
+                tmdb_type = "movie" if rec.get("type") == "movie" else "series"
+                hits = tmdb_search(rec["title"], settings.TMDB_API_KEY)
+                # Pick the first result that matches the type
+                match = next(
+                    (h for h in hits if h["type"] == tmdb_type),
+                    hits[0] if hits else None,
+                )
+                if match and match.get("poster_url"):
+                    rec["poster_url"] = match["poster_url"]
+            except Exception:
+                pass  # poster is optional, never fail the whole request
 
     # Persist to history
     entry = RecommendationHistory(

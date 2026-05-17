@@ -1182,6 +1182,21 @@
   background: var(--color-beige);
 }
 
+.rec-card__poster {
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.rec-card--main .rec-card__poster {
+  width: 120px;
+  align-self: stretch;
+}
+
+.rec-card--similar .rec-card__poster {
+  width: 100%;
+  height: 160px;
+}
+
 .rec-card__poster-placeholder--movie {
   background: linear-gradient(135deg, #e8d5bb 0%, #d4b896 100%);
 }

@@ -3,10 +3,19 @@ const TYPE_LABEL = { movie: '🎬 Película', series: '📺 Serie' };
 export default function RecommendationCard({ rec, isMain, onAdd, onBlock, added, blocked }) {
   return (
     <div className={`rec-card ${isMain ? 'rec-card--main' : 'rec-card--similar'} ${blocked ? 'rec-card--blocked' : ''}`}>
-      {/* Poster placeholder */}
-      <div className={`rec-card__poster-placeholder rec-card__poster-placeholder--${rec.type}`}>
-        <span>{rec.type === 'movie' ? '🎬' : '📺'}</span>
-      </div>
+      {/* Poster */}
+      {rec.poster_url ? (
+        <img
+          src={rec.poster_url}
+          alt={rec.title}
+          className="rec-card__poster"
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
+      ) : (
+        <div className={`rec-card__poster-placeholder rec-card__poster-placeholder--${rec.type}`}>
+          <span>{rec.type === 'movie' ? '🎬' : '📺'}</span>
+        </div>
+      )}
 
       <div className="rec-card__body">
         <div className="rec-card__meta">
