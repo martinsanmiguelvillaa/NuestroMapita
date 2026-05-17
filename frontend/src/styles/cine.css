@@ -6,7 +6,7 @@
   min-height: calc(100vh - var(--navbar-height));
   /* El fondo se configura en variables.css cuando el usuario lo elija.
      Por ahora usa el degradado base de la app. */
-  background-image: var(--bg-cine, linear-gradient(145deg, var(--color-cream) 0%, var(--color-beige) 100%));
+  background-image: var(--bg-cine);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
