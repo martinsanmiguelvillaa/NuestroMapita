@@ -17,6 +17,7 @@ const links = [
 export default function Navbar() {
   const { logout } = useAuth();
   const [confirming, setConfirming] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
   const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
 
   return (
@@ -43,26 +44,39 @@ export default function Navbar() {
             </li>
           ))}
 
-          {/* Notificaciones */}
-          {supported && permission !== 'denied' && (
-            <li>
-              <button
-                className="navbar__logout"
-                onClick={subscribed ? unsubscribe : subscribe}
-                title={subscribed ? 'Desactivar notificaciones' : 'Activar notificaciones'}
-              >
-                <span className="navbar__link-icon">{subscribed ? '🔔' : '🔕'}</span>
-                <span>{subscribed ? 'Notif.' : 'Notif.'}</span>
-              </button>
-            </li>
-          )}
-
-          {/* Cerrar sesión */}
-          <li>
-            <button className="navbar__logout" onClick={() => setConfirming(true)} title="Cerrar sesión">
-              <span className="navbar__link-icon">↩</span>
-              <span>Salir</span>
+          {/* Config */}
+          <li className="navbar__config-wrap">
+            <button
+              className="navbar__logout"
+              onClick={() => setConfigOpen((v) => !v)}
+              title="Configuración"
+            >
+              <span className="navbar__link-icon">⚙️</span>
+              <span>Config</span>
             </button>
+            {configOpen && (
+              <>
+                <div className="navbar__config-backdrop" onClick={() => setConfigOpen(false)} />
+                <div className="navbar__config-menu" onClick={() => setConfigOpen(false)}>
+                {supported && permission !== 'denied' && (
+                  <button
+                    className="navbar__config-item"
+                    onClick={subscribed ? unsubscribe : subscribe}
+                  >
+                    <span>{subscribed ? '🔔' : '🔕'}</span>
+                    <span>{subscribed ? 'Desactivar notificaciones' : 'Activar notificaciones'}</span>
+                  </button>
+                )}
+                <button
+                  className="navbar__config-item navbar__config-item--danger"
+                  onClick={() => setConfirming(true)}
+                >
+                  <span>↩</span>
+                  <span>Cerrar sesión</span>
+                </button>
+              </div>
+              </>
+            )}
           </li>
         </ul>
       </nav>

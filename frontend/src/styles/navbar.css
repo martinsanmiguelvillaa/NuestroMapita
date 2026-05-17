@@ -87,6 +87,58 @@
   color: var(--color-error);
 }
 
+/* --- Menú de config --- */
+.navbar__config-wrap {
+  position: relative;
+}
+
+.navbar__config-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  min-width: 210px;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.navbar__config-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.navbar__config-item:hover {
+  background: var(--color-beige);
+}
+
+.navbar__config-item--danger {
+  color: var(--color-error);
+}
+
+.navbar__config-item--danger:hover {
+  background: #fce4e4;
+}
+
+.navbar__config-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
 /* --- Confirmación de logout --- */
 .logout-overlay {
   position: fixed;
@@ -167,5 +219,11 @@
     display: flex;
     align-items: center;
     gap: 2px;
+  }
+
+  .navbar__config-menu {
+    top: auto;
+    bottom: calc(100% + 8px);
+    right: 0;
   }
 }
