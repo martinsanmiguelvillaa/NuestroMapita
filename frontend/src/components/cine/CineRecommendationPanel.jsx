@@ -60,7 +60,8 @@ export default function CineRecommendationPanel({ onItemAdded }) {
     });
   };
 
-  const handleGenerate = async (currentExcluded = sessionExcluded) => {
+  const handleGenerate = async () => {
+    const currentExcluded = sessionExcluded;
     setLoading(true);
     setError('');
     setAdded(new Set());
