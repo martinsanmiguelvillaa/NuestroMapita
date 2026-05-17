@@ -35,6 +35,7 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+  background: var(--color-white);
 }
 
 .login-card__title {
