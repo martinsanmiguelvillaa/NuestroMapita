@@ -42,8 +42,6 @@ export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavor
 
         <h3 className="cine-card__title">{item.title}</h3>
 
-        {item.year && <p className="cine-card__meta">{item.year}</p>}
-
         {item.genres?.length > 0 && (
           <p className="cine-card__genres">{item.genres.slice(0, 2).join(' · ')}</p>
         )}
