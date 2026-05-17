@@ -104,11 +104,12 @@
   .modal-overlay {
     align-items: flex-end;
     padding: 0;
+    padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
   }
 
   .modal-content {
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    max-height: 92vh;
+    max-height: calc(92vh - var(--mobile-nav-height) - env(safe-area-inset-bottom));
   }
 
   .modal-header {
