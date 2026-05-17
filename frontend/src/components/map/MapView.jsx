@@ -207,17 +207,23 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
     marker.on('mouseover', () => {
       cancelClose();
       if (!marker.isPopupOpen()) {
-        // Ajustar offset horizontal para no cortarse en los bordes
         const map = marker._map;
         const popup = marker.getPopup();
         if (map && popup) {
           const pt = map.latLngToContainerPoint(marker.getLatLng());
           const mapSize = map.getSize();
           const PW = 300;
+
+          // Horizontal: evitar borde izquierdo/derecho
           let offsetX = 0;
           if (pt.x > mapSize.x - PW / 2) offsetX = -(pt.x - (mapSize.x - PW / 2));
           else if (pt.x < PW / 2)        offsetX = PW / 2 - pt.x;
-          popup.options.offset = L.point(offsetX, 0);
+
+          // Vertical: si está cerca del borde superior, abrir abajo
+          // Usamos offset grande provisorio; popupopen lo corrige con la altura real
+          const openBelow = pt.y < 350;
+          popup._openBelow = openBelow;
+          popup.options.offset = L.point(offsetX, openBelow ? 450 : 0);
         }
         marker.openPopup();
       }
@@ -239,9 +245,22 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
       }
     });
 
-    // Cuando el popup abre: registrar hover/clic sobre la tarjeta
+    // Cuando el popup abre: corregir posición con altura real + registrar hover/clic
     marker.on('popupopen', (e) => {
       const popup = e.popup;
+
+      // Si abre abajo: corregir offset con la altura real del popup
+      if (popup._openBelow) {
+        const el = popup.getElement();
+        if (el) {
+          const h = el.offsetHeight;
+          // tip por defecto está a popupAnchor.y = -34 sobre el marker
+          // queremos que la parte superior del popup quede 10px bajo el corazón (iconBottom ≈ 4px)
+          // offset = h + 34 + 4 + 10 = h + 48
+          popup.options.offset = L.point(popup.options.offset.x, h + 48);
+          popup.update();
+        }
+      }
 
       const el = popup?.getElement();
       if (!el) return;
