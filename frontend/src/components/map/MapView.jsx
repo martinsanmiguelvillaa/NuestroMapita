@@ -206,7 +206,30 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
 
     marker.on('mouseover', () => {
       cancelClose();
-      if (!marker.isPopupOpen()) marker.openPopup();
+      if (!marker.isPopupOpen()) {
+        // Calcular offset antes de abrir para abrir en el espacio disponible
+        const map = marker._map;
+        const popup = marker.getPopup();
+        if (map && popup) {
+          const pt = map.latLngToContainerPoint(marker.getLatLng());
+          const mapSize = map.getSize();
+          const PH = 300; // altura estimada del popup
+          const PW = 300; // ancho máximo del popup
+
+          // Vertical: si no hay espacio arriba, abrir abajo
+          // Por default el popup se abre arriba (tip en popupAnchor [0,-34])
+          // Para abrir abajo corremos el tip PH+38px hacia abajo
+          const offsetY = pt.y < PH + 40 ? PH + 38 : 0;
+
+          // Horizontal: evitar que se salga por los bordes
+          let offsetX = 0;
+          if (pt.x > mapSize.x - PW / 2) offsetX = -(pt.x - (mapSize.x - PW / 2));
+          else if (pt.x < PW / 2)        offsetX = PW / 2 - pt.x;
+
+          popup.options.offset = L.point(offsetX, offsetY);
+        }
+        marker.openPopup();
+      }
     });
 
     marker.on('mouseout', scheduleClose);
@@ -304,7 +327,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {showVisited &&
         visitedPins.map((pin, i) => (
           <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--visited', i * 35)} markerKey={`visited-${pin.id}`} markersRef={markersRef}>
-            <Popup minWidth={240} maxWidth={300} autoPan autoPanPaddingTopLeft={[20, 100]} autoPanPaddingBottomRight={[20, 80]}>
+            <Popup minWidth={240} maxWidth={300} autoPan={false}>
               <VisitedPopup pin={pin} />
             </Popup>
           </HoverMarker>
@@ -314,7 +337,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
       {showWishlist &&
         wishlistPins.map((pin, i) => (
           <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--wishlist', i * 35)} markerKey={`wishlist-${pin.id}`} markersRef={markersRef}>
-            <Popup minWidth={240} maxWidth={300} autoPan autoPanPaddingTopLeft={[20, 100]} autoPanPaddingBottomRight={[20, 80]}>
+            <Popup minWidth={240} maxWidth={300} autoPan={false}>
               <WishlistPopup pin={pin} onConvert={onConvert} />
             </Popup>
           </HoverMarker>
