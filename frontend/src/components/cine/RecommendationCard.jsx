@@ -53,7 +53,7 @@ export default function RecommendationCard({ rec, isMain, onAdd, onBlock, added,
               onClick={() => onBlock(rec)}
               title="No la banco, no volver a sugerir"
             >
-              ✕ No la banco
+              ✕ No banco
             </button>
           )}
         </div>
