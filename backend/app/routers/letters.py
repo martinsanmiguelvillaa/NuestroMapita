@@ -8,6 +8,7 @@ from app.models.letter import Letter
 from app.schemas.letter import LetterCreate, LetterUpdate, LetterResponse
 from app.services.cloudinary_service import upload_image, delete_image
 from app.services.upload_validation import read_valid_image_upload
+from app.services.push_service import send_push_to_all
 
 router = APIRouter(prefix="/letters", tags=["Cartitas"])
 
@@ -30,6 +31,7 @@ def create_letter(
     db.add(letter)
     db.commit()
     db.refresh(letter)
+    send_push_to_all(db, title="💌 Nueva cartita", body=letter.title, url="/cartitas")
     return letter
 
 

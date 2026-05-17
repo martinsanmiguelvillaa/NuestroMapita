@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 import '../../styles/navbar.css';
 
 const links = [
@@ -16,6 +17,7 @@ const links = [
 export default function Navbar() {
   const { logout } = useAuth();
   const [confirming, setConfirming] = useState(false);
+  const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
 
   return (
     <>
@@ -40,6 +42,20 @@ export default function Navbar() {
               </NavLink>
             </li>
           ))}
+
+          {/* Notificaciones */}
+          {supported && permission !== 'denied' && (
+            <li>
+              <button
+                className="navbar__logout"
+                onClick={subscribed ? unsubscribe : subscribe}
+                title={subscribed ? 'Desactivar notificaciones' : 'Activar notificaciones'}
+              >
+                <span className="navbar__link-icon">{subscribed ? '🔔' : '🔕'}</span>
+                <span>{subscribed ? 'Notif.' : 'Notif.'}</span>
+              </button>
+            </li>
+          )}
 
           {/* Cerrar sesión */}
           <li>

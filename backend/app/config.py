@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     # Obtener clave en: https://platform.openai.com/api-keys
     OPENAI_API_KEY: str = ""
 
+    # Web Push (VAPID) — para notificaciones push
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_CLAIMS_EMAIL: str = ""
+
     # Cloudinary
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
