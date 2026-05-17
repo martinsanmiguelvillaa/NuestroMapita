@@ -242,7 +242,7 @@ export default function Cine() {
 
         {/* Modal: Detalle */}
         {detailId && (
-          <Modal isOpen onClose={handleDetailClose} title="" wide>
+          <Modal isOpen onClose={handleDetailClose} title="" wide fullscreen>
             <CineDetail
               itemId={detailId}
               onClose={handleDetailClose}

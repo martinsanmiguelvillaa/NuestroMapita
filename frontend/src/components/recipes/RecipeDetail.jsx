@@ -31,7 +31,7 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
   }, [fetchRecipe]);
 
   return (
-    <Modal isOpen onClose={onClose} title={recipe?.title || '...'} wide>
+    <Modal isOpen onClose={onClose} title={recipe?.title || '...'} wide fullscreen>
       {loading ? (
         <div className="loading-state">Cargando receta...</div>
       ) : recipe ? (
