@@ -32,6 +32,11 @@
   gap: var(--space-2);
 }
 .navbar__brand:hover { color: var(--color-brown-dark); }
+.navbar__brand-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
 
 .navbar__links {
   display: flex;

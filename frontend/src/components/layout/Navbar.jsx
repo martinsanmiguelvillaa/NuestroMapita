@@ -21,6 +21,7 @@ export default function Navbar() {
       <nav className="navbar">
         {/* Marca / título (solo visible en desktop) */}
         <Link to="/" className="navbar__brand">
+          <img src="/icons/icono-app.png" alt="" className="navbar__brand-icon" />
           Nuestro Mapita
         </Link>
 
