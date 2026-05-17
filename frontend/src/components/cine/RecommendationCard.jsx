@@ -51,9 +51,9 @@ export default function RecommendationCard({ rec, isMain, onAdd, onBlock, added,
             <button
               className="btn btn-ghost btn-sm rec-card__block-btn"
               onClick={() => onBlock(rec)}
-              title="No me copa, no volver a sugerir"
+              title="No la banco, no volver a sugerir"
             >
-              ✕ No me copa
+              ✕ No la banco
             </button>
           )}
         </div>
