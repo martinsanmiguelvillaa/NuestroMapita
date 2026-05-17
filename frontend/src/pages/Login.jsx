@@ -30,7 +30,7 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <img className="login-card__icon" src="/icons/fe4bbc65-973a-42fd-af37-8b78cba608f9.png" alt="Nuestro Mapita" />
+        <img className="login-card__icon" src="/icons/icono-app.png" alt="Nuestro Mapita" />
         <h1 className="login-card__title">Nuestro Mapita</h1>
         <p className="login-card__subtitle">un lugar solo para nosotros</p>
 
