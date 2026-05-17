@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import '../styles/modal.css';
 
 function UnsavedDialog({ onSave, onDiscard, onCancel }) {
@@ -51,9 +52,12 @@ export function useDirtyForm() {
     pendingClose.current = null;
   }, []);
 
-  const dialog = dialogOpen ? (
-    <UnsavedDialog onSave={handleSave} onDiscard={handleDiscard} onCancel={handleCancel} />
-  ) : null;
+  const dialog = dialogOpen
+    ? createPortal(
+        <UnsavedDialog onSave={handleSave} onDiscard={handleDiscard} onCancel={handleCancel} />,
+        document.body,
+      )
+    : null;
 
   return { isDirty, setDirty, submitRef, handleAttemptClose, dialog };
 }
