@@ -63,7 +63,6 @@ export default function CineRecommendationPanel({ onItemAdded }) {
   const handleGenerate = async (currentExcluded = sessionExcluded) => {
     setLoading(true);
     setError('');
-    setResult(null);
     setAdded(new Set());
     setBlocked(new Set());
     try {
