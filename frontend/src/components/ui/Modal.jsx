@@ -48,11 +48,19 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
     const overlay = el.closest('.modal-overlay');
     const snap = 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
 
-    if (drag.current.dy > CLOSE_THRESHOLD && !isDirty) {
-      el.style.transition = snap;
-      el.style.transform = 'translateY(110%)';
-      if (overlay) { overlay.style.transition = 'opacity 0.3s'; overlay.style.opacity = '0'; }
-      setTimeout(onClose, 320);
+    if (drag.current.dy > CLOSE_THRESHOLD) {
+      if (isDirty) {
+        // Snap back y luego mostrar diálogo
+        el.style.transition = snap;
+        el.style.transform = 'translateY(0)';
+        if (overlay) { overlay.style.transition = 'opacity 0.3s'; overlay.style.opacity = '1'; }
+        setTimeout(() => onClose(), 350);
+      } else {
+        el.style.transition = snap;
+        el.style.transform = 'translateY(110%)';
+        if (overlay) { overlay.style.transition = 'opacity 0.3s'; overlay.style.opacity = '0'; }
+        setTimeout(onClose, 320);
+      }
     } else {
       el.style.transition = snap;
       el.style.transform = 'translateY(0)';

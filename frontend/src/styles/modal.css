@@ -176,14 +176,15 @@
   .modal-overlay--fullscreen {
     align-items: flex-end;
     padding: 0;
+    padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
     background: rgba(74, 55, 40, 0.55);
     backdrop-filter: blur(6px);
   }
 
   .modal-fullscreen {
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    max-height: 93dvh;
-    height: 93dvh;
+    max-height: calc(93dvh - var(--mobile-nav-height) - env(safe-area-inset-bottom));
+    height: calc(93dvh - var(--mobile-nav-height) - env(safe-area-inset-bottom));
     animation: sheetSlideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
