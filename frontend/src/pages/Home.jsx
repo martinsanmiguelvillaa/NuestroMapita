@@ -216,6 +216,7 @@ export default function Home() {
     { to: '/mapa',        icon: '🗺️', name: 'Mapa',       desc: 'Ver todos en el mapa' },
     { to: '/cartitas',    icon: '💌', name: 'Cartitas',    desc: `${stats.letters} guardada${stats.letters !== 1 ? 's' : ''}` },
     { to: '/recetas',     icon: '🍴', name: 'Recetas',     desc: 'Ver nuestras recetas' },
+    { to: '/cine',        icon: '🎬', name: 'Cine',        desc: 'Películas y series' },
   ];
 
   return (
