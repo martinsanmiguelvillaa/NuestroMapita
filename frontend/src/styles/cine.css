@@ -4,22 +4,28 @@
 
 .cine-bg {
   min-height: calc(100vh - var(--navbar-height));
-  /* El fondo se configura en variables.css cuando el usuario lo elija.
-     Por ahora usa el degradado base de la app. */
-  background-image: var(--bg-cine);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
   position: relative;
+  isolation: isolate;
 }
 
 .cine-bg::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image: var(--bg-cine);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.cine-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background: rgba(253, 246, 236, 0.85);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .cine-bg > * {
@@ -897,12 +903,6 @@
    ========================================= */
 
 @media (max-width: 768px) {
-  .cine-bg {
-    background-attachment: scroll;
-  }
-  .cine-bg::before {
-    position: absolute;
-  }
   .cine-detail__hero {
     flex-direction: column;
     align-items: center;

@@ -5,20 +5,28 @@
 /* Fondo de la sección */
 .letters-bg {
   min-height: calc(100vh - var(--navbar-height));
+  position: relative;
+  isolation: isolate;
+}
+
+.letters-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
   background-image: var(--bg-letters);
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  pointer-events: none;
+  z-index: -2;
 }
 
-/* Overlay semitransparente para que el texto sea legible sobre la foto */
-.letters-bg::before {
+.letters-bg::after {
   content: '';
   position: fixed;
   inset: 0;
   background: rgba(253, 246, 236, 0.82);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .letters-bg > * {
@@ -36,15 +44,6 @@
   margin-bottom: 24px;
 }
 
-/* background-attachment: fixed no funciona en iOS */
-@media (max-width: 768px) {
-  .letters-bg {
-    background-attachment: scroll;
-  }
-  .letters-bg::before {
-    position: absolute;
-  }
-}
 
 @media (max-width: 900px) {
   .letters-grid { columns: 2; }

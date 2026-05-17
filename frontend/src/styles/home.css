@@ -4,20 +4,28 @@
 
 .home {
   min-height: 100vh;
-  background-image: var(--bg-home);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
   position: relative;
+  isolation: isolate;
 }
 
 .home::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image: var(--bg-home);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.home::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background: rgba(253, 246, 236, 0.82);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 /* --- Hero --- */
@@ -344,16 +352,6 @@
   justify-content: center;
   font-size: var(--text-xs);
   font-weight: 700;
-}
-
-/* background-attachment: fixed no funciona en iOS — usar scroll en mobile */
-@media (max-width: 768px) {
-  .home {
-    background-attachment: scroll;
-  }
-  .home::before {
-    position: absolute;
-  }
 }
 
 /* ── Video player custom en lightbox ── */

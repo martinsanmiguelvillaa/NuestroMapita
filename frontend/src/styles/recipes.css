@@ -4,20 +4,28 @@
 
 .recipes-bg {
   min-height: calc(100vh - var(--navbar-height));
-  background-image: var(--bg-recipes);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
   position: relative;
+  isolation: isolate;
 }
 
 .recipes-bg::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image: var(--bg-recipes);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.recipes-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background: rgba(253, 246, 236, 0.82);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .recipes-bg > * {
@@ -483,16 +491,6 @@
 /* =========================================
    RESPONSIVE
    ========================================= */
-
-/* background-attachment: fixed no funciona en iOS */
-@media (max-width: 768px) {
-  .recipes-bg {
-    background-attachment: scroll;
-  }
-  .recipes-bg::before {
-    position: absolute;
-  }
-}
 
 @media (max-width: 580px) {
   .recipe-filters {

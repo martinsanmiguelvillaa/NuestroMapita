@@ -5,19 +5,28 @@
 /* --- Fondo de sección Ya hicimos --- */
 .visited-bg {
   min-height: calc(100vh - var(--navbar-height));
-  background-image: var(--bg-visited);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  position: relative;
+  isolation: isolate;
 }
 
 .visited-bg::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image: var(--bg-visited);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.visited-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background: rgba(253, 246, 236, 0.82);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .visited-bg > * {
@@ -28,19 +37,28 @@
 /* --- Fondo de sección Por hacer --- */
 .wishlist-bg {
   min-height: calc(100vh - var(--navbar-height));
-  background-image: var(--bg-wishlist);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  position: relative;
+  isolation: isolate;
 }
 
 .wishlist-bg::before {
   content: '';
   position: fixed;
   inset: 0;
+  background-image: var(--bg-wishlist);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.wishlist-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background: rgba(253, 246, 236, 0.82);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .wishlist-bg > * {
@@ -580,16 +598,7 @@
   font-style: italic;
 }
 
-/* background-attachment: fixed no funciona en iOS — usar scroll en mobile */
 @media (max-width: 768px) {
-  .visited-bg,
-  .wishlist-bg {
-    background-attachment: scroll;
-  }
-  .visited-bg::before,
-  .wishlist-bg::before {
-    position: absolute;
-  }
   .section-header { flex-direction: column; align-items: flex-start; }
   .search-bar input { width: 140px; }
 }
