@@ -4,6 +4,7 @@ import Modal from '../components/ui/Modal';
 import WishlistForm from '../components/places/WishlistForm';
 import PlaceForm from '../components/places/PlaceForm';
 import RecipeForm from '../components/recipes/RecipeForm';
+import CineForm from '../components/cine/CineForm';
 import { createWishlist } from '../api/placesWishlist';
 import { createVisited } from '../api/placesVisited';
 import { uploadPhotos, uploadWishlistPhotos } from '../api/photos';
@@ -36,6 +37,16 @@ const OPTIONS = [
     desc: 'Registrarlo como algo que ya hicimos',
     hints: {
       maps: 'Registrar este lugar como visitado',
+    },
+  },
+  {
+    id: 'cine',
+    icon: '🎬',
+    label: 'Al cine',
+    desc: 'Agregar película o serie a nuestra lista',
+    hints: {
+      video: 'Guardar el tráiler en el cine',
+      social: 'Guardar en la lista del cine',
     },
   },
   {
@@ -80,6 +91,10 @@ export default function ShareTarget() {
 
   const recipeInitial = {
     video_url: url,
+  };
+
+  const cineInitial = {
+    trailer_url: url,
   };
 
   const handleWishlistSave = async (data, files) => {
@@ -147,6 +162,14 @@ export default function ShareTarget() {
           onSubmit={handleVisitedSave}
           onCancel={() => setSelected(null)}
           loading={saving}
+        />
+      </Modal>
+
+      <Modal isOpen={selected === 'cine'} onClose={() => setSelected(null)} title="Agregar al cine" wide>
+        <CineForm
+          initialData={cineInitial}
+          onSaved={() => navigate('/cine')}
+          onCancel={() => setSelected(null)}
         />
       </Modal>
 

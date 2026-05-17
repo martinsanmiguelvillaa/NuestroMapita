@@ -332,3 +332,70 @@ img {
   background: var(--color-beige-dark);
   border-radius: 3px;
 }
+
+/* =========================================
+   CLIPBOARD IMPORT BANNER
+   ========================================= */
+
+.clipboard-banner {
+  position: sticky;
+  top: var(--navbar-height);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-brown);
+  color: var(--color-white);
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+}
+
+.clipboard-banner__content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.clipboard-banner__icon {
+  font-size: var(--text-xl);
+  flex-shrink: 0;
+}
+
+.clipboard-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.clipboard-banner__text strong {
+  font-size: var(--text-sm);
+}
+
+.clipboard-banner__url {
+  font-size: var(--text-xs);
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clipboard-banner__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.clipboard-banner__actions .btn-primary {
+  background: var(--color-white);
+  color: var(--color-brown);
+  border-color: var(--color-white);
+}
+
+.clipboard-banner__actions .btn-ghost {
+  color: var(--color-white);
+  opacity: 0.8;
+}
