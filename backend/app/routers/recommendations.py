@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -76,6 +78,10 @@ def generate(
                     rec["poster_url"] = match["poster_url"]
             except Exception:
                 pass  # poster is optional, never fail the whole request
+
+    # Purge history older than 30 days
+    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+    db.query(RecommendationHistory).filter(RecommendationHistory.created_at < cutoff).delete()
 
     # Persist to history
     entry = RecommendationHistory(
