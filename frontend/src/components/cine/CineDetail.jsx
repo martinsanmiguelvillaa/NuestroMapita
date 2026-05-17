@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import StarRating from '../places/StarRating';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useToast } from '../../context/ToastContext';
 import {
   getCineItem,
   updateCineItem,
@@ -12,6 +14,8 @@ const TYPE_LABEL = { movie: '🎬 Película', series: '📺 Serie' };
 const STATUS_LABEL = { to_watch: 'Por ver', watched: 'Ya vimos' };
 
 export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,12 +70,13 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`¿Eliminar "${item.title}"?`)) return;
+    const ok = await confirm({ title: `¿Eliminar "${item.title}"?`, confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     try {
       await deleteCineItem(itemId);
       onDeleted();
     } catch (err) {
-      alert('No se pudo eliminar: ' + err.message);
+      toast.error('No se pudo eliminar: ' + err.message);
     }
   };
 
@@ -88,7 +93,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
       setCommentAuthor('');
       await load();
     } catch (err) {
-      alert('No se pudo guardar el comentario: ' + err.message);
+      toast.error('No se pudo guardar el comentario: ' + err.message);
     } finally {
       setSavingComment(false);
     }
@@ -100,7 +105,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
       await deleteCineComment(itemId, commentId);
       await load();
     } catch (err) {
-      alert('No se pudo eliminar: ' + err.message);
+      toast.error('No se pudo eliminar: ' + err.message);
     } finally {
       setDeletingComment(null);
     }

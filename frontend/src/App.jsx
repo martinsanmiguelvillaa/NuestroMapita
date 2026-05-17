@@ -9,6 +9,8 @@
  */
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ConfirmProvider } from './context/ConfirmContext';
+import { ToastProvider } from './context/ToastContext';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -30,6 +32,8 @@ function ProtectedRoute() {
 export default function App() {
   return (
     <AuthProvider>
+      <ConfirmProvider>
+      <ToastProvider>
       <BrowserRouter>
         <Routes>
           {/* Página de login (sin navbar) */}
@@ -57,6 +61,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      </ToastProvider>
+      </ConfirmProvider>
     </AuthProvider>
   );
 }

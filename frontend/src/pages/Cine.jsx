@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCineItems, deleteCineItem, updateCineItem } from '../api/cine';
+import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import Modal from '../components/ui/Modal';
 import CineCard from '../components/cine/CineCard';
 import CineForm from '../components/cine/CineForm';
@@ -32,6 +34,8 @@ function buildParams(typeFilter, statusFilter, search) {
 }
 
 export default function Cine() {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('all');
@@ -61,13 +65,14 @@ export default function Cine() {
   }, [load]);
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`¿Eliminar "${item.title}"?`)) return;
+    const ok = await confirm({ title: `¿Eliminar "${item.title}"?`, confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     setDeleting(item.id);
     try {
       await deleteCineItem(item.id);
       load();
     } catch (err) {
-      alert('No se pudo eliminar: ' + err.message);
+      toast.error('No se pudo eliminar: ' + err.message);
     } finally {
       setDeleting(null);
     }

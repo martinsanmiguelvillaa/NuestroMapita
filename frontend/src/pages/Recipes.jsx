@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRecipes, deleteRecipe } from '../api/recipes';
+import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import Modal from '../components/ui/Modal';
 import RecipeCard from '../components/recipes/RecipeCard';
 import RecipeForm from '../components/recipes/RecipeForm';
@@ -19,6 +21,8 @@ const EMPTY_MESSAGES = {
 };
 
 export default function Recipes() {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
@@ -50,13 +54,14 @@ export default function Recipes() {
   }, [load]);
 
   const handleDelete = async (recipe) => {
-    if (!window.confirm(`¿Eliminar "${recipe.title}"?`)) return;
+    const ok = await confirm({ title: `¿Eliminar "${recipe.title}"?`, confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     setDeleting(recipe.id);
     try {
       await deleteRecipe(recipe.id);
       load();
     } catch (err) {
-      alert('No se pudo eliminar: ' + err.message);
+      toast.error('No se pudo eliminar: ' + err.message);
     } finally {
       setDeleting(null);
     }

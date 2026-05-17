@@ -16,12 +16,16 @@ import ConvertModal from '../components/places/ConvertModal';
 import PhotoSection from '../components/photos/PhotoSection';
 import CoverPhoto from '../components/photos/CoverPhoto';
 import SearchBar from '../components/ui/SearchBar';
+import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import '../styles/places.css';
 import '../styles/photos.css';
 
 // ─── Tarjeta individual ──────────────────────────────────────────────────────
 
 function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHandleProps, isDragging }) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [deleting, setDeleting] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -59,13 +63,14 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`¿Eliminar "${place.name}"?`)) return;
+    const ok = await confirm({ title: `¿Eliminar "${place.name}"?`, confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     setDeleting(true);
     try {
       await deleteWishlist(place.id);
       onDelete?.();
     } catch (err) {
-      alert('Error al eliminar: ' + err.message);
+      toast.error('Error al eliminar: ' + err.message);
       setDeleting(false);
     }
   };
@@ -284,6 +289,7 @@ function useDragSort({ items, onOrderChange }) {
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function Wishlist() {
+  const toast = useToast();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -357,7 +363,7 @@ export default function Wishlist() {
       const place = await getRandomWishlist(randomPlace?.id);
       setRandomPlace(place);
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setRolling(false);
     }

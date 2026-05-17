@@ -9,6 +9,7 @@ import {
 import { createCineItem } from '../../api/cine';
 import RecommendationCard from './RecommendationCard';
 import Modal from '../ui/Modal';
+import { useToast } from '../../context/ToastContext';
 
 const MOODS = [
   'Romántica ♥',
@@ -23,6 +24,7 @@ const MOODS = [
 ];
 
 export default function CineRecommendationPanel({ onItemAdded }) {
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [reqType, setReqType] = useState('');
   const [moods, setMoods] = useState(new Set());
@@ -105,7 +107,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
       setAdded((prev) => new Set([...prev, rec.title]));
       onItemAdded?.();
     } catch (err) {
-      alert('No se pudo agregar: ' + err.message);
+      toast.error('No se pudo agregar: ' + err.message);
     }
   };
 
@@ -114,7 +116,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
       await blockRecommendation(rec.title);
       setBlocked((prev) => new Set([...prev, rec.title]));
     } catch (err) {
-      alert('No se pudo bloquear: ' + err.message);
+      toast.error('No se pudo bloquear: ' + err.message);
     }
   };
 
@@ -149,7 +151,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
       await unblockRecommendation(id);
       setBlockedList((prev) => prev.filter((b) => b.id !== id));
     } catch (err) {
-      alert('Error: ' + err.message);
+      toast.error('Error: ' + err.message);
     }
   };
 

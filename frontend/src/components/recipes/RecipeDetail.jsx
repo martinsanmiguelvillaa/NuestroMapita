@@ -2,12 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import Modal from '../ui/Modal';
 import StarRating from '../places/StarRating';
 import { getRecipe, addComment, deleteComment } from '../../api/recipes';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useToast } from '../../context/ToastContext';
 import '../../styles/recipes.css';
 
 /**
  * Modal de detalle completo de una receta, con comentarios.
  */
 export default function RecipeDetail({ recipeId, onClose, onEdit }) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -141,12 +145,13 @@ function RecipeComments({ recipe, onUpdated }) {
   };
 
   const handleDelete = async (commentId) => {
-    if (!window.confirm('¿Eliminar este comentario?')) return;
+    const ok = await confirm({ title: '¿Eliminar este comentario?', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     try {
       await deleteComment(recipe.id, commentId);
       onUpdated?.();
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

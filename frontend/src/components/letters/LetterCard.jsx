@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Modal from '../ui/Modal';
 import LetterForm from './LetterForm';
 import { deleteLetter } from '../../api/letters';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useToast } from '../../context/ToastContext';
 import '../../styles/letters.css';
 
 function formatDate(dateStr) {
@@ -17,18 +19,21 @@ function formatDate(dateStr) {
  * Tarjeta de cartita con vista completa, edición y eliminación.
  */
 export default function LetterCard({ letter, onChanged }) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [open, setOpen] = useState(false);      // Ver completa
   const [editing, setEditing] = useState(false); // Formulario de edición
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!window.confirm('¿Eliminar esta cartita?')) return;
+    const ok = await confirm({ title: '¿Eliminar esta cartita?', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     setDeleting(true);
     try {
       await deleteLetter(letter.id);
       onChanged?.();
     } catch (err) {
-      alert('No se pudo eliminar: ' + err.message);
+      toast.error('No se pudo eliminar: ' + err.message);
       setDeleting(false);
     }
   };

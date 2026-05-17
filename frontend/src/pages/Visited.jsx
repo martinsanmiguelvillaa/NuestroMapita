@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getVisited, createVisited, updateVisited, deleteVisited, convertBackToWishlist } from '../api/placesVisited';
+import { useConfirm } from '../context/ConfirmContext';
+import { useToast } from '../context/ToastContext';
 import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
@@ -18,6 +20,8 @@ function formatDate(dateStr) {
 }
 
 function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -56,25 +60,36 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   };
 
   const handleConvertBack = async () => {
-    if (!window.confirm(`¿Devolver "${place.name}" a Por hacer? Se moverán las fotos pero se perderán el rating y la fecha.`)) return;
+    const ok = await confirm({
+      title: `¿Devolver "${place.name}" a Por hacer?`,
+      message: 'Se moverán las fotos pero se perderán el rating y la fecha.',
+      confirmLabel: 'Devolver',
+    });
+    if (!ok) return;
     setConvertingBack(true);
     try {
       await convertBackToWishlist(place.id);
       onDelete?.();
     } catch (err) {
-      alert('Error: ' + err.message);
+      toast.error('Error: ' + err.message);
       setConvertingBack(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`¿Eliminar "${place.name}"? También se borrarán sus fotos.`)) return;
+    const ok = await confirm({
+      title: `¿Eliminar "${place.name}"?`,
+      message: 'También se borrarán sus fotos.',
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await deleteVisited(place.id);
       onDelete?.();
     } catch (err) {
-      alert('Error al eliminar: ' + err.message);
+      toast.error('Error al eliminar: ' + err.message);
       setDeleting(false);
     }
   };

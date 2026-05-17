@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
 import { thumbUrl, fullUrl } from '../../utils/cloudinary';
+import { useConfirm } from '../../context/ConfirmContext';
+import { useToast } from '../../context/ToastContext';
 import '../../styles/photos.css';
 
 function videoThumb(url) {
@@ -52,6 +54,8 @@ function GalleryVideo({ src, className, onClick }) {
 }
 
 const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, canDelete = true }, ref) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
   const [localPhotos, setLocalPhotos] = useState(photos);
   const coverChangedRef = useRef(false);
@@ -100,7 +104,8 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
   }, [isOpen, prev, next]);
 
   const handleDelete = async (photo) => {
-    if (!window.confirm('¿Eliminar esta foto?')) return;
+    const ok = await confirm({ title: '¿Eliminar esta foto?', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     setDeleting(photo.id);
     try {
       await deletePhoto(photo.id);
@@ -116,7 +121,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
       });
       onDelete?.();
     } catch (err) {
-      alert('No se pudo eliminar la foto: ' + err.message);
+      toast.error('No se pudo eliminar la foto: ' + err.message);
     } finally {
       setDeleting(null);
     }
@@ -141,7 +146,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         onCoverSet?.();
       }
     } catch (err) {
-      alert('No se pudo cambiar la portada: ' + err.message);
+      toast.error('No se pudo cambiar la portada: ' + err.message);
     } finally {
       setSettingCover(null);
     }
