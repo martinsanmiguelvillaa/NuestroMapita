@@ -29,9 +29,12 @@
 }
 
 .login-card__icon {
-  font-size: 3rem;
+  width: 96px;
+  height: 96px;
   margin-bottom: var(--space-4);
   display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .login-card__title {
