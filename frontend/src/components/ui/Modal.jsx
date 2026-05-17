@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import '../../styles/modal.css';
 
 const DRAG_ZONE_PX = 72;   // px desde el top del sheet donde se activa el drag
@@ -68,7 +69,7 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
     }
   };
 
-  return (
+  return createPortal(
     <div className={`modal-overlay${fullscreen ? ' modal-overlay--fullscreen' : ''}`} onClick={onClose}>
       <div
         ref={sheetRef}
@@ -86,6 +87,7 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
         </div>
         <div className="modal-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
