@@ -71,6 +71,7 @@ export default function LetterCard({ letter, onChanged }) {
         isOpen={open && !editing}
         onClose={() => setOpen(false)}
         title={letter.title}
+        fullscreen
       >
         {letter.photo_url && (
           <img

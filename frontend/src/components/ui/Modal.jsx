@@ -7,7 +7,7 @@ import '../../styles/modal.css';
  * - Bloquea el scroll del body mientras está abierto.
  * - Animación de fade + slide up.
  */
-export default function Modal({ isOpen, onClose, title, children, wide = false }) {
+export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false }) {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -27,10 +27,10 @@ export default function Modal({ isOpen, onClose, title, children, wide = false }
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className={`modal-overlay${fullscreen ? ' modal-overlay--fullscreen' : ''}`} onClick={onClose}>
       {/* Detener propagación para que el click dentro del modal no cierre el overlay */}
       <div
-        className={`modal-content${wide ? ' modal-wide' : ''}`}
+        className={`modal-content${wide ? ' modal-wide' : ''}${fullscreen ? ' modal-fullscreen' : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">

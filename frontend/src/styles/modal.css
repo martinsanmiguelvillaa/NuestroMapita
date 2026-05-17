@@ -115,4 +115,21 @@
   .modal-header {
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
+
+  /* Modo pantalla completa: cubre todo, ignora el nav inferior */
+  .modal-overlay--fullscreen {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .modal-fullscreen {
+    border-radius: 0;
+    max-height: 100%;
+    height: 100%;
+  }
+
+  .modal-fullscreen .modal-header {
+    border-radius: 0;
+    padding-top: calc(var(--space-5) + env(safe-area-inset-top));
+  }
 }
