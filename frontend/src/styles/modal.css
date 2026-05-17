@@ -87,7 +87,7 @@
   width: 100%;
   max-width: 560px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: var(--shadow-lg);
   animation: modalSlideUp 0.25s ease;
   display: flex;
@@ -104,11 +104,9 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1.5px solid var(--color-beige-mid);
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   background: var(--color-white);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  z-index: 800;
 }
 
 .modal-title {
@@ -141,6 +139,7 @@
 .modal-body {
   padding: var(--space-6);
   flex: 1;
+  overflow-y: auto;
 }
 
 .modal-footer {
