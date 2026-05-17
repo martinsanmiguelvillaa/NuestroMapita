@@ -207,26 +207,17 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
     marker.on('mouseover', () => {
       cancelClose();
       if (!marker.isPopupOpen()) {
-        // Calcular offset antes de abrir para abrir en el espacio disponible
+        // Ajustar offset horizontal para no cortarse en los bordes
         const map = marker._map;
         const popup = marker.getPopup();
         if (map && popup) {
           const pt = map.latLngToContainerPoint(marker.getLatLng());
           const mapSize = map.getSize();
-          const PH = 300; // altura estimada del popup
-          const PW = 300; // ancho máximo del popup
-
-          // Vertical: si no hay espacio arriba, abrir abajo
-          // Por default el popup se abre arriba (tip en popupAnchor [0,-34])
-          // Para abrir abajo corremos el tip PH+38px hacia abajo
-          const offsetY = pt.y < PH + 40 ? PH + 38 : 0;
-
-          // Horizontal: evitar que se salga por los bordes
+          const PW = 300;
           let offsetX = 0;
           if (pt.x > mapSize.x - PW / 2) offsetX = -(pt.x - (mapSize.x - PW / 2));
           else if (pt.x < PW / 2)        offsetX = PW / 2 - pt.x;
-
-          popup.options.offset = L.point(offsetX, offsetY);
+          popup.options.offset = L.point(offsetX, 0);
         }
         marker.openPopup();
       }
