@@ -43,7 +43,7 @@ def generate(
     watchlist = db.query(CineItem).filter(CineItem.status == "to_watch").all()
     blocked = db.query(BlockedRecommendation).all()
 
-    blocked_titles = [b.title for b in blocked]
+    blocked_titles = list({b.title for b in blocked} | set(req.session_excluded))
 
     try:
         result = generate_recommendations(

@@ -33,6 +33,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
   const [result, setResult] = useState(null);           // { main, similar }
   const [added, setAdded] = useState(new Set());         // set of added titles
   const [blocked, setBlocked] = useState(new Set());     // set of blocked titles (session)
+  const [sessionExcluded, setSessionExcluded] = useState(new Set()); // all titles shown so far
 
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState(null);
@@ -42,7 +43,15 @@ export default function CineRecommendationPanel({ onItemAdded }) {
   const [blockedList, setBlockedList] = useState(null);
   const [loadingBlocked, setLoadingBlocked] = useState(false);
 
+  const resetSession = () => {
+    setSessionExcluded(new Set());
+    setResult(null);
+    setAdded(new Set());
+    setBlocked(new Set());
+  };
+
   const toggleMood = (mood) => {
+    resetSession();
     setMoods((prev) => {
       const next = new Set(prev);
       next.has(mood) ? next.delete(mood) : next.add(mood);
@@ -50,7 +59,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
     });
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (currentExcluded = sessionExcluded) => {
     setLoading(true);
     setError('');
     setResult(null);
@@ -62,7 +71,11 @@ export default function CineRecommendationPanel({ onItemAdded }) {
         moods: Array.from(moods),
         extra_text: extraText || null,
         include_watchlist: includeWatchlist,
+        session_excluded: Array.from(currentExcluded),
       });
+      // Accumulate all shown titles for this session
+      const newTitles = [data.main, ...(data.similar || [])].map((r) => r.title);
+      setSessionExcluded((prev) => new Set([...prev, ...newTitles]));
       setResult(data);
     } catch (err) {
       setError(err.message || 'No se pudo generar la recomendación');
@@ -162,7 +175,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
                   <button
                     key={val}
                     className={`rec-panel__type-btn ${reqType === val ? 'rec-panel__type-btn--active' : ''}`}
-                    onClick={() => setReqType(val)}
+                    onClick={() => { setReqType(val); resetSession(); }}
                     type="button"
                   >
                     {label}

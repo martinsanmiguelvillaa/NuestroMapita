@@ -12,6 +12,7 @@ class RecommendationRequest(BaseModel):
     moods: list[str] = []
     extra_text: Optional[str] = None
     include_watchlist: bool = False
+    session_excluded: list[str] = []    # titles already shown this session
 
 
 # ── Recommendation item (returned by OpenAI + stored in history) ───────────
