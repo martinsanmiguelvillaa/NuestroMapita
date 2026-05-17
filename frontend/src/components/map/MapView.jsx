@@ -221,7 +221,7 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
 
           // Vertical: si está cerca del borde superior, abrir abajo
           // Usamos offset grande provisorio; popupopen lo corrige con la altura real
-          const openBelow = pt.y < 350;
+          const openBelow = pt.y < 220;
           popup._openBelow = openBelow;
           popup.options.offset = L.point(offsetX, openBelow ? 450 : 0);
         }
