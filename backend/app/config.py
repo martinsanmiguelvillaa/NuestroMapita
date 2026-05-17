@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # Obtener clave gratuita en: https://www.themoviedb.org/settings/api
     TMDB_API_KEY: str = ""
 
+    # OpenAI — opcional, para recomendaciones inteligentes
+    # Obtener clave en: https://platform.openai.com/api-keys
+    OPENAI_API_KEY: str = ""
+
     # Cloudinary
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""

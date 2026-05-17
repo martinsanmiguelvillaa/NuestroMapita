@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine
+from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine, recommendations
 
 app = FastAPI(
     title="Nuestro Mapita API",
@@ -30,6 +30,7 @@ app.include_router(photos.router)
 app.include_router(letters.router)
 app.include_router(recipes.router)
 app.include_router(cine.router)
+app.include_router(recommendations.router)
 app.include_router(search.router)
 app.include_router(map.router)
 

@@ -4,6 +4,7 @@ import Modal from '../components/ui/Modal';
 import CineCard from '../components/cine/CineCard';
 import CineForm from '../components/cine/CineForm';
 import CineDetail from '../components/cine/CineDetail';
+import CineRecommendationPanel from '../components/cine/CineRecommendationPanel';
 import '../styles/cine.css';
 
 const TYPE_TABS = [
@@ -140,6 +141,9 @@ export default function Cine() {
             </button>
           </div>
         </div>
+
+        {/* Recomendación inteligente */}
+        <CineRecommendationPanel onItemAdded={load} />
 
         {/* Filtros */}
         <div className="cine-filters">
