@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.cine import CineItem
 from app.models.recommendation import BlockedRecommendation, RecommendationHistory
-from app.routers.auth import require_auth
 from app.schemas.recommendation import (
     BlockedCreate,
     BlockedResponse,
@@ -30,7 +30,7 @@ def _item_to_dict(item: CineItem) -> dict:
 def generate(
     req: RecommendationRequest,
     db: Session = Depends(get_db),
-    _: None = Depends(require_auth),
+    _: bool = Depends(get_current_user),
 ):
     if not settings.OPENAI_API_KEY:
         raise HTTPException(status_code=503, detail="OPENAI_API_KEY no configurada")
@@ -76,7 +76,7 @@ def generate(
 @router.get("/history", response_model=list[RecommendationHistoryResponse])
 def get_history(
     db: Session = Depends(get_db),
-    _: None = Depends(require_auth),
+    _: bool = Depends(get_current_user),
 ):
     rows = (
         db.query(RecommendationHistory)
@@ -93,7 +93,7 @@ def get_history(
 @router.get("/blocked", response_model=list[BlockedResponse])
 def list_blocked(
     db: Session = Depends(get_db),
-    _: None = Depends(require_auth),
+    _: bool = Depends(get_current_user),
 ):
     return db.query(BlockedRecommendation).order_by(BlockedRecommendation.created_at.desc()).all()
 
@@ -102,7 +102,7 @@ def list_blocked(
 def block_title(
     body: BlockedCreate,
     db: Session = Depends(get_db),
-    _: None = Depends(require_auth),
+    _: bool = Depends(get_current_user),
 ):
     # Avoid duplicates
     existing = db.query(BlockedRecommendation).filter(
@@ -122,7 +122,7 @@ def block_title(
 def unblock_title(
     blocked_id: int,
     db: Session = Depends(get_db),
-    _: None = Depends(require_auth),
+    _: bool = Depends(get_current_user),
 ):
     row = db.get(BlockedRecommendation, blocked_id)
     if not row:
