@@ -257,7 +257,7 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
           // tip por defecto está a popupAnchor.y = -34 sobre el marker
           // queremos que la parte superior del popup quede 10px bajo el corazón (iconBottom ≈ 4px)
           // offset = h + 34 + 4 + 10 = h + 48
-          popup.options.offset = L.point(popup.options.offset.x, h + 48);
+          popup.options.offset = L.point(popup.options.offset.x, h + 72);
           popup.update();
         }
       }
