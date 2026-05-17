@@ -365,7 +365,6 @@
 .location-picker__map {
   position: relative;
   z-index: 0;
-  isolation: isolate;
   height: 280px;
   border-radius: var(--radius-md);
   overflow: hidden;
