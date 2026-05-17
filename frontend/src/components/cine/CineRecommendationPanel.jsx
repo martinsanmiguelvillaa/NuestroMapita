@@ -8,6 +8,7 @@ import {
 } from '../../api/recommendations';
 import { createCineItem } from '../../api/cine';
 import RecommendationCard from './RecommendationCard';
+import Modal from '../ui/Modal';
 
 const MOODS = [
   'Romántica ♥',
@@ -122,11 +123,11 @@ export default function CineRecommendationPanel({ onItemAdded }) {
     try {
       const data = await getRecommendationHistory();
       setHistory(data);
-      setShowHistory(true);
     } catch {
       setHistory([]);
     } finally {
       setLoadingHistory(false);
+      setShowHistory(true);
     }
   };
 
@@ -135,11 +136,11 @@ export default function CineRecommendationPanel({ onItemAdded }) {
     try {
       const data = await getBlockedRecommendations();
       setBlockedList(data);
-      setShowBlocked(true);
     } catch {
       setBlockedList([]);
     } finally {
       setLoadingBlocked(false);
+      setShowBlocked(true);
     }
   };
 
@@ -236,17 +237,17 @@ export default function CineRecommendationPanel({ onItemAdded }) {
               <div className="rec-panel__meta-links">
                 <button
                   className="btn btn-ghost btn-sm"
-                  onClick={showHistory ? () => setShowHistory(false) : loadHistory}
+                  onClick={loadHistory}
                   disabled={loadingHistory}
                 >
-                  {loadingHistory ? 'Cargando...' : showHistory ? 'Ocultar historial' : 'Ver historial'}
+                  {loadingHistory ? 'Cargando...' : 'Ver historial'}
                 </button>
                 <button
                   className="btn btn-ghost btn-sm"
-                  onClick={showBlocked ? () => setShowBlocked(false) : loadBlocked}
+                  onClick={loadBlocked}
                   disabled={loadingBlocked}
                 >
-                  {loadingBlocked ? 'Cargando...' : showBlocked ? 'Ocultar bloqueadas' : 'Bloqueadas'}
+                  {loadingBlocked ? 'Cargando...' : 'Bloqueadas'}
                 </button>
               </div>
             </div>
@@ -298,60 +299,63 @@ export default function CineRecommendationPanel({ onItemAdded }) {
             </div>
           )}
 
-          {/* History */}
-          {showHistory && history !== null && (
-            <div className="rec-panel__history">
-              <p className="rec-panel__history-title">Historial de recomendaciones</p>
-              {history.length === 0 ? (
-                <p className="rec-panel__history-empty">Todavía no generaron ninguna.</p>
-              ) : (
-                <div className="rec-panel__history-list">
-                  {history.map((entry) => (
-                    <div key={entry.id} className="rec-panel__history-entry">
-                      <span className="rec-panel__history-date">
-                        {new Date(entry.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
-                      </span>
-                      <div className="rec-panel__history-titles">
-                        <strong>{entry.main_title}</strong>
-                        {entry.recommendations?.similar?.length > 0 && (
-                          <span className="rec-panel__history-similar">
-                            {' '}· {entry.recommendations.similar.map((s) => s.title).join(', ')}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Blocked list */}
-          {showBlocked && blockedList !== null && (
-            <div className="rec-panel__blocked">
-              <p className="rec-panel__history-title">Títulos bloqueados</p>
-              {blockedList.length === 0 ? (
-                <p className="rec-panel__history-empty">No bloqueaste ningún título.</p>
-              ) : (
-                <div className="rec-panel__blocked-list">
-                  {blockedList.map((b) => (
-                    <div key={b.id} className="rec-panel__blocked-item">
-                      <span>{b.title}</span>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => handleUnblock(b.id)}
-                        title="Desbloquear"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
+
+      {/* Modal: Historial */}
+      <Modal
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        title="Historial de recomendaciones"
+      >
+        {history === null || history.length === 0 ? (
+          <p className="rec-panel__history-empty">Todavía no generaron ninguna.</p>
+        ) : (
+          <div className="rec-panel__history-list">
+            {history.map((entry) => (
+              <div key={entry.id} className="rec-panel__history-entry">
+                <span className="rec-panel__history-date">
+                  {new Date(entry.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
+                </span>
+                <div className="rec-panel__history-titles">
+                  <strong>{entry.main_title}</strong>
+                  {entry.recommendations?.similar?.length > 0 && (
+                    <span className="rec-panel__history-similar">
+                      {' '}· {entry.recommendations.similar.map((s) => s.title).join(', ')}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal: Bloqueadas */}
+      <Modal
+        isOpen={showBlocked}
+        onClose={() => setShowBlocked(false)}
+        title="Títulos bloqueados"
+      >
+        {blockedList === null || blockedList.length === 0 ? (
+          <p className="rec-panel__history-empty">No bloqueaste ningún título.</p>
+        ) : (
+          <div className="rec-panel__blocked-list">
+            {blockedList.map((b) => (
+              <div key={b.id} className="rec-panel__blocked-item">
+                <span>{b.title}</span>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => handleUnblock(b.id)}
+                  title="Desbloquear"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
