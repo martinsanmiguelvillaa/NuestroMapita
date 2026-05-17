@@ -936,6 +936,9 @@
   .cine-tabs::-webkit-scrollbar {
     display: none;
   }
+  .cine-tabs--status {
+    align-self: auto;
+  }
   .cine-form__search-row {
     flex-direction: column;
   }
