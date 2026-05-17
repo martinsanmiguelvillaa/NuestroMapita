@@ -57,7 +57,7 @@ export default function Navbar() {
             {configOpen && (
               <>
                 <div className="navbar__config-backdrop" onClick={() => setConfigOpen(false)} />
-                <div className="navbar__config-menu" onClick={() => setConfigOpen(false)}>
+                <div className="navbar__config-menu">
                 {supported && permission !== 'denied' && (
                   <button
                     className="navbar__config-item"
