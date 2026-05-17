@@ -233,14 +233,19 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
 
         <form className="cine-comment-form" onSubmit={handleAddComment}>
           <p className="cine-comment-form__title">Agregar comentario</p>
+          <div className="cine-comment-form__authors">
+            {['Martín', 'Van', 'Ambos'].map((name) => (
+              <button
+                key={name}
+                type="button"
+                className={`cine-comment-form__author-btn ${commentAuthor === name ? 'active' : ''}`}
+                onClick={() => setCommentAuthor(commentAuthor === name ? '' : name)}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
           <div className="cine-comment-form__row">
-            <input
-              className="form-input"
-              placeholder="Autor (ej: Martín, Van...)"
-              value={commentAuthor}
-              onChange={(e) => setCommentAuthor(e.target.value)}
-              style={{ maxWidth: '180px' }}
-            />
             <textarea
               className="form-textarea"
               placeholder="¿Qué les pareció?"
