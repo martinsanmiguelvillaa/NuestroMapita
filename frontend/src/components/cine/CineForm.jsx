@@ -279,18 +279,20 @@ export default function CineForm({ initialData, onSaved, onCancel }) {
         />
       </div>
 
-      {/* Año */}
-      <div className="form-group">
-        <label className="form-label">Año</label>
-        <input
-          className="form-input"
-          value={form.year}
-          onChange={(e) => handleChange('year', e.target.value)}
-          placeholder="2024"
-          maxLength={4}
-          style={{ maxWidth: '120px' }}
-        />
-      </div>
+      {/* Año — solo editable en carga manual */}
+      {form.external_source !== 'tmdb' && (
+        <div className="form-group">
+          <label className="form-label">Año</label>
+          <input
+            className="form-input"
+            value={form.year}
+            onChange={(e) => handleChange('year', e.target.value)}
+            placeholder="2024"
+            maxLength={4}
+            style={{ maxWidth: '120px' }}
+          />
+        </div>
+      )}
 
       {/* Géneros */}
       <div className="form-group">
