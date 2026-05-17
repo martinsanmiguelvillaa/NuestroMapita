@@ -71,7 +71,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(74, 55, 40, 0.45);
+  background: rgba(20, 12, 6, 0.78);
   z-index: 200;
   display: flex;
   align-items: center;
@@ -176,7 +176,7 @@
     align-items: flex-end;
     padding: 0;
     padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
-    background: rgba(74, 55, 40, 0.55);
+    background: rgba(20, 12, 6, 0.82);
   }
 
   .modal-fullscreen {
