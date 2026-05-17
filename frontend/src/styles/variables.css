@@ -88,3 +88,11 @@
   --bg-recipes: url('/backgrounds/fondo-recetas.png');
   --bg-cine: url('/backgrounds/fondo-cine.png');
 }
+
+@media (max-width: 768px) {
+  :root {
+    --bg-visited: url('/backgrounds/fondo-ya-hicimos-celular.png');
+    --bg-wishlist: url('/backgrounds/fondo-por-hacer-celular.png');
+    --bg-cine: url('/backgrounds/fondo-cine-celular.png');
+  }
+}
