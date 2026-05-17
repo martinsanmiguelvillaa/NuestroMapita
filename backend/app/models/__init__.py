@@ -4,5 +4,6 @@ from app.models.photo import Photo
 from app.models.place_wishlist import PlaceWishlist
 from app.models.letter import Letter
 from app.models.recipe import Recipe, RecipeComment
+from app.models.cine import CineItem, CineComment
 
-__all__ = ["PlaceVisited", "Photo", "PlaceWishlist", "Letter", "Recipe", "RecipeComment"]
+__all__ = ["PlaceVisited", "Photo", "PlaceWishlist", "Letter", "Recipe", "RecipeComment", "CineItem", "CineComment"]

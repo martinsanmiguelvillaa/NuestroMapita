@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     APP_PASSWORD: str
     SECRET_KEY: str
 
+    # TMDb (The Movie Database) — opcional, para búsqueda automática de películas/series
+    # Obtener clave gratuita en: https://www.themoviedb.org/settings/api
+    TMDB_API_KEY: str = ""
+
     # Cloudinary
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""

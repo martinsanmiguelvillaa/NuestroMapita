@@ -10,6 +10,7 @@ const links = [
   { to: '/por-visitar',label: 'Por hacer',   icon: '★' },
   { to: '/cartitas',   label: 'Cartitas',    icon: '💌' },
   { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
+  { to: '/cine',       label: 'Cine',        icon: '🎬' },
 ];
 
 export default function Navbar() {
