@@ -13,6 +13,8 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  /* Evita que iOS redimensione la fuente en landscape */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -22,6 +24,18 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  /* Evita scroll horizontal accidental en mobile */
+  overflow-x: hidden;
+}
+
+/* iOS: evita el zoom automático al enfocar inputs (requiere font-size >= 16px) */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}
+
+/* iOS: evita el delay de 300ms y el doble-tap zoom en elementos interactivos */
+button, input, textarea, select, a {
+  touch-action: manipulation;
 }
 
 /* Espacio para la navbar en desktop */

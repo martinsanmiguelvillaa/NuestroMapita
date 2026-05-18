@@ -4,11 +4,15 @@
 
 .login-page {
   min-height: 100vh;
+  /* En iOS Safari el 100vh incluye la barra de navegación — dvh lo corrige */
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(145deg, var(--color-rose-light) 0%, var(--color-cream) 50%, var(--color-beige) 100%);
   padding: var(--space-4);
+  /* Evitar que el teclado virtual desplace el layout en iOS PWA */
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 
 /* Quitar el padding-top del root en la página de login */
