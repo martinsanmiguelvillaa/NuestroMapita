@@ -89,6 +89,7 @@ export default function MapPage() {
   const [wishlist, setWishlist] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
 
@@ -99,6 +100,7 @@ export default function MapPage() {
       setWishlist(data.wishlist || []);
     } catch (err) {
       console.error(err);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -124,6 +126,19 @@ export default function MapPage() {
     return (
       <div className="map-page">
         <div className="loading-state">Cargando mapa...</div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="map-page">
+        <div className="empty-state">
+          <p>No se pudo cargar el mapa. Revisá tu conexión e intentá de nuevo.</p>
+          <button className="btn btn-outline" onClick={() => { setLoadError(false); setLoading(true); load(); }}>
+            Reintentar
+          </button>
+        </div>
       </div>
     );
   }

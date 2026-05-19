@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { getOpenModalCount } from '../components/ui/Modal';
 
 const ConfirmContext = createContext(null);
 
@@ -28,7 +29,7 @@ export function ConfirmProvider({ children }) {
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
+      if (getOpenModalCount() === 0) document.body.style.overflow = '';
     };
   }, [state.open]);
 

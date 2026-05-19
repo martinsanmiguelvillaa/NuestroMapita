@@ -4,7 +4,7 @@ import '../../styles/cine.css';
 const TYPE_LABEL = { movie: '🎬 Película', series: '📺 Serie' };
 const STATUS_LABEL = { to_watch: 'Por ver', watched: 'Ya vimos' };
 
-export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavorite, onToggleStatus }) {
+export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavorite, onToggleStatus, disabled = false }) {
   const lastComment = item.comments?.[item.comments.length - 1];
 
   return (
@@ -71,6 +71,7 @@ export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavor
           <button
             className={`cine-card__fav-btn ${item.is_favorite ? 'active' : ''}`}
             onClick={onToggleFavorite}
+            disabled={disabled}
             title={item.is_favorite ? 'Quitar de favoritas' : 'Marcar como favorita'}
           >
             {item.is_favorite ? '♥' : '♡'}
@@ -78,14 +79,17 @@ export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavor
           <button
             className="cine-card__status-btn"
             onClick={onToggleStatus}
+            disabled={disabled}
             title={item.status === 'to_watch' ? 'Marcar como vista' : 'Volver a pendiente'}
           >
             {item.status === 'to_watch' ? '✓' : '↩'}
           </button>
         </div>
         <div className="cine-card__actions">
-          <button className="btn btn-ghost btn-sm" onClick={onEdit}>Editar</button>
-          <button className="btn btn-danger btn-sm" onClick={onDelete}>Eliminar</button>
+          <button className="btn btn-ghost btn-sm" onClick={onEdit} disabled={disabled}>Editar</button>
+          <button className="btn btn-danger btn-sm" onClick={onDelete} disabled={disabled}>
+            {disabled ? '...' : 'Eliminar'}
+          </button>
         </div>
       </div>
     </div>

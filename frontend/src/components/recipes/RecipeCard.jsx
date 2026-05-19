@@ -4,7 +4,7 @@ import '../../styles/recipes.css';
 /**
  * Tarjeta compacta de receta para la grilla.
  */
-export default function RecipeCard({ recipe, onView, onEdit, onDelete }) {
+export default function RecipeCard({ recipe, onView, onEdit, onDelete, disabled = false }) {
   const allIngredients = recipe.ingredients.split('\n').map((l) => l.trim()).filter(Boolean);
   const firstIngredients = allIngredients.slice(0, 3);
 
@@ -74,11 +74,11 @@ export default function RecipeCard({ recipe, onView, onEdit, onDelete }) {
           </a>
         )}
         <div className="recipe-card__actions">
-          <button className="btn btn-ghost btn-sm" onClick={onEdit}>
+          <button className="btn btn-ghost btn-sm" onClick={onEdit} disabled={disabled}>
             Editar
           </button>
-          <button className="btn btn-danger btn-sm" onClick={onDelete}>
-            Eliminar
+          <button className="btn btn-danger btn-sm" onClick={onDelete} disabled={disabled}>
+            {disabled ? '...' : 'Eliminar'}
           </button>
         </div>
       </div>

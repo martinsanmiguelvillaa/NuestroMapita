@@ -8,6 +8,7 @@ const CLOSE_THRESHOLD = 160; // px arrastrados para cerrar
 // Contador de modales abiertos — evita que un modal restaure el scroll
 // mientras otro sigue abierto.
 let _openModalCount = 0;
+export const getOpenModalCount = () => _openModalCount;
 
 export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false, isDirty = false }) {
   const sheetRef = useRef(null);
