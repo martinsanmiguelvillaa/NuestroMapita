@@ -1,6 +1,24 @@
 # Nuestro Mapita
 
-Una página privada y romántica para guardar los lugares que visitamos, los que queremos visitar, fotos, cartitas y un mapa interactivo con nuestros recuerdos compartidos.
+Una app privada y romántica para dos. Guarda los lugares que visitaron, los que quieren visitar, fotos, cartitas, recetas, películas y un mapa interactivo con todos sus recuerdos compartidos.
+
+---
+
+## Funcionalidades
+
+| Sección | Qué podés hacer |
+|---------|----------------|
+| **Ya hicimos** | Registrar lugares visitados con fecha, comentario, rating, fotos y coordenadas |
+| **Por hacer** | Lista de planes pendientes con drag-and-drop para ordenar, reel/TikTok adjunto y sorteo aleatorio |
+| **Mapa** | Ver todos los lugares con pines, filtrar por tipo, buscar y convertir pendientes en visitados |
+| **Cartitas** | Escribir y guardar mensajes románticos con foto y fecha |
+| **Recetas** | Guardar recetas propias con ingredientes, pasos, video y comentarios con rating |
+| **Cine** | Lista de películas y series (vistas / por ver / favoritas) con búsqueda automática vía TMDB |
+| **Recomendaciones** | Sistema de recomendación inteligente con OpenAI basado en sus gustos |
+| **Rating** | Sistema de alas de hada (1–5) compartido entre lugares, recetas y cine |
+| **Fotos** | Subida y gestión de fotos y videos por lugar, con foto de portada configurable |
+| **PWA** | Instalable como app en iOS y Android, con soporte para compartir desde otras apps |
+| **Notificaciones** | Push notifications cuando se agrega una cartita nueva |
 
 ---
 
@@ -8,14 +26,19 @@ Una página privada y romántica para guardar los lugares que visitamos, los que
 
 | Capa | Tecnología |
 |------|-----------|
-| Frontend | React + Vite |
-| Estilos | CSS propio (sin Tailwind) |
-| Backend | Python + FastAPI |
+| Frontend | React 18 + Vite |
+| Estilos | CSS propio (sin frameworks) |
+| Backend | Python 3.12 + FastAPI |
 | ORM | SQLAlchemy 2.0 |
 | Base de datos | MySQL 8 |
 | Migraciones | Alembic |
-| Fotos | Cloudinary (free tier) |
+| Fotos / Videos | Cloudinary |
 | Mapa | React Leaflet + OpenStreetMap |
+| Geocodificación | Nominatim (gratuito, sin API key) |
+| Películas | TMDB API (gratuito, opcional) |
+| Recomendaciones | OpenAI API (opcional) |
+| Notificaciones | Web Push API + VAPID |
+| Auth | JWT en HttpOnly cookie (SameSite=none, Secure) |
 | Contenedores | Docker Compose |
 
 ---
@@ -26,28 +49,41 @@ Una página privada y romántica para guardar los lugares que visitamos, los que
 nuestro-mapita/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py          # Entrada de FastAPI
-│   │   ├── config.py        # Variables de entorno
-│   │   ├── database.py      # Conexión a MySQL
-│   │   ├── dependencies.py  # Validación JWT
-│   │   ├── models/          # Tablas SQLAlchemy
-│   │   ├── schemas/         # Schemas Pydantic (validación)
-│   │   ├── routers/         # Endpoints por recurso
-│   │   └── services/        # Cloudinary
-│   ├── alembic/             # Migraciones de DB
+│   │   ├── main.py              # Entrada de FastAPI
+│   │   ├── config.py            # Variables de entorno (Pydantic Settings)
+│   │   ├── database.py          # Conexión a MySQL
+│   │   ├── dependencies.py      # Validación de sesión (cookie JWT)
+│   │   ├── models/              # Tablas SQLAlchemy
+│   │   ├── schemas/             # Schemas Pydantic (validación y respuesta)
+│   │   ├── routers/             # Endpoints organizados por recurso
+│   │   └── services/            # Cloudinary, OpenAI, TMDB, Web Push
+│   ├── alembic/                 # Migraciones de base de datos
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── entrypoint.sh        # Script de inicio (migra + levanta)
+│   ├── entrypoint.sh            # Aplica migraciones y levanta el servidor
 │   └── .env.example
 │
 ├── frontend/
+│   ├── public/
+│   │   ├── icons/               # Iconos de la app y rating
+│   │   ├── manifest.json        # Configuración PWA
+│   │   └── sw.js                # Service Worker
 │   ├── src/
-│   │   ├── api/             # Funciones para llamar al backend
-│   │   ├── components/      # Componentes reutilizables
-│   │   ├── context/         # AuthContext (sesión)
-│   │   ├── pages/           # Una page por sección
-│   │   └── styles/          # CSS organizado por sección
-│   ├── nginx.conf           # Proxy al backend en Docker
+│   │   ├── api/                 # Funciones para llamar al backend
+│   │   ├── components/          # Componentes por sección y UI compartida
+│   │   │   ├── cine/
+│   │   │   ├── letters/
+│   │   │   ├── map/
+│   │   │   ├── photos/
+│   │   │   ├── places/
+│   │   │   ├── recipes/
+│   │   │   └── ui/              # Modal, Toast, ConfirmDialog, SearchBar
+│   │   ├── context/             # AuthContext, ToastContext, ConfirmContext
+│   │   ├── hooks/               # useDirtyForm, usePushNotifications, useClipboardImport
+│   │   ├── pages/               # Una page por sección
+│   │   ├── styles/              # CSS por sección + variables globales
+│   │   └── utils/               # cloudinary.js (transformaciones de URL)
+│   ├── nginx.conf               # Proxy al backend en Docker
 │   ├── Dockerfile
 │   └── .env.example
 │
@@ -63,182 +99,294 @@ nuestro-mapita/
 
 ```bash
 cd nuestro-mapita
-
-# Crear el archivo .env en la raíz
 cp .env.example .env
 ```
 
-Abrir `.env` y editar:
+Editar `.env`:
 
 ```env
-APP_PASSWORD=la_contraseña_que_van_a_usar
-
+# Obligatorios
+APP_PASSWORD=la_contraseña_que_van_a_usar   # mínimo 8 caracteres
+SECRET_KEY=clave_larga_y_aleatoria           # mínimo 32 caracteres
 # Generar con: python -c "import secrets; print(secrets.token_hex(32))"
-SECRET_KEY=una_clave_larga_y_aleatoria
 
+# Cloudinary (fotos y videos)
 CLOUDINARY_CLOUD_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
+
+# Opcionales — la app funciona sin estas, con funcionalidad reducida
+TMDB_API_KEY=           # búsqueda automática de películas/series
+OPENAI_API_KEY=         # recomendaciones inteligentes de cine
+VAPID_PUBLIC_KEY=       # notificaciones push
+VAPID_PRIVATE_KEY=
+VAPID_CLAIMS_EMAIL=
 ```
 
-> Importante: `APP_PASSWORD` y `SECRET_KEY` no pueden quedar vacíos ni con valores de ejemplo. El backend falla al iniciar si detecta una configuración insegura.
+> `APP_PASSWORD` y `SECRET_KEY` no pueden quedar vacíos ni con valores de ejemplo. El backend rechaza el inicio si detecta una configuración insegura.
 
-### 2. Levantar todo
+### 2. Levantar
 
 ```bash
 docker compose up --build
 ```
 
-La primera vez tarda unos minutos mientras baja las imágenes y construye el frontend.
+La primera vez descarga imágenes y construye el frontend — tarda unos minutos.
 
 ### 3. Acceder
 
 | Servicio | URL |
 |---------|-----|
-| **App (frontend)** | http://localhost |
-| **API (backend)** | http://localhost:8000 |
-| **Docs automáticos** | http://localhost:8000/docs |
-| **MySQL** | localhost:3306 (user: mapita) |
-
-La app empieza vacía. Entrar con la contraseña configurada en `APP_PASSWORD`.
+| **App** | http://localhost |
+| **API** | http://localhost:8000 |
+| **Swagger docs** | http://localhost:8000/docs |
+| **MySQL** | localhost:3306 |
 
 ### 4. Detener
 
 ```bash
-docker compose down
-```
-
-Para también borrar los datos de la base de datos:
-
-```bash
-docker compose down -v
+docker compose down          # detener sin borrar datos
+docker compose down -v       # detener y borrar base de datos
 ```
 
 ---
 
-## Cómo levantar en desarrollo local (sin Docker)
-
-Útil para hacer cambios y ver hot-reload inmediato.
+## Desarrollo local (sin Docker)
 
 ### Backend
 
 ```bash
 cd backend
-
-# Crear entorno virtual
 python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+source venv/bin/activate      # Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
+cp .env.example .env          # editar con tu MySQL local y Cloudinary
 
-# Crear .env en backend/
-cp .env.example .env
-# Editar el .env con los datos de tu MySQL local y Cloudinary
-
-# Aplicar migraciones
-alembic upgrade head
-
-# Iniciar servidor
+alembic upgrade head          # aplicar migraciones
 uvicorn app.main:app --reload --port 8000
-```
-
-### Tests del backend
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements-dev.txt
-pytest
 ```
 
 ### Frontend
 
 ```bash
 cd frontend
-
 npm install
-
-# El proxy de Vite ya apunta a localhost:8000
-npm run dev
+npm run dev                   # http://localhost:5173
 ```
 
-Entrar en http://localhost:5173
+El proxy de Vite ya apunta a `localhost:8000` automáticamente.
+
+### Tests del backend
+
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest
+```
 
 ---
 
-## Endpoints principales de la API
+## Variables de entorno
 
-Todos los endpoints (excepto `/auth/login` y `/health`) requieren el header:
+### Obligatorias
+
+| Variable | Descripción |
+|----------|-------------|
+| `APP_PASSWORD` | Contraseña de acceso a la app (mín. 8 caracteres) |
+| `SECRET_KEY` | Clave para firmar los JWT (mín. 32 caracteres) |
+
+### Base de datos (con Docker usan los defaults)
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `DB_HOST` | `db` | Host de MySQL |
+| `DB_PORT` | `3306` | Puerto |
+| `DB_USER` | `mapita` | Usuario |
+| `DB_PASSWORD` | — | Contraseña |
+| `DB_NAME` | `nuestro_mapita` | Nombre de la base |
+
+### Cloudinary (fotos y videos)
+
+| Variable | Descripción |
+|----------|-------------|
+| `CLOUDINARY_CLOUD_NAME` | Cloud name del dashboard |
+| `CLOUDINARY_API_KEY` | API Key |
+| `CLOUDINARY_API_SECRET` | API Secret |
+
+Crear cuenta gratuita en [cloudinary.com](https://cloudinary.com). El free tier incluye 25 GB de storage y 25 GB de bandwidth/mes.
+
+### Opcionales
+
+| Variable | Descripción | Dónde obtenerla |
+|----------|-------------|-----------------|
+| `TMDB_API_KEY` | Búsqueda automática de películas y series con poster, sinopsis y tráiler | [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) — gratuito |
+| `OPENAI_API_KEY` | Recomendaciones inteligentes de cine según los gustos guardados | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) — de pago |
+| `VAPID_PUBLIC_KEY` | Notificaciones push (ver sección más abajo) | generadas localmente |
+| `VAPID_PRIVATE_KEY` | — | — |
+| `VAPID_CLAIMS_EMAIL` | Email de contacto para VAPID | cualquier email |
+| `ALLOWED_ORIGINS` | Orígenes permitidos por CORS | `http://localhost:5173` en dev, dominio de Vercel en prod |
+| `COOKIE_SECURE` | `True` en producción HTTPS, `False` en dev HTTP | — |
+
+---
+
+## Notificaciones push (opcional)
+
+Las notificaciones se envían cuando se crea una cartita nueva. Requieren HTTPS en producción.
+
+### 1. Generar claves VAPID
+
+```bash
+pip install py-vapid
+vapid --gen
 ```
-Authorization: Bearer <token>
+
+Genera dos archivos: `private_key.pem` y `public_key.pem`.
+
+```bash
+# Extraer la clave pública en formato base64url
+vapid --applicationServerKey
 ```
+
+### 2. Configurar en el `.env`
+
+```env
+VAPID_PUBLIC_KEY=BD...  (clave pública en base64url)
+VAPID_PRIVATE_KEY=...   (contenido de private_key.pem, sin saltos de línea)
+VAPID_CLAIMS_EMAIL=tu@email.com
+```
+
+### 3. Activar en la app
+
+En la app, ir a **Config → Activar notificaciones**. Cada dispositivo se suscribe de forma independiente.
+
+---
+
+## PWA y Share Target
+
+La app es instalable como PWA en iOS y Android.
+
+**iOS**: Safari → compartir → "Agregar a pantalla de inicio"
+**Android**: Chrome → menú → "Instalar app"
+
+Una vez instalada, podés compartir cualquier URL (Google Maps, Instagram, YouTube, TikTok) directamente desde otra app hacia Nuestro Mapita. La app detecta el tipo de URL y ofrece guardarlo como:
+- lugar por visitar
+- lugar visitado
+- película/serie
+- receta
+
+---
+
+## API — Endpoints principales
+
+Todos los endpoints (excepto `/auth/login` y `/health`) requieren sesión activa vía cookie HttpOnly.
 
 ### Autenticación
 | Método | Endpoint | Descripción |
 |--------|---------|-------------|
-| POST | `/auth/login` | Iniciar sesión con la contraseña compartida |
+| POST | `/auth/login` | Iniciar sesión con `APP_PASSWORD` |
+| POST | `/auth/logout` | Cerrar sesión |
 
 ### Lugares visitados
 | Método | Endpoint | Descripción |
 |--------|---------|-------------|
-| GET | `/places/visited?sort=newest&search=texto` | Listar |
+| GET | `/places/visited` | Listar (`sort`, `search`, `revisit`) |
 | POST | `/places/visited` | Crear |
-| GET | `/places/visited/{id}` | Ver uno |
 | PUT | `/places/visited/{id}` | Editar |
-| DELETE | `/places/visited/{id}` | Eliminar |
-| POST | `/places/visited/{id}/photos` | Subir fotos |
-
-### Fotos
-| Método | Endpoint | Descripción |
-|--------|---------|-------------|
-| DELETE | `/photos/{id}` | Eliminar una foto |
+| DELETE | `/places/visited/{id}` | Eliminar (borra fotos de Cloudinary) |
+| POST | `/places/visited/{id}/photos` | Subir fotos/videos |
+| POST | `/places/visited/{id}/convert-back` | Devolver a la lista de pendientes |
 
 ### Lugares por visitar
 | Método | Endpoint | Descripción |
 |--------|---------|-------------|
-| GET | `/places/wishlist?search=texto` | Listar |
+| GET | `/places/wishlist` | Listar (`search`) |
 | POST | `/places/wishlist` | Agregar |
 | PUT | `/places/wishlist/{id}` | Editar |
 | DELETE | `/places/wishlist/{id}` | Eliminar |
-| PATCH | `/places/wishlist/{id}/order?direction=up` | Reordenar (up/down/top/bottom) |
+| POST | `/places/wishlist/reorder` | Reordenar en bulk (drag-and-drop) |
 | POST | `/places/wishlist/{id}/convert` | Pasar a visitado |
 | GET | `/places/wishlist/random` | Elegir uno al azar |
+| POST | `/places/wishlist/{id}/photos` | Subir fotos |
+
+### Fotos
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| DELETE | `/photos/{id}` | Eliminar foto (de Cloudinary y DB) |
+| PATCH | `/photos/{id}/cover` | Marcar como portada |
+| PATCH | `/photos/{id}/position` | Actualizar posición (x, y) de recorte |
 
 ### Cartitas
 | Método | Endpoint | Descripción |
 |--------|---------|-------------|
 | GET | `/letters` | Listar |
-| POST | `/letters` | Crear |
+| POST | `/letters` | Crear (dispara push notification) |
 | PUT | `/letters/{id}` | Editar |
 | DELETE | `/letters/{id}` | Eliminar |
 | POST | `/letters/{id}/photo` | Subir/reemplazar foto |
 | DELETE | `/letters/{id}/photo` | Eliminar foto |
 
-### Mapa y Búsqueda
+### Recetas
 | Método | Endpoint | Descripción |
 |--------|---------|-------------|
-| GET | `/map/pins` | Todos los pines del mapa |
+| GET | `/recipes` | Listar (`category`, `search`) |
+| POST | `/recipes` | Crear |
+| GET | `/recipes/{id}` | Ver una receta con comentarios |
+| PUT | `/recipes/{id}` | Editar |
+| DELETE | `/recipes/{id}` | Eliminar |
+| POST | `/recipes/{id}/photo` | Subir/reemplazar foto |
+| POST | `/recipes/{id}/comments` | Agregar comentario con rating opcional |
+| DELETE | `/recipes/{id}/comments/{comment_id}` | Eliminar comentario |
+
+### Cine
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/cine` | Listar (`type`, `status`, `is_favorite`, `search`) |
+| POST | `/cine` | Agregar película/serie |
+| GET | `/cine/{id}` | Ver detalle con comentarios |
+| PUT | `/cine/{id}` | Editar |
+| DELETE | `/cine/{id}` | Eliminar |
+| GET | `/cine/tmdb/search?q=texto` | Buscar en TMDB (requiere `TMDB_API_KEY`) |
+| GET | `/cine/tmdb/detail?type=movie&tmdb_id=123` | Detalle completo de TMDB |
+| POST | `/cine/{id}/comments` | Agregar comentario |
+| DELETE | `/cine/{id}/comments/{comment_id}` | Eliminar comentario |
+
+### Recomendaciones de cine
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| POST | `/recommendations/generate` | Generar recomendación con OpenAI |
+| GET | `/recommendations/history` | Historial de recomendaciones |
+| GET | `/recommendations/blocked` | Títulos bloqueados |
+| POST | `/recommendations/blocked` | Bloquear un título |
+| DELETE | `/recommendations/blocked/{id}` | Desbloquear |
+
+### Mapa, Búsqueda y otros
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/map/pins` | Todos los pines con coordenadas |
 | GET | `/search?q=texto` | Búsqueda global |
+| GET | `/push/vapid-public-key` | Clave pública VAPID |
+| POST | `/push/subscribe` | Registrar dispositivo |
+| DELETE | `/push/unsubscribe` | Desuscribir |
 | GET | `/health` | Health check |
 
 ---
 
-## Base de datos y modelos
+## Base de datos
 
 ### Tablas
 
-**places_visited** — Lugares que ya visitaron
-- `id`, `name`, `address`, `visit_date`
-- `comment`, `rating` (1-5), `google_maps_url`
-- `latitude`, `longitude`
-- `created_at`, `updated_at`
+**places_visited** — Lugares visitados
+- `id`, `name`, `address`, `visit_date`, `comment`, `rating` (1–5)
+- `would_revisit` (bool nullable), `google_maps_url`
+- `latitude`, `longitude`, `created_at`, `updated_at`
 
-**photos** — Fotos de lugares visitados (N:1)
-- `id`, `place_visited_id` (FK cascade delete)
-- `cloudinary_url`, `cloudinary_public_id`
+**photos** — Fotos y videos de lugares (N:1)
+- `id`, `place_visited_id` / `place_wishlist_id` (FK con cascade delete)
+- `cloudinary_url`, `cloudinary_public_id`, `resource_type` (image/video)
+- `is_cover`, `position_x`, `position_y`, `sort_order`
 
-**places_wishlist** — Lugares por visitar
+**places_wishlist** — Planes pendientes
 - `id`, `name`, `description`, `address`
 - `google_maps_url`, `social_url` (Reel/TikTok/IG)
 - `latitude`, `longitude`, `order_index`
@@ -247,9 +395,34 @@ Authorization: Bearer <token>
 - `id`, `title`, `body`, `letter_date`
 - `photo_url`, `photo_public_id`
 
+**recipes** — Recetas
+- `id`, `title`, `category` (salado/dulce)
+- `ingredients`, `steps`, `notes`, `video_url`, `image_url`
+
+**recipe_comments** — Comentarios de recetas (N:1)
+- `id`, `recipe_id`, `author`, `text`, `rating` (1–5 nullable)
+
+**cine_items** — Películas y series
+- `id`, `title`, `type` (movie/series), `status` (to_watch/watched)
+- `poster_url`, `synopsis`, `genres` (JSON), `platform`, `trailer_url`, `year`
+- `rating` (1–5), `is_favorite`, `external_source`, `external_id`
+
+**cine_comments** — Comentarios de cine (N:1)
+- `id`, `cine_item_id`, `author`, `text`
+
+**recommendation_history** — Historial de recomendaciones
+- `id`, `request_type`, `request_moods`, `request_extra`
+- `main_title`, `recommendations` (JSON), `created_at`
+
+**blocked_recommendations** — Títulos que no se vuelven a sugerir
+- `id`, `title`, `created_at`
+
+**push_subscriptions** — Dispositivos suscritos a notificaciones
+- `id`, `endpoint`, `p256dh`, `auth`, `created_at`
+
 ### Migraciones
 
-El backend aplica las migraciones automáticamente al iniciar con `alembic upgrade head`.
+El backend aplica las migraciones automáticamente al iniciar.
 
 Para generar una nueva migración después de cambiar un modelo:
 ```bash
@@ -260,130 +433,100 @@ alembic upgrade head
 
 ---
 
-## Cloudinary (fotos)
-
-1. Crear cuenta gratis en https://cloudinary.com
-2. Ir al **Dashboard** → copiar Cloud Name, API Key y API Secret
-3. Pegar en el `.env`
-
-El free tier incluye 25 GB de storage y 25 GB de bandwidth/mes, más que suficiente.
-
-Las fotos se guardan en Cloudinary y solo sus URLs quedan en MySQL. Al eliminar una foto, se borra tanto de Cloudinary como de la base de datos.
-
----
-
-## Mapa
-
-- **Motor**: React Leaflet + OpenStreetMap (100% gratuito, sin API key)
-- **Geocodificación**: Nominatim (servicio público de OpenStreetMap) — el botón "Buscar" en los formularios obtiene las coordenadas automáticamente
-- **Pines**: marrones para visitados, rosas para por visitar
-- Los lugares sin coordenadas aparecen en las listas pero no en el mapa
-
----
-
 ## Cómo usar la app
 
 1. **Entrar**: escribir la contraseña configurada en `APP_PASSWORD`
-2. **Agregar lugar visitado**: ir a "Visitados" → "+ Agregar lugar"
-   - Al ingresar la dirección, tocar "📍 Buscar" para obtener coordenadas automáticamente
-   - Las fotos se pueden subir después de crear el lugar (expandir la tarjeta)
-3. **Agregar lugar por visitar**: ir a "Por visitar" → "+ Agregar"
-   - Pegar el link del Reel o TikTok que lo motivó
-4. **Pasar a visitado**: en la tarjeta del lugar, tocar "Ya fuimos" y completar fecha + rating
-5. **Mapa**: ver todos los lugares con pines, filtrar por tipo, tocar para ver detalles
-6. **Cartitas**: escribir un mensaje romántico desde "Cartitas" → "+ Escribir cartita"
-7. **Sorteo**: en "Por visitar" → "Elegir al azar" para elegir el próximo plan
+
+2. **Agregar lugar visitado**: "Ya hicimos" → "+ Agregar lugar"
+   - Usar el mapa integrado para marcar la ubicación
+   - Las fotos se pueden subir después desde la tarjeta del lugar
+
+3. **Agregar lugar pendiente**: "Por hacer" → "+ Agregar"
+   - Pegar el link del Reel o Google Maps que lo motivó
+   - Arrastrar las tarjetas para reordenar la lista
+
+4. **Pasar a visitado**: en la tarjeta → "Ya fuimos" → completar fecha y rating
+
+5. **Cine**: "Cine" → "+ Agregar" → buscar el título automáticamente con TMDB
+   - Filtrar por Películas / Series / Favoritas / Por ver / Ya vimos
+   - "🎲 ¿Qué miramos hoy?" para elegir algo al azar de los pendientes
+   - "✨ Recomendación inteligente" para que OpenAI sugiera algo según sus gustos
+
+6. **Recetas**: "Recetas" → "+ Nueva receta"
+   - Agregar ingredientes (uno por línea), pasos y foto
+   - Dejar comentarios con rating desde el detalle
+
+7. **Compartir desde otra app**: abrir cualquier URL en Instagram, Maps o YouTube → Compartir → Nuestro Mapita → elegir dónde guardarla
+
+8. **Sorteo**: "Por hacer" → "Elegir al azar" para decidir el próximo plan
 
 ---
 
 ## Cómo cambiar la contraseña
 
-1. Editar el `.env` en la raíz del proyecto
-2. Cambiar el valor de `APP_PASSWORD`
-3. Reiniciar el backend: `docker compose restart backend`
+```bash
+# Editar .env
+APP_PASSWORD=nueva_contraseña
 
-Los tokens existentes seguirán siendo válidos hasta que expire (30 días). Si querés invalidarlos inmediatamente, también cambiá `SECRET_KEY`.
+# Reiniciar el backend
+docker compose restart backend
+```
+
+Los tokens existentes siguen siendo válidos 30 días. Para invalidarlos inmediatamente, también cambiar `SECRET_KEY`.
 
 ---
 
-## Cómo modificar colores, fuentes y estilos
+## Personalización
 
-Todos los valores están centralizados en:
-```
-frontend/src/styles/variables.css
-```
+### Colores y fuentes
 
-Cambiar por ejemplo el color primario:
+Todos los valores están centralizados en `frontend/src/styles/variables.css`.
+
 ```css
---color-brown: #A0745A;  /* Cambiar este valor */
+--color-brown: #A0745A;     /* color primario */
+--color-cream: #FDF6EE;     /* fondo general */
+--font-heading: 'Playfair Display', serif;
+--font-body: 'Lato', sans-serif;
 ```
 
-El cambio se aplica automáticamente en toda la app.
+Las fuentes se cargan desde Google Fonts en `frontend/index.html`.
 
-Las fuentes se cargan desde Google Fonts en `frontend/index.html`. Para cambiarlas, reemplazar la URL de Google Fonts y actualizar las variables `--font-heading` y `--font-body` en `variables.css`.
+### Centro y zoom del mapa
 
----
+`frontend/src/components/map/MapView.jsx` → `defaultCenter` y `defaultZoom`.
 
-## Cómo agregar categorías
+### Tiles del mapa
 
-Los lugares no tienen categorías por ahora. Para agregarlas:
+```jsx
+// CartoDB (minimalista):
+url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
 
-1. **Backend**: agregar columna `category` en el modelo correspondiente:
-```python
-category = Column(String(100), nullable=True)
+// OpenStreetMap estándar (actual):
+url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 ```
 
-2. **Migración**: `alembic revision --autogenerate -m "add category"`
+### Autores en comentarios de cine
 
-3. **Schema**: agregar el campo en el schema Pydantic
-
-4. **Frontend**: agregar el selector de categoría en el formulario y filtro en la lista
+`frontend/src/components/cine/CineDetail.jsx` → array `['Martín', 'Van', 'Ambos']`.
 
 ---
 
-## Cómo agregar nuevos campos
-
-1. Agregar la columna en el modelo SQLAlchemy (`app/models/`)
-2. Generar migración: `alembic revision --autogenerate -m "descripción"`
-3. Aplicar: `alembic upgrade head`
-4. Agregar el campo en el schema Pydantic (`app/schemas/`)
-5. Agregar el campo en el formulario del frontend (`src/components/places/PlaceForm.jsx`)
-6. Mostrar el campo en la tarjeta del frontend (`src/pages/Visited.jsx`)
-
----
-
-## Cómo modificar el mapa
-
-El mapa está en `frontend/src/components/map/MapView.jsx`.
-
-- **Cambiar el centro por defecto**: modificar `defaultCenter` (latitud, longitud)
-- **Cambiar el zoom**: modificar `defaultZoom`
-- **Cambiar los tiles (diseño del mapa)**: reemplazar la URL del `<TileLayer>`. Opciones gratuitas:
-  - CartoDB (mapa minimalista): `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png`
-  - OpenStreetMap estándar: `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png` (actual)
-- **Colores de los pines**: modificar en `frontend/src/styles/map.css`
-
----
-
-## Guía de deploy gratuito
+## Deploy gratuito
 
 ### Frontend → Vercel
 
 1. Pushear el código a GitHub
-2. Crear cuenta en https://vercel.com
-3. Importar el repositorio → seleccionar la carpeta `frontend` como root
-4. Variables de entorno en Vercel:
+2. Importar el repositorio en [vercel.com](https://vercel.com), seleccionar `frontend/` como root
+3. Variable de entorno en Vercel:
    ```
    VITE_API_URL=https://tu-backend.railway.app
    ```
-5. Vercel detecta Vite automáticamente
 
 ### Backend → Railway
 
-1. Crear cuenta en https://railway.app
-2. Nuevo proyecto → "Deploy from GitHub repo" → seleccionar la carpeta `backend`
-3. Agregar servicio MySQL en el mismo proyecto
-4. Variables de entorno en Railway:
+1. Nuevo proyecto en [railway.app](https://railway.app) → "Deploy from GitHub" → carpeta `backend/`
+2. Agregar un servicio MySQL en el mismo proyecto
+3. Variables de entorno (todas las del `.env`, más las de DB del servicio MySQL):
    ```
    DB_HOST=tu-mysql.railway.internal
    DB_PORT=3306
@@ -396,39 +539,44 @@ El mapa está en `frontend/src/components/map/MapView.jsx`.
    CLOUDINARY_API_KEY=...
    CLOUDINARY_API_SECRET=...
    ALLOWED_ORIGINS=https://tu-app.vercel.app
+   COOKIE_SECURE=True
+   TMDB_API_KEY=...          (opcional)
+   OPENAI_API_KEY=...        (opcional)
+   VAPID_PUBLIC_KEY=...      (opcional)
+   VAPID_PRIVATE_KEY=...     (opcional)
+   VAPID_CLAIMS_EMAIL=...    (opcional)
    ```
-5. Railway ejecuta `entrypoint.sh` automáticamente (aplica migraciones + inicia servidor)
 
-### Alternativa gratuita: Render
+Railway ejecuta `entrypoint.sh` automáticamente (aplica migraciones + inicia el servidor).
 
-- Backend en https://render.com (free tier, duerme después de 15 min de inactividad)
-- MySQL: usar https://planetscale.com (tienen free tier) o Supabase con SQLite driver
+### Alternativa: Render
 
-### CORS en producción
+- Backend en [render.com](https://render.com) (free tier, se duerme tras 15 min de inactividad)
+- MySQL: [Supabase](https://supabase.com) o [PlanetScale](https://planetscale.com)
 
-En el `.env` del backend, actualizar:
-```
-ALLOWED_ORIGINS=https://tu-app.vercel.app
-```
+### Servicios gratuitos — resumen
 
-### Fotos → Cloudinary (ya gratuito)
-
-No requiere configuración adicional para deploy.
+| Servicio | Limitaciones |
+|---------|-------------|
+| Vercel (frontend) | Ninguna para proyectos personales |
+| Railway (backend) | $5/mes de crédito; suficiente para uso personal |
+| Cloudinary (fotos) | 25 GB storage, 25 GB bandwidth/mes |
+| TMDB (películas) | Gratuito con registro |
+| OpenAI (recomendaciones) | De pago; ~$0.01–0.03 por recomendación |
+| Nominatim (geocodificación) | Gratuito; máx 1 req/seg |
 
 ---
 
-## Guía de debugging
+## Debugging
 
 ### MySQL no conecta
 
-```
-Error: Can't connect to MySQL server
+```bash
+docker compose ps                    # verificar que el servicio db esté corriendo
+docker compose logs db               # ver logs de MySQL
 ```
 
-Verificar:
-- Que MySQL esté corriendo: `docker compose ps`
-- Variables `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` en el `.env`
-- Si es local (sin Docker): verificar que MySQL esté iniciado con `mysql.server start` o `brew services start mysql`
+Verificar `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` en el `.env`.
 
 ### El backend no levanta
 
@@ -437,97 +585,55 @@ docker compose logs backend
 ```
 
 Causas comunes:
-- Variable de entorno faltante (revisar que el `.env` esté creado)
-- Error de sintaxis en Python (ver el log completo)
-- Puerto 8000 ocupado: cambiar en `docker-compose.yml`
-
-### El frontend no carga
-
-```bash
-docker compose logs frontend
-```
-
-Si en desarrollo local:
-```bash
-cd frontend && npm install && npm run dev
-```
-
-Verificar que la URL del backend esté bien configurada en `vite.config.js` (para dev) o en `nginx.conf` (para Docker).
+- `.env` no creado o con valores placeholder en `APP_PASSWORD` / `SECRET_KEY`
+- Puerto 8000 ocupado (cambiar en `docker-compose.yml`)
+- Error de sintaxis (ver el log completo)
 
 ### Error de CORS
 
-Síntoma: en la consola del navegador aparece `CORS policy: No 'Access-Control-Allow-Origin'`
+Síntoma: `CORS policy: No 'Access-Control-Allow-Origin'` en la consola del navegador.
 
-Solución:
-- Verificar `ALLOWED_ORIGINS` en el `.env` del backend
-- En producción, incluir el dominio exacto de Vercel (con https://)
-- Reiniciar el backend después de cambiar el `.env`
+Verificar `ALLOWED_ORIGINS` en el `.env` del backend (incluir el dominio exacto con `https://`) y reiniciar el backend.
 
-### Variables de entorno mal configuradas
+### Las fotos no se suben
 
-Si el backend carga pero la app no funciona:
-```bash
-# Ver qué variables tiene el backend
-docker compose exec backend python -c "from app.config import settings; print(settings.DATABASE_URL)"
-```
+Verificar las tres variables de Cloudinary en el `.env` y probar el endpoint en `http://localhost:8000/docs`.
 
-### Cloudinary no sube fotos
+### Los pines no aparecen en el mapa
 
-Síntoma: error al intentar subir una imagen
+Los pines solo aparecen si el lugar tiene coordenadas. Editar el lugar y usar el mapa integrado para marcarlas.
 
-Verificar:
-1. Que `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` estén correctos
-2. Probar en http://localhost:8000/docs → endpoint de upload
-3. Verificar que la cuenta de Cloudinary esté activa
+### La búsqueda de películas no funciona
 
-### No se ven los pines del mapa
+Verificar que `TMDB_API_KEY` esté configurada. Sin ella, el formulario de cine funciona igual pero sin autocompletado (los datos se cargan manualmente).
 
-Los pines solo aparecen si el lugar tiene **latitud y longitud** cargadas.
+### Las recomendaciones no funcionan
 
-Solución: editar el lugar y usar el botón "📍 Buscar" para obtener coordenadas automáticamente a partir de la dirección.
+Verificar que `OPENAI_API_KEY` esté configurada. Sin ella, el panel de recomendaciones muestra error 503.
 
-### Docker Compose falla al buildear el frontend
+### Limpiar y reconstruir
 
 ```bash
-# Limpiar cache de Docker y reintentar
 docker compose down
 docker builder prune -f
 docker compose up --build
 ```
 
-### Puerto ocupado
-
-Error: `address already in use`
+### Ver variables de entorno activas
 
 ```bash
-# Ver qué proceso usa el puerto (ej: 8000)
-lsof -i :8000
+docker compose exec backend python -c "from app.config import settings; print(settings.DATABASE_URL)"
+```
+
+### Puerto ocupado
+
+```bash
+lsof -i :8000    # encontrar el proceso
 kill -9 <PID>
 ```
 
 O cambiar el puerto en `docker-compose.yml`:
 ```yaml
 ports:
-  - "8001:8000"  # Cambiar 8001 por cualquier puerto libre
+  - "8001:8000"
 ```
-
-### Problemas con URLs del frontend/backend en producción
-
-Si el frontend no puede comunicarse con el backend:
-1. Verificar `VITE_API_URL` en las variables de entorno de Vercel
-2. Verificar que el backend en Railway/Render esté corriendo (`/health` debe devolver `{"status": "ok"}`)
-3. Verificar CORS en el backend
-
----
-
-## Notas sobre los servicios gratuitos
-
-| Servicio | Limitaciones |
-|---------|-------------|
-| Vercel (frontend) | Ninguna para proyectos personales |
-| Railway (backend) | $5/mes de crédito gratuito; después requiere tarjeta |
-| Render (backend, alternativa) | Se "duerme" después de 15 min sin tráfico; tarda ~30 seg en despertar |
-| Cloudinary (fotos) | 25 GB storage, 25 GB bandwidth/mes |
-| Nominatim (geocodificación) | Máx 1 request/segundo; para uso personal es más que suficiente |
-
-Para uso personal de pareja, todos estos free tiers son más que suficientes.
