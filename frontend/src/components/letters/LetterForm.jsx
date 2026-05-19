@@ -96,18 +96,19 @@ export default function LetterForm({ initialData = null, onSaved, onCancel, onDi
         />
       </div>
 
-      {!initialData && (
-        <div className="form-group">
-          <label className="form-label">Foto (opcional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="form-input"
-            onChange={(e) => { setPhotoFile(e.target.files[0] || null); onDirtyChange?.(true); }}
-            style={{ padding: '8px' }}
-          />
-        </div>
-      )}
+      <div className="form-group">
+        <label className="form-label">Foto (opcional)</label>
+        <input
+          type="file"
+          accept="image/*"
+          className="form-input"
+          onChange={(e) => { setPhotoFile(e.target.files[0] || null); onDirtyChange?.(true); }}
+          style={{ padding: '8px' }}
+        />
+        {initialData?.photo_url && !photoFile && (
+          <p className="form-hint">Ya tiene una foto. Seleccioná otra para reemplazarla.</p>
+        )}
+      </div>
 
       <div className="letter-form__actions">
         {onCancel && (

@@ -12,18 +12,23 @@ export default function Letters() {
   const [showForm, setShowForm] = useState(false);
   const addForm = useDirtyForm();
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal) => {
     try {
-      const data = await getLetters();
+      const data = await getLetters(signal);
       setLetters(data);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error(err);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   return (
     <div className="letters-bg">

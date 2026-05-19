@@ -83,13 +83,13 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     setLightboxIndex((i) => (i + 1) % localPhotos.length);
   }, [localPhotos.length]);
 
-  const close = () => {
+  const close = useCallback(() => {
     setLightboxIndex(null);
     if (coverChangedRef.current) {
       coverChangedRef.current = false;
       onCoverSet?.();
     }
-  };
+  }, [onCoverSet]);
 
   // Teclado: flechas + Escape
   useEffect(() => {
@@ -101,7 +101,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, prev, next]);
+  }, [isOpen, prev, next, close]);
 
   const handleDelete = async (photo) => {
     const ok = await confirm({ title: '¿Eliminar esta foto?', confirmLabel: 'Eliminar', danger: true });
@@ -319,6 +319,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
                   alt=""
                   className={`lightbox__thumb${i === lightboxIndex ? ' lightbox__thumb--active' : ''}`}
                   onClick={() => setLightboxIndex(i)}
+                  onError={(e) => { e.target.style.visibility = 'hidden'; }}
                 />
               ))}
             </div>

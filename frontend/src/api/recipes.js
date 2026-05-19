@@ -2,12 +2,12 @@ import apiFetch from './client';
 
 const BASE = '/recipes';
 
-export const getRecipes = (params = {}) => {
+export const getRecipes = (params = {}, signal) => {
   const clean = Object.fromEntries(
     Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''),
   );
   const qs = new URLSearchParams(clean).toString();
-  return apiFetch(`${BASE}${qs ? '?' + qs : ''}`);
+  return apiFetch(`${BASE}${qs ? '?' + qs : ''}`, { signal });
 };
 
 export const getRecipe = (id) => apiFetch(`${BASE}/${id}`);

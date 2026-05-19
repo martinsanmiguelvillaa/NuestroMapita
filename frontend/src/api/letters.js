@@ -2,7 +2,7 @@ import apiFetch from './client';
 
 const BASE = '/letters';
 
-export const getLetters = () => apiFetch(BASE);
+export const getLetters = (signal) => apiFetch(BASE, { signal });
 
 export const createLetter = (data) =>
   apiFetch(BASE, { method: 'POST', body: JSON.stringify(data) });

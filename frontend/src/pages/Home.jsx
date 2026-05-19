@@ -17,7 +17,7 @@ import '../styles/home.css';
 import '../styles/photos.css';
 
 // ── Polaroid de video con autoplay por visibilidad ─────────────────
-function VideoPolaroid({ photo, onClick }) {
+function VideoPolaroid({ photo }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -51,7 +51,6 @@ function VideoPolaroid({ photo, onClick }) {
       loop
       playsInline
       preload="metadata"
-      onClick={onClick}
       style={{ cursor: 'pointer' }}
     />
   );
@@ -292,7 +291,7 @@ export default function Home() {
             {recentPhotos.map((photo) => (
               <div key={photo.id} className="polaroid" onClick={() => setLightboxPhoto(photo)}>
                 {photo.resource_type === 'video'
-                  ? <VideoPolaroid photo={photo} onClick={() => setLightboxPhoto(photo)} />
+                  ? <VideoPolaroid photo={photo} />
                   : <img src={polaroidUrl(photo.cloudinary_url)} alt={photo.placeName} className="polaroid__img" loading="lazy" />
                 }
                 <p className="polaroid__caption">{photo.placeName}</p>

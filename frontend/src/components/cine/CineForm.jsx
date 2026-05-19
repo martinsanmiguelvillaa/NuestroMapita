@@ -400,7 +400,7 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
           <button
             type="button"
             className="btn btn-ghost btn-sm"
-            onClick={() => { setShowManual(false); setTmdbResults(null); setSearchError(''); }}
+            onClick={() => { setShowManual(false); setTmdbResults(null); setSearchError(''); setForm(EMPTY_FORM); onDirtyChange?.(false); }}
           >
             ← Volver a buscar
           </button>

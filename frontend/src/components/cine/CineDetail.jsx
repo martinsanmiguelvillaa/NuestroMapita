@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import StarRating from '../places/StarRating';
 import { useConfirm } from '../../context/ConfirmContext';
 import { useToast } from '../../context/ToastContext';
@@ -24,7 +24,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
   const [savingComment, setSavingComment] = useState(false);
   const [deletingComment, setDeletingComment] = useState(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const data = await getCineItem(itemId);
       setItem(data);
@@ -33,11 +33,11 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [itemId]);
 
   useEffect(() => {
     load();
-  }, [itemId]);
+  }, [load]);
 
   const handleToggleFavorite = async () => {
     setSaving(true);

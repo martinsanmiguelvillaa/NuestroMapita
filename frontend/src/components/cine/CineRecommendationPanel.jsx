@@ -54,7 +54,6 @@ export default function CineRecommendationPanel({ onItemAdded }) {
   };
 
   const toggleMood = (mood) => {
-    resetSession();
     setMoods((prev) => {
       const next = new Set(prev);
       next.has(mood) ? next.delete(mood) : next.add(mood);
@@ -178,7 +177,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
                   <button
                     key={val}
                     className={`rec-panel__type-btn ${reqType === val ? 'rec-panel__type-btn--active' : ''}`}
-                    onClick={() => { setReqType(val); resetSession(); }}
+                    onClick={() => { setReqType(val); }}
                     type="button"
                   >
                     {label}

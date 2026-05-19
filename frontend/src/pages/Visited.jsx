@@ -97,14 +97,16 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
 
   return (
     <div className="place-card fade-in">
-      <CoverPhoto
-        photos={photos}
-        coverIndex={coverIndex}
-        onCoverIndexChange={setCoverIndex}
-        onCoverClick={handleCoverClick}
-        onPositionSaved={onPhotosChanged}
-        aspectRatio="4/3"
-      />
+      {photos.length > 0 && (
+        <CoverPhoto
+          photos={photos}
+          coverIndex={coverIndex}
+          onCoverIndexChange={setCoverIndex}
+          onCoverClick={handleCoverClick}
+          onPositionSaved={onPhotosChanged}
+          aspectRatio="4/3"
+        />
+      )}
 
       <div className="place-card__body">
         <h3 className="place-card__name">

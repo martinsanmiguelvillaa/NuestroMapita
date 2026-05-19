@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -24,6 +24,7 @@ def list_letters(
 @router.post("", response_model=LetterResponse, status_code=201)
 def create_letter(
     data: LetterCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
@@ -31,7 +32,8 @@ def create_letter(
     db.add(letter)
     db.commit()
     db.refresh(letter)
-    send_push_to_all(db, title="💌 Nueva cartita", body=letter.title, url="/cartitas")
+    # Enviar push en background para no bloquear la respuesta al cliente
+    background_tasks.add_task(send_push_to_all, db, title="💌 Nueva cartita", body=letter.title, url="/cartitas")
     return letter
 
 

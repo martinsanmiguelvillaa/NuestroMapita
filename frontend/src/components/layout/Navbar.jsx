@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
@@ -19,6 +19,13 @@ export default function Navbar() {
   const [confirming, setConfirming] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
+
+  useEffect(() => {
+    if (!configOpen) return;
+    const handler = (e) => { if (e.key === 'Escape') setConfigOpen(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [configOpen]);
 
   return (
     <>

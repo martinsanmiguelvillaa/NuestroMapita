@@ -37,14 +37,15 @@ export default function Recipes() {
   const addForm = useDirtyForm();
   const editForm = useDirtyForm();
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal) => {
     try {
       const data = await getRecipes({
         category: category || undefined,
         search: search || undefined,
-      });
+      }, signal);
       setRecipes(data);
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error(err);
     } finally {
       setLoading(false);
@@ -53,7 +54,9 @@ export default function Recipes() {
 
   useEffect(() => {
     setLoading(true);
-    load();
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
   }, [load]);
 
   const handleDelete = async (recipe) => {
