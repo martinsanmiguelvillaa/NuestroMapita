@@ -69,7 +69,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           className="form-input"
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
-          placeholder="Ej: Restaurante La Mar"
+          placeholder="Ej: Monti"
           required
         />
       </div>
@@ -80,7 +80,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           className="form-textarea"
           value={form.description}
           onChange={(e) => set('description', e.target.value)}
-          placeholder="Lo recomendó alguien, lo vimos en Instagram..."
+          placeholder="Ej: vimos un reel, tienen mucha pinta las papas..."
           rows={3}
         />
       </div>

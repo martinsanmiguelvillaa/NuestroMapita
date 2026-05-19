@@ -28,7 +28,7 @@ export default function LetterCard({ letter, onChanged }) {
   const editForm = useDirtyForm();
 
   const handleDelete = async () => {
-    const ok = await confirm({ title: '¿Eliminar esta cartita?', confirmLabel: 'Eliminar', danger: true });
+    const ok = await confirm({ title: '¿Eliminar esta cartita? 💔', confirmLabel: 'Eliminar', danger: true });
     if (!ok) return;
     setDeleting(true);
     try {

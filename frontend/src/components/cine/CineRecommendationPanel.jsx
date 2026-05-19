@@ -208,7 +208,7 @@ export default function CineRecommendationPanel({ onItemAdded }) {
               <span className="rec-panel__config-label">Algo más</span>
               <textarea
                 className="form-textarea rec-panel__extra"
-                placeholder="Ej: Algo una roncom adolescente o algo parecido a The Vimpire Diaries"
+                placeholder="Ej: una roncom adolescente o algo parecido a The Vimpire Diaries..."
                 value={extraText}
                 onChange={(e) => setExtraText(e.target.value)}
                 rows={2}

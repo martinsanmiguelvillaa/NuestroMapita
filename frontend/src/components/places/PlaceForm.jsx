@@ -78,7 +78,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
           className="form-input"
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
-          placeholder="Ej: Café de los Angelitos"
+          placeholder="Ej: Café Laban"
           required
         />
       </div>

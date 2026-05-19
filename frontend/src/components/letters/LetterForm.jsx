@@ -80,7 +80,7 @@ export default function LetterForm({ initialData = null, onSaved, onCancel, onDi
           className="form-textarea"
           value={form.body}
           onChange={(e) => set('body', e.target.value)}
-          placeholder="Escribí lo que querés decir..."
+          placeholder="Escribí lo mucho que me amas y esas cosas lindas..."
           rows={6}
           required
         />

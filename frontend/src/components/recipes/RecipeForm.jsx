@@ -104,7 +104,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
           className="form-input"
           value={form.title}
           onChange={(e) => set('title', e.target.value)}
-          placeholder="Tarta de espinaca, Brownie de chocolate..."
+          placeholder="Ramencito, Brownie de chocolate..."
           required
         />
       </div>
@@ -162,7 +162,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
           className="form-textarea"
           value={form.ingredients}
           onChange={(e) => set('ingredients', e.target.value)}
-          placeholder={"2 tapas de tarta\n500g de espinaca\n3 huevos\n..."}
+          placeholder={"-Azucar\n-Flores\n- Y mucho colores\n..."}
           rows={6}
           required
         />
@@ -175,7 +175,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
           className="form-textarea"
           value={form.steps}
           onChange={(e) => set('steps', e.target.value)}
-          placeholder={"Hervir la espinaca y escurrirla.\nMezclar con los huevos y condimentar.\n..."}
+          placeholder={"Tirar un poco de polvo de hadas\nDarle un besito a tu mujer porque se lo re merece\n..."}
           rows={8}
           required
         />
@@ -200,7 +200,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
           className="form-textarea"
           value={form.notes}
           onChange={(e) => set('notes', e.target.value)}
-          placeholder="Tips, variantes, cómo mejorarla..."
+          placeholder="Tips, variantes, cómo mejorarla, un mensajito de amor..."
           rows={3}
         />
       </div>
