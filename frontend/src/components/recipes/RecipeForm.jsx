@@ -162,7 +162,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
           className="form-textarea"
           value={form.ingredients}
           onChange={(e) => set('ingredients', e.target.value)}
-          placeholder={"-Azucar\n-Flores\n- Y mucho colores\n..."}
+          placeholder={"-Azucar\n-Flores\n-Y mucho colores\n..."}
           rows={6}
           required
         />
