@@ -134,7 +134,7 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
     };
 
     try {
-      if (isEdit) {
+      if (isEdit && initialData?.id) {
         await updateCineItem(initialData.id, payload);
       } else {
         await createCineItem(payload);
@@ -410,7 +410,7 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
             Cancelar
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Agregar'}
+            {saving ? 'Guardando...' : (isEdit && initialData?.id) ? 'Guardar cambios' : 'Agregar'}
           </button>
         </div>
       </div>

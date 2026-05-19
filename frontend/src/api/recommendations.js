@@ -1,9 +1,9 @@
 import apiFetch from './client';
 
-export async function generateRecommendation({ type, moods, extra_text, include_watchlist }) {
+export async function generateRecommendation({ type, moods, extra_text, include_watchlist, session_excluded }) {
   return apiFetch('/recommendations/generate', {
     method: 'POST',
-    body: JSON.stringify({ type: type || null, moods, extra_text: extra_text || null, include_watchlist }),
+    body: JSON.stringify({ type: type || null, moods, extra_text: extra_text || null, include_watchlist, session_excluded: session_excluded || [] }),
   });
 }
 

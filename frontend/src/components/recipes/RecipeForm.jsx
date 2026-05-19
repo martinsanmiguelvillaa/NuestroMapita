@@ -25,10 +25,10 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
   const [form, setForm] = useState(
     initialData
       ? {
-          title: initialData.title,
-          category: initialData.category,
-          ingredients: initialData.ingredients,
-          steps: initialData.steps,
+          title: initialData.title || '',
+          category: initialData.category || EMPTY_FORM.category,
+          ingredients: initialData.ingredients || '',
+          steps: initialData.steps || '',
           video_url: initialData.video_url || '',
           notes: initialData.notes || '',
         }
@@ -75,7 +75,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
       };
 
       let saved;
-      if (initialData) {
+      if (initialData?.id) {
         saved = await updateRecipe(initialData.id, payload);
       } else {
         saved = await createRecipe(payload);
@@ -215,7 +215,7 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
         <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading
             ? 'Guardando...'
-            : initialData
+            : initialData?.id
               ? 'Guardar cambios'
               : 'Agregar receta'}
         </button>

@@ -89,7 +89,7 @@ export default function Cine() {
       await updateCineItem(item.id, { is_favorite: !item.is_favorite });
       load();
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo actualizar: ' + err.message);
     }
   };
 
@@ -99,7 +99,7 @@ export default function Cine() {
       await updateCineItem(item.id, { status: next });
       load();
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo actualizar: ' + err.message);
     }
   };
 
@@ -130,7 +130,7 @@ export default function Cine() {
       }
       setShowRandom(true);
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo elegir: ' + err.message);
     }
   };
 

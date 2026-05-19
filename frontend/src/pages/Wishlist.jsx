@@ -325,7 +325,7 @@ export default function Wishlist() {
     try {
       await reorderWishlistBulk(orderedIds);
     } catch (err) {
-      console.error('Error al guardar orden:', err);
+      toast.error('No se pudo guardar el orden: ' + err.message);
     }
   };
 

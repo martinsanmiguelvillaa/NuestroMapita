@@ -44,6 +44,8 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
     try {
       await updateCineItem(itemId, { is_favorite: !item.is_favorite });
       await load();
+    } catch (err) {
+      toast.error('No se pudo actualizar: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -55,6 +57,8 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
     try {
       await updateCineItem(itemId, { status: next });
       await load();
+    } catch (err) {
+      toast.error('No se pudo actualizar: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -65,7 +69,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
       await updateCineItem(itemId, { rating: val });
       await load();
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo guardar el puntaje: ' + err.message);
     }
   };
 
