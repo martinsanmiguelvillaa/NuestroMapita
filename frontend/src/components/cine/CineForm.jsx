@@ -42,7 +42,7 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
-  });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [tmdbResults, setTmdbResults] = useState(null); // null = todavía no buscó

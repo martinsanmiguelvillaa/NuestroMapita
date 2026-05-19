@@ -2,7 +2,7 @@
  * Mapa interactivo para elegir una ubicación tocando/clickeando.
  * Reutiliza react-leaflet (ya instalado en el proyecto).
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -36,10 +36,13 @@ function MapController({ onMapClick, flyTo }) {
     },
   });
 
-  // flyTo se actualiza cuando el usuario busca un lugar por nombre
-  if (flyTo) {
-    map.flyTo([flyTo.lat, flyTo.lng], 15, { duration: 1 });
-  }
+  // flyTo se actualiza cuando el usuario busca un lugar por nombre.
+  // Moverlo a useEffect evita ejecutar side-effects durante el render.
+  useEffect(() => {
+    if (flyTo) {
+      map.flyTo([flyTo.lat, flyTo.lng], 15, { duration: 1 });
+    }
+  }, [flyTo, map]);
 
   return null;
 }

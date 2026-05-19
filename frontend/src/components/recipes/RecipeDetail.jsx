@@ -117,6 +117,8 @@ function RecipeDetailContent({ recipe, onEdit, onCommentChanged }) {
 }
 
 function RecipeComments({ recipe, onUpdated }) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const EMPTY = { author: '', text: '', rating: null };
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);

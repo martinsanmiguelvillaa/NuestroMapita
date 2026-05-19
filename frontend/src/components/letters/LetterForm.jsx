@@ -8,7 +8,7 @@ export default function LetterForm({ initialData = null, onSaved, onCancel, onDi
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
-  });
+  }, []);
 
   const [form, setForm] = useState(
     initialData

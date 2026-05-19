@@ -156,7 +156,7 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
 
 // ─── Hook de drag-and-drop nativo (mouse + touch) ────────────────────────────
 
-function useDragSort({ items, onOrderChange }) {
+function useDragSort({ items, onOrderChange, disabled = false }) {
   const [order, setOrder] = useState(items.map((i) => i.id));
   const [draggingId, setDraggingId] = useState(null);
   const [overId, setOverId] = useState(null);
@@ -264,15 +264,15 @@ function useDragSort({ items, onOrderChange }) {
     .filter(Boolean);
 
   const getItemProps = (id) => ({
-    draggable: true,
+    draggable: !disabled,
     'data-drag-id': id,
-    onDragStart: onDragStart(id),
-    onDragOver: onDragOver(id),
-    onDrop: onDrop(id),
-    onDragEnd,
-    onTouchStart: onTouchStart(id),
-    onTouchMove,
-    onTouchEnd,
+    onDragStart: disabled ? undefined : onDragStart(id),
+    onDragOver: disabled ? undefined : onDragOver(id),
+    onDrop: disabled ? undefined : onDrop(id),
+    onDragEnd: disabled ? undefined : onDragEnd,
+    onTouchStart: disabled ? undefined : onTouchStart(id),
+    onTouchMove: disabled ? undefined : onTouchMove,
+    onTouchEnd: disabled ? undefined : onTouchEnd,
     style: {
       opacity: draggingId === id ? 0.4 : 1,
       outline: overId === id && overId !== draggingId ? '2px dashed var(--color-brown)' : 'none',
@@ -326,13 +326,13 @@ export default function Wishlist() {
       await reorderWishlistBulk(orderedIds);
     } catch (err) {
       console.error('Error al guardar orden:', err);
-      load(); // revert si falla
     }
   };
 
   const { sortedItems, draggingId, getItemProps, dragHandleProps } = useDragSort({
     items: places,
     onOrderChange: handleOrderChange,
+    disabled: !!search,
   });
 
   const handleCreate = async (data, files) => {

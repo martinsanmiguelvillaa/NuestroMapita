@@ -5,11 +5,8 @@ import '../../styles/recipes.css';
  * Tarjeta compacta de receta para la grilla.
  */
 export default function RecipeCard({ recipe, onView, onEdit, onDelete }) {
-  const firstIngredients = recipe.ingredients
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .slice(0, 3);
+  const allIngredients = recipe.ingredients.split('\n').map((l) => l.trim()).filter(Boolean);
+  const firstIngredients = allIngredients.slice(0, 3);
 
   const lastComment = recipe.comments?.[recipe.comments.length - 1];
 
@@ -47,9 +44,9 @@ export default function RecipeCard({ recipe, onView, onEdit, onDelete }) {
           {firstIngredients.map((ing, i) => (
             <li key={i}>{ing}</li>
           ))}
-          {recipe.ingredients.split('\n').filter(Boolean).length > 3 && (
+          {allIngredients.length > 3 && (
             <li className="recipe-card__ingredients-more">
-              +{recipe.ingredients.split('\n').filter(Boolean).length - 3} más
+              +{allIngredients.length - 3} más
             </li>
           )}
         </ul>

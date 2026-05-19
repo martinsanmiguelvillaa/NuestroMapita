@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Navigate } from 'react-router-dom';
 import Modal from '../components/ui/Modal';
 import { useDirtyForm } from '../hooks/useDirtyForm';
 import WishlistForm from '../components/places/WishlistForm';
@@ -76,8 +76,7 @@ export default function ShareTarget() {
   const urlType = detectType(url);
 
   if (!url) {
-    navigate('/');
-    return null;
+    return <Navigate to="/" replace />;
   }
 
   const wishlistInitial = {

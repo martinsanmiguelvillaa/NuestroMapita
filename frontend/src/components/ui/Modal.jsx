@@ -5,18 +5,24 @@ import '../../styles/modal.css';
 const DRAG_ZONE_PX = 72;   // px desde el top del sheet donde se activa el drag
 const CLOSE_THRESHOLD = 160; // px arrastrados para cerrar
 
+// Contador de modales abiertos — evita que un modal restaure el scroll
+// mientras otro sigue abierto.
+let _openModalCount = 0;
+
 export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false, isDirty = false }) {
   const sheetRef = useRef(null);
   const drag = useRef({ active: false, startY: 0, dy: 0 });
 
   useEffect(() => {
     if (!isOpen) return;
+    _openModalCount++;
     const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleEsc);
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = '';
+      _openModalCount--;
+      if (_openModalCount === 0) document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
 
@@ -51,11 +57,10 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
 
     if (drag.current.dy > CLOSE_THRESHOLD) {
       if (isDirty) {
-        // Snap back y luego mostrar diálogo
+        // Snap back — el formulario tiene cambios sin guardar, no cerrar
         el.style.transition = snap;
         el.style.transform = 'translateY(0)';
         if (overlay) { overlay.style.transition = 'opacity 0.3s'; overlay.style.opacity = '1'; }
-        setTimeout(() => onClose(), 350);
       } else {
         el.style.transition = snap;
         el.style.transform = 'translateY(110%)';

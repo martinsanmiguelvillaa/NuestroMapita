@@ -15,7 +15,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
-  });
+  }, []);
 
   const [form, setForm] = useState({
     ...EMPTY_FORM,

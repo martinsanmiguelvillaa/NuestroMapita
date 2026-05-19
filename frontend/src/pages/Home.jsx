@@ -272,7 +272,7 @@ export default function Home() {
               <div className="home__letter-card-body">
                 <p className="home__letter-card-title">💌 {letter.title}</p>
                 <p className="home__letter-card-snippet">
-                  {letter.body.length > 80 ? letter.body.slice(0, 80) + '…' : letter.body}
+                  {letter.body ? (letter.body.length > 80 ? letter.body.slice(0, 80) + '…' : letter.body) : ''}
                 </p>
               </div>
             </Link>

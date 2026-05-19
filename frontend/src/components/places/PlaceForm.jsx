@@ -21,7 +21,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
-  });
+  }, []);
 
   const [form, setForm] = useState({
     ...EMPTY_FORM,
