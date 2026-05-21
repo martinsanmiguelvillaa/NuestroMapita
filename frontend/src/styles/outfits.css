@@ -96,6 +96,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-5);
+  align-items: start;
   animation: outfits-fadein 0.3s ease;
 }
 
