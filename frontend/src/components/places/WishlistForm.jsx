@@ -10,7 +10,7 @@ const EMPTY_FORM = {
   longitude: null,
 };
 
-export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef }) {
+export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialCenter }) {
   const formRef = useRef();
 
   useEffect(() => {
@@ -91,6 +91,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           lat={form.latitude}
           lng={form.longitude}
           onChange={handleLocationChange}
+          initialCenter={initialCenter}
         />
       </div>
 

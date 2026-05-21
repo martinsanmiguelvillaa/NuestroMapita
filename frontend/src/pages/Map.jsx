@@ -100,6 +100,7 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
+  const [mapView, setMapView] = useState(null); // { center, zoom }
 
   // Agregar lugar desde el mapa
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -279,6 +280,7 @@ export default function MapPage() {
             onConvert={handleConvert}
             flyToPin={flyToPin}
             onFlyToDone={() => setFlyToPin(null)}
+            onViewChange={setMapView}
           />
         )}
 
@@ -324,6 +326,7 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
+          initialCenter={mapView?.center}
         />
         {addForm.dialog}
       </Modal>
@@ -342,6 +345,7 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
+          initialCenter={mapView?.center}
         />
         {addForm.dialog}
       </Modal>

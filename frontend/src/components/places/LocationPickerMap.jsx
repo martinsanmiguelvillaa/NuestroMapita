@@ -50,14 +50,14 @@ function MapController({ onMapClick, flyTo }) {
 const DEFAULT_CENTER = [-34.6037, -58.3816]; // Buenos Aires
 const DEFAULT_ZOOM = 12;
 
-export default function LocationPickerMap({ lat, lng, onChange }) {
+export default function LocationPickerMap({ lat, lng, onChange, initialCenter }) {
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchStatus, setSearchStatus] = useState(null); // 'notfound' | null
   const [flyTo, setFlyTo] = useState(null);
 
   const hasPin = lat != null && lng != null;
-  const center = hasPin ? [lat, lng] : DEFAULT_CENTER;
+  const center = hasPin ? [lat, lng] : (initialCenter ?? DEFAULT_CENTER);
 
   const handleMapClick = useCallback(
     (newLat, newLng) => {
