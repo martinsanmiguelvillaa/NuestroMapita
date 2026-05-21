@@ -3,10 +3,27 @@
   padding: var(--space-8) var(--space-4);
   display: flex;
   justify-content: center;
+  position: relative;
+}
+
+.outfits-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
   background-image: var(--bg-outfits);
   background-size: cover;
   background-position: center top;
-  background-attachment: fixed;
+  pointer-events: none;
+  z-index: -2;
+}
+
+.outfits-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 246, 236, 0.82);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .outfits-page__inner {
@@ -111,7 +128,7 @@
 
 /* ── Tarjeta clima ────────────────────────── */
 .weather-card {
-  background: var(--color-white);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
@@ -203,7 +220,7 @@
 }
 
 .weather-card__stat {
-  background: var(--color-cream);
+  background: rgba(253, 246, 236, 0.75);
   border: 1px solid var(--color-beige);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-2);
@@ -235,7 +252,7 @@
 
 /* ── Tarjeta outfit ───────────────────────── */
 .outfit-card {
-  background: var(--color-white);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
@@ -268,7 +285,7 @@
   font-size: 1.6rem;
   line-height: 1;
   flex-shrink: 0;
-  background: var(--color-cream);
+  background: rgba(253, 246, 236, 0.75);
   border: 1px solid var(--color-beige);
   border-radius: var(--radius-md);
   width: 44px;
@@ -385,7 +402,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: var(--color-cream);
+  background: rgba(253, 246, 236, 0.75);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
