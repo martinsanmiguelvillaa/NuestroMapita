@@ -12,13 +12,41 @@ import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import '../styles/outfits.css';
 
+const SELECTED_USER_KEY = 'outfits_selected_user';
+
 const OUTFIT_ITEMS = [
-  { key: 'upper_body', label: 'Arriba' },
-  { key: 'lower_body', label: 'Abajo' },
-  { key: 'footwear',   label: 'Calzado' },
+  { key: 'upper_body', label: 'Parte superior', icon: '👕' },
+  { key: 'lower_body', label: 'Parte inferior', icon: '👖' },
+  { key: 'footwear',   label: 'Calzado',         icon: '👟' },
 ];
 
-const SELECTED_USER_KEY = 'outfits_selected_user';
+const WEATHER_STATS = [
+  { key: 'humidity',     label: 'Humedad',    icon: '💧', format: v => `${Math.round(v)}%` },
+  { key: 'wind_speed',   label: 'Viento',     icon: '💨', format: v => `${Math.round(v * 3.6)} km/h` },
+  { key: 'pop',          label: 'Lluvia',     icon: '🌧️', format: v => `${Math.round(v * 100)}%` },
+  { key: 'cloudiness',   label: 'Nubosidad',  icon: '☁️', format: v => `${Math.round(v)}%` },
+  { key: 'max_uv_index', label: 'Índice UV',  icon: '🔆', format: v => v != null ? Number(v).toFixed(1) : '—' },
+  { key: 'sunset',       label: 'Atardecer',  icon: '🌅', format: v => v ? new Date(v * 1000).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '—' },
+];
+
+function weatherIcon(description = '') {
+  const d = description.toLowerCase();
+  if (d.includes('thunderstorm')) return '⛈️';
+  if (d.includes('drizzle') || d.includes('llovizna')) return '🌦️';
+  if (d.includes('rain') || d.includes('lluvia')) return '🌧️';
+  if (d.includes('snow') || d.includes('nieve')) return '❄️';
+  if (d.includes('mist') || d.includes('fog') || d.includes('niebla')) return '🌫️';
+  if (d.includes('overcast') || d.includes('broken')) return '☁️';
+  if (d.includes('scattered') || d.includes('few clouds')) return '🌤️';
+  if (d.includes('clear') || d.includes('despejado')) return '☀️';
+  return '🌡️';
+}
+
+function formatDate(isoString) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  return date.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
 
 export default function Outfits() {
   const toast = useToast();
@@ -36,7 +64,6 @@ export default function Outfits() {
   const [addingPref, setAddingPref] = useState(false);
   const [deletingPrefId, setDeletingPrefId] = useState(null);
 
-  // Inicializar sesión cuando se selecciona un usuario
   const initSession = useCallback(async (userKey) => {
     setLoadingSession(true);
     setOutfit(null);
@@ -45,7 +72,7 @@ export default function Outfits() {
       const s = await ensureSession(userKey);
       setSession(s);
       return s;
-    } catch (err) {
+    } catch {
       toast.error('No se pudo conectar con la API de outfits');
       return null;
     } finally {
@@ -53,14 +80,12 @@ export default function Outfits() {
     }
   }, []);
 
-  // Pedir outfit, opcionalmente con una preferencia de ocasión temporal
   const fetchOutfit = useCallback(async (s, prefs, occasionText) => {
     setLoadingOutfit(true);
     let tempPrefId = null;
     try {
       if (occasionText.trim()) {
         await addPreference(s.userId, s.token, `Ocasión: ${occasionText.trim()}`);
-        // Obtenemos las prefs actualizadas para conseguir el id de la que acabamos de agregar
         const updated = await getPreferences(s.userId, s.token);
         const temp = updated.find(p => p.preference.startsWith('Ocasión: '));
         tempPrefId = temp?.id ?? null;
@@ -69,7 +94,6 @@ export default function Outfits() {
       setOutfit(o);
       setWeather(w);
     } catch (err) {
-      // Si el token expiró, limpiar y reintentar una vez
       if (err.message?.toLowerCase().includes('unauthorized') || err.message?.includes('401')) {
         clearSession(selectedUser);
         toast.error('Sesión expirada, recargá la página');
@@ -77,13 +101,8 @@ export default function Outfits() {
         toast.error(err.message || 'No se pudo obtener el outfit');
       }
     } finally {
-      // Siempre limpiar la preferencia temporal
       if (tempPrefId) {
-        try {
-          await deletePreference(s.userId, s.token, tempPrefId);
-        } catch {
-          // Si falla la limpieza, no es crítico
-        }
+        try { await deletePreference(s.userId, s.token, tempPrefId); } catch { /* no crítico */ }
       }
       setLoadingOutfit(false);
     }
@@ -99,7 +118,6 @@ export default function Outfits() {
     }
   }, []);
 
-  // Al seleccionar usuario: init sesión → cargar prefs → cargar outfit
   useEffect(() => {
     if (!selectedUser) return;
     let cancelled = false;
@@ -176,7 +194,6 @@ export default function Outfits() {
           <p className="outfits-page__subtitle">Outfit del día según el clima real</p>
         </header>
 
-        {/* Selector de usuario */}
         <div className="outfits-page__user-selector">
           {Object.values(USERS).map(u => (
             <button
@@ -190,7 +207,6 @@ export default function Outfits() {
           ))}
         </div>
 
-        {/* Loading inicial */}
         {busy && (
           <div className="outfits-page__loading">
             <div className="outfits-page__spinner" />
@@ -198,37 +214,66 @@ export default function Outfits() {
           </div>
         )}
 
-        {/* Resultado */}
-        {outfit && !busy && (
+        {outfit && weather && !busy && (
           <>
-            <div className="outfits-page__result">
-              {weather && (
-                <p className="outfits-page__weather-meta">
-                  {weather.city} · {weather.temperature}°C · {weather.description}
-                </p>
-              )}
+            {/* Tarjetas clima + outfit */}
+            <div className="outfits-page__cards">
 
-              <p className="outfits-page__summary">{outfit.summary}</p>
-
-              <div className="outfits-page__items">
-                {OUTFIT_ITEMS.map(({ key, label }) => (
-                  <div key={key} className="outfits-page__item">
-                    <span className="outfits-page__item-label">{label}</span>
-                    <span className="outfits-page__item-value">{outfit[key]}</span>
+              {/* Tarjeta clima */}
+              <div className="weather-card">
+                <div className="weather-card__header">
+                  <div>
+                    <p className="weather-card__city">📍 {weather.city}</p>
+                    <p className="weather-card__date">{formatDate(weather.checked_at)}</p>
                   </div>
-                ))}
+                  <span className="weather-card__icon">{weatherIcon(weather.description)}</span>
+                </div>
+
+                <div className="weather-card__main">
+                  <span className="weather-card__temp">{Math.round(weather.temperature)}°C</span>
+                  <div className="weather-card__meta">
+                    <span>Sensación térmica: {Math.round(weather.feels_like)}°C</span>
+                    <span className="weather-card__desc">{weather.description}</span>
+                  </div>
+                </div>
+
+                <div className="weather-card__grid">
+                  {WEATHER_STATS.map(({ key, label, icon, format }) => (
+                    <div key={key} className="weather-card__stat">
+                      <span className="weather-card__stat-icon">{icon}</span>
+                      <span className="weather-card__stat-value">{format(weather[key])}</span>
+                      <span className="weather-card__stat-label">{label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {outfit.extras?.length > 0 && (
-                <div className="outfits-page__extras">
-                  <span className="outfits-page__extras-label">Extras</span>
-                  <ul className="outfits-page__extras-list">
-                    {outfit.extras.map((extra, i) => (
-                      <li key={i} className="outfits-page__extra-item">{extra}</li>
-                    ))}
-                  </ul>
+              {/* Tarjeta outfit */}
+              <div className="outfit-card">
+                <h2 className="outfit-card__title">Tu outfit de hoy</h2>
+
+                <div className="outfit-card__items">
+                  {OUTFIT_ITEMS.map(({ key, label, icon }) => (
+                    <div key={key} className="outfit-card__item">
+                      <span className="outfit-card__item-icon">{icon}</span>
+                      <div className="outfit-card__item-body">
+                        <span className="outfit-card__item-label">{label}</span>
+                        <span className="outfit-card__item-value">{outfit[key]}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+
+                {outfit.extras?.length > 0 && (
+                  <div className="outfit-card__extras">
+                    {outfit.extras.map((extra, i) => (
+                      <span key={i} className="outfit-card__extra-pill">{extra}</span>
+                    ))}
+                  </div>
+                )}
+
+                <p className="outfit-card__summary">{outfit.summary}</p>
+              </div>
             </div>
 
             {/* Ocasión + actualizar */}
@@ -241,11 +286,7 @@ export default function Outfits() {
                 onChange={e => setOccasion(e.target.value)}
                 disabled={busy}
               />
-              <button
-                className="btn btn-primary"
-                onClick={handleRefresh}
-                disabled={busy}
-              >
+              <button className="btn btn-primary" onClick={handleRefresh} disabled={busy}>
                 Actualizar outfit
               </button>
             </div>
@@ -253,9 +294,7 @@ export default function Outfits() {
             {/* Preferencias */}
             <section className="outfits-page__prefs">
               <h2 className="outfits-page__prefs-title">Tus preferencias</h2>
-              <p className="outfits-page__prefs-subtitle">
-                Se usan siempre al generar tu outfit
-              </p>
+              <p className="outfits-page__prefs-subtitle">Se usan siempre al generar tu outfit</p>
 
               <form className="outfits-page__pref-form" onSubmit={handleAddPref}>
                 <input
@@ -267,19 +306,13 @@ export default function Outfits() {
                   disabled={addingPref}
                   maxLength={250}
                 />
-                <button
-                  type="submit"
-                  className="btn btn-secondary"
-                  disabled={addingPref || !newPref.trim()}
-                >
+                <button type="submit" className="btn btn-secondary" disabled={addingPref || !newPref.trim()}>
                   {addingPref ? 'Guardando...' : 'Agregar'}
                 </button>
               </form>
 
               {preferences.length === 0 ? (
-                <p className="outfits-page__prefs-empty">
-                  Todavía no tenés preferencias guardadas.
-                </p>
+                <p className="outfits-page__prefs-empty">Todavía no tenés preferencias guardadas.</p>
               ) : (
                 <ul className="outfits-page__prefs-list">
                   {preferences.map(pref => (
