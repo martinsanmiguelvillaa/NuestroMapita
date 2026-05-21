@@ -443,6 +443,9 @@
     grid-template-columns: 1fr;
   }
 
+  .outfit-card { order: -1; }
+  .weather-card { order: 1; }
+
   .outfits-page__refresh-area {
     flex-direction: column;
   }
