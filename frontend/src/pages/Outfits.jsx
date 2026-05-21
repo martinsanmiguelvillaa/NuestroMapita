@@ -29,16 +29,50 @@ const WEATHER_STATS = [
   { key: 'sunset',       label: 'Atardecer',  icon: '🌅', format: v => v ? new Date(v * 1000).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '—' },
 ];
 
+const DESCRIPTION_ES = {
+  'clear sky': 'Cielo despejado',
+  'few clouds': 'Pocas nubes',
+  'scattered clouds': 'Nubes dispersas',
+  'broken clouds': 'Nublado parcial',
+  'overcast clouds': 'Muy nublado',
+  'light rain': 'Lluvia leve',
+  'moderate rain': 'Lluvia moderada',
+  'heavy intensity rain': 'Lluvia intensa',
+  'very heavy rain': 'Lluvia muy intensa',
+  'light drizzle': 'Llovizna leve',
+  'drizzle': 'Llovizna',
+  'heavy drizzle': 'Llovizna intensa',
+  'thunderstorm': 'Tormenta eléctrica',
+  'thunderstorm with light rain': 'Tormenta con lluvia leve',
+  'thunderstorm with rain': 'Tormenta con lluvia',
+  'thunderstorm with heavy rain': 'Tormenta con lluvia intensa',
+  'light snow': 'Nevada leve',
+  'snow': 'Nieve',
+  'heavy snow': 'Nevada intensa',
+  'sleet': 'Aguanieve',
+  'mist': 'Neblina',
+  'smoke': 'Humo',
+  'haze': 'Bruma',
+  'sand': 'Arena',
+  'dust': 'Polvo',
+  'fog': 'Niebla',
+  'tornado': 'Tornado',
+};
+
+function translateDescription(description = '') {
+  return DESCRIPTION_ES[description.toLowerCase()] ?? description;
+}
+
 function weatherIcon(description = '') {
   const d = description.toLowerCase();
   if (d.includes('thunderstorm')) return '⛈️';
-  if (d.includes('drizzle') || d.includes('llovizna')) return '🌦️';
-  if (d.includes('rain') || d.includes('lluvia')) return '🌧️';
-  if (d.includes('snow') || d.includes('nieve')) return '❄️';
-  if (d.includes('mist') || d.includes('fog') || d.includes('niebla')) return '🌫️';
+  if (d.includes('drizzle')) return '🌦️';
+  if (d.includes('rain')) return '🌧️';
+  if (d.includes('snow') || d.includes('sleet')) return '❄️';
+  if (d.includes('mist') || d.includes('fog') || d.includes('haze')) return '🌫️';
   if (d.includes('overcast') || d.includes('broken')) return '☁️';
   if (d.includes('scattered') || d.includes('few clouds')) return '🌤️';
-  if (d.includes('clear') || d.includes('despejado')) return '☀️';
+  if (d.includes('clear')) return '☀️';
   return '🌡️';
 }
 
@@ -245,10 +279,13 @@ export default function Outfits() {
                 </div>
 
                 <div className="weather-card__main">
-                  <span className="weather-card__temp">{Math.round(weather.temperature)}°C</span>
+                  <div className="weather-card__temp">
+                    <span className="weather-card__temp-num">{Math.round(weather.temperature)}</span>
+                    <span className="weather-card__temp-unit">°C</span>
+                  </div>
                   <div className="weather-card__meta">
                     <span>Sensación térmica: {Math.round(weather.feels_like)}°C</span>
-                    <span className="weather-card__desc">{weather.description}</span>
+                    <span className="weather-card__desc">{translateDescription(weather.description)}</span>
                   </div>
                 </div>
 

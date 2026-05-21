@@ -149,11 +149,26 @@
 }
 
 .weather-card__temp {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1;
+  gap: 2px;
+}
+
+.weather-card__temp-num {
   font-family: var(--font-heading);
-  font-size: 4rem;
+  font-size: 5rem;
   font-weight: 700;
   color: var(--color-text);
-  line-height: 1;
+  line-height: 0.9;
+}
+
+.weather-card__temp-unit {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--color-text-mid);
+  margin-top: 0.4rem;
 }
 
 .weather-card__meta {
@@ -418,7 +433,7 @@
     font-size: var(--text-2xl);
   }
 
-  .weather-card__temp {
-    font-size: 3rem;
+  .weather-card__temp-num {
+    font-size: 3.5rem;
   }
 }
