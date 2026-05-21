@@ -216,6 +216,8 @@ export default function Home() {
     { to: '/cartitas',    icon: '💌', name: 'Cartitas',    desc: `${stats.letters} guardada${stats.letters !== 1 ? 's' : ''}` },
     { to: '/recetas',     icon: '🍴', name: 'Recetas',     desc: 'Ver nuestras recetas' },
     { to: '/cine',        icon: '🎬', name: 'Cine',        desc: 'Películas y series' },
+    { to: '/viajecitos',  icon: '✈️', name: 'Viajecitos',  desc: 'Nuestros próximos viajes' },
+    { to: '/outfits',     icon: '👗', name: 'Outfits',     desc: 'Qué ponerse hoy' },
   ];
 
   return (
