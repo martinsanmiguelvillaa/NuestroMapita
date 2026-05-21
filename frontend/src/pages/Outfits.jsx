@@ -216,6 +216,21 @@ export default function Outfits() {
 
         {outfit && weather && !busy && (
           <>
+            {/* Ocasión + actualizar */}
+            <div className="outfits-page__refresh-area">
+              <input
+                className="form-input"
+                type="text"
+                placeholder="¿Tenés alguna ocasión especial? (opcional)"
+                value={occasion}
+                onChange={e => setOccasion(e.target.value)}
+                disabled={busy}
+              />
+              <button className="btn btn-primary" onClick={handleRefresh} disabled={busy}>
+                Actualizar outfit
+              </button>
+            </div>
+
             {/* Tarjetas clima + outfit */}
             <div className="outfits-page__cards">
 
@@ -274,21 +289,6 @@ export default function Outfits() {
 
                 <p className="outfit-card__summary">{outfit.summary}</p>
               </div>
-            </div>
-
-            {/* Ocasión + actualizar */}
-            <div className="outfits-page__refresh-area">
-              <input
-                className="form-input"
-                type="text"
-                placeholder="¿Tenés alguna ocasión especial? (opcional)"
-                value={occasion}
-                onChange={e => setOccasion(e.target.value)}
-                disabled={busy}
-              />
-              <button className="btn btn-primary" onClick={handleRefresh} disabled={busy}>
-                Actualizar outfit
-              </button>
             </div>
 
             {/* Preferencias */}
