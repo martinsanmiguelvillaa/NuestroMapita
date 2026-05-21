@@ -100,7 +100,7 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
-  const [addCenter, setAddCenter] = useState(null); // centro del mapa al abrir el form
+  const [addView, setAddView] = useState(null); // { center, zoom } al abrir el form
 
   // Agregar lugar desde el mapa
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -154,7 +154,7 @@ export default function MapPage() {
   const handleSelectAddType = (type) => {
     if (leafletMapRef.current) {
       const c = leafletMapRef.current.getCenter();
-      setAddCenter([c.lat, c.lng]);
+      setAddView({ center: [c.lat, c.lng], zoom: leafletMapRef.current.getZoom() });
     }
     setShowAddMenu(false);
     setAddType(type);
@@ -331,7 +331,8 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
-          initialCenter={addCenter}
+          initialCenter={addView?.center}
+          initialZoom={addView?.zoom}
         />
         {addForm.dialog}
       </Modal>
@@ -350,7 +351,8 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
-          initialCenter={addCenter}
+          initialCenter={addView?.center}
+          initialZoom={addView?.zoom}
         />
         {addForm.dialog}
       </Modal>

@@ -50,7 +50,7 @@ function MapController({ onMapClick, flyTo }) {
 const DEFAULT_CENTER = [-34.6037, -58.3816]; // Buenos Aires
 const DEFAULT_ZOOM = 12;
 
-export default function LocationPickerMap({ lat, lng, onChange, initialCenter }) {
+export default function LocationPickerMap({ lat, lng, onChange, initialCenter, initialZoom }) {
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchStatus, setSearchStatus] = useState(null); // 'notfound' | null
@@ -122,7 +122,7 @@ export default function LocationPickerMap({ lat, lng, onChange, initialCenter })
       <div className="location-picker__map">
         <MapContainer
           center={center}
-          zoom={hasPin ? 15 : DEFAULT_ZOOM}
+          zoom={hasPin ? 15 : (initialZoom ?? DEFAULT_ZOOM)}
           style={{ width: '100%', height: '100%' }}
           zoomControl
         >
