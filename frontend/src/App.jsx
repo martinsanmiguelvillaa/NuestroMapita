@@ -21,6 +21,7 @@ import Letters from './pages/Letters';
 import Recipes from './pages/Recipes';
 import Cine from './pages/Cine';
 import Outfits from './pages/Outfits';
+import Trips from './pages/Trips';
 import ShareTarget from './pages/ShareTarget';
 
 // Ruta protegida: si no hay sesión, manda al login
@@ -52,6 +53,7 @@ export default function App() {
               <Route path="/mapa" element={<MapPage />} />
               <Route path="/visitados" element={<Visited />} />
               <Route path="/por-visitar" element={<Wishlist />} />
+              <Route path="/viajecitos" element={<Trips />} />
               <Route path="/cartitas" element={<Letters />} />
               <Route path="/recetas" element={<Recipes />} />
               <Route path="/cine" element={<Cine />} />

@@ -26,5 +26,12 @@ class Photo(Base):
     resource_type = Column(String(10), nullable=False, default="image", server_default="image")
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
+    place_trip_id = Column(
+        Integer,
+        ForeignKey("places_trips.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+
     place_visited = relationship("PlaceVisited", back_populates="photos")
     place_wishlist = relationship("PlaceWishlist", back_populates="photos")
+    place_trip = relationship("PlaceTrip", back_populates="photos")

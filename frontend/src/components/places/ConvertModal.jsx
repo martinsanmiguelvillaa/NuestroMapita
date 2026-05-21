@@ -7,7 +7,7 @@ import Modal from '../ui/Modal';
 import { convertToVisited } from '../../api/placesWishlist';
 import StarRating from '../places/StarRating';
 
-export default function ConvertModal({ place, isOpen, onClose, onConverted }) {
+export default function ConvertModal({ place, isOpen, onClose, onConverted, convertFn }) {
   const [visitDate, setVisitDate] = useState(new Date().toISOString().slice(0, 10));
   const [comment, setComment] = useState(place?.description || '');
   const [rating, setRating] = useState(null);
@@ -21,7 +21,8 @@ export default function ConvertModal({ place, isOpen, onClose, onConverted }) {
 
     setLoading(true);
     try {
-      await convertToVisited(place.id, {
+      const fn = convertFn ?? convertToVisited;
+      await fn(place.id, {
         visit_date: visitDate,
         comment: comment.trim() || null,
         rating: rating || null,

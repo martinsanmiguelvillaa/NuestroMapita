@@ -9,6 +9,7 @@ const links = [
   { to: '/mapa',       label: 'Mapa',        icon: '🗺️' },
   { to: '/visitados',  label: 'Ya hicimos',  icon: '✓' },
   { to: '/por-visitar',label: 'Por hacer',   icon: '★' },
+  { to: '/viajecitos', label: 'Viajecitos',  icon: '✈️' },
   { to: '/cartitas',   label: 'Cartitas',    icon: '💌' },
   { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
   { to: '/cine',       label: 'Cine',        icon: '🎬' },

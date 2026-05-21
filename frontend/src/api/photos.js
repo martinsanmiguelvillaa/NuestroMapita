@@ -36,6 +36,9 @@ export const uploadPhotos = (placeId, files) =>
 export const uploadWishlistPhotos = (placeId, files) =>
   uploadWithTimeout(`/places/wishlist/${placeId}/photos`, files);
 
+export const uploadTripPhotos = (tripId, files) =>
+  uploadWithTimeout(`/trips/${tripId}/photos`, files);
+
 export const deletePhoto = (photoId) =>
   apiFetch(`/photos/${photoId}`, { method: 'DELETE' });
 
