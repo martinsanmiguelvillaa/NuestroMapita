@@ -4,8 +4,16 @@
  */
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { getMapPins } from '../api/map';
+import { createVisited } from '../api/placesVisited';
+import { createWishlist } from '../api/placesWishlist';
+import { uploadPhotos, uploadWishlistPhotos } from '../api/photos';
 import MapView from '../components/map/MapView';
 import ConvertModal from '../components/places/ConvertModal';
+import Modal from '../components/ui/Modal';
+import PlaceForm from '../components/places/PlaceForm';
+import WishlistForm from '../components/places/WishlistForm';
+import { useDirtyForm } from '../hooks/useDirtyForm.jsx';
+import { useToast } from '../context/ToastContext';
 import '../styles/map.css';
 
 function MapSearch({ visited, wishlist, onSelect }) {
@@ -23,7 +31,6 @@ function MapSearch({ visited, wishlist, onSelect }) {
     return all.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 8);
   }, [query, visited, wishlist]);
 
-  // Cerrar al hacer clic afuera
   useEffect(() => {
     const handler = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -85,6 +92,7 @@ function MapSearch({ visited, wishlist, onSelect }) {
 }
 
 export default function MapPage() {
+  const toast = useToast();
   const [visited, setVisited] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [filter, setFilter] = useState('all');
@@ -92,6 +100,13 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
+
+  // Agregar lugar desde el mapa
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [addType, setAddType] = useState(null); // 'visited' | 'wishlist'
+  const [saving, setSaving] = useState(false);
+  const addForm = useDirtyForm();
+  const addMenuRef = useRef(null);
 
   const load = async () => {
     try {
@@ -108,6 +123,18 @@ export default function MapPage() {
 
   useEffect(() => { load(); }, []);
 
+  // Cerrar menú al hacer clic afuera
+  useEffect(() => {
+    if (!showAddMenu) return;
+    const handler = (e) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target)) {
+        setShowAddMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showAddMenu]);
+
   const totalPins = visited.length + wishlist.length;
 
   const handleConvert = (pin) => {
@@ -120,6 +147,40 @@ export default function MapPage() {
       latitude: pin.lat,
       longitude: pin.lon,
     });
+  };
+
+  const handleSelectAddType = (type) => {
+    setShowAddMenu(false);
+    setAddType(type);
+  };
+
+  const handleCloseAddModal = () => {
+    addForm.handleAttemptClose(() => {
+      setAddType(null);
+      addForm.setDirty(false);
+    });
+  };
+
+  const handleCreate = async (data, files) => {
+    setSaving(true);
+    try {
+      if (addType === 'visited') {
+        const newPlace = await createVisited(data);
+        if (files?.length) await uploadPhotos(newPlace.id, files);
+        toast.success('Lugar agregado a Ya hicimos');
+      } else {
+        const newPlace = await createWishlist(data);
+        if (files?.length) await uploadWishlistPhotos(newPlace.id, files);
+        toast.success('Lugar agregado a Por hacer');
+      }
+      addForm.setDirty(false);
+      setAddType(null);
+      load();
+    } catch (err) {
+      toast.error('No se pudo guardar: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -147,7 +208,6 @@ export default function MapPage() {
     <div className="map-page">
       {/* Controles del mapa */}
       <div className="map-page__controls">
-        {/* Filtros */}
         <div className="map-filter">
           {[
             { value: 'all',      label: 'Todos' },
@@ -164,7 +224,6 @@ export default function MapPage() {
           ))}
         </div>
 
-        {/* Buscador */}
         {totalPins > 0 && (
           <MapSearch
             visited={visited}
@@ -173,7 +232,6 @@ export default function MapPage() {
           />
         )}
 
-        {/* Leyenda */}
         <div className="map-legend">
           <div className="map-legend-item">
             <div className="map-legend-dot map-legend-dot--visited" />
@@ -223,7 +281,70 @@ export default function MapPage() {
             onFlyToDone={() => setFlyToPin(null)}
           />
         )}
+
+        {/* Botón flotante agregar */}
+        <div className="map-add" ref={addMenuRef}>
+          {showAddMenu && (
+            <div className="map-add__menu">
+              <button
+                className="map-add__option map-add__option--visited"
+                onClick={() => handleSelectAddType('visited')}
+              >
+                ✓ Ya hicimos
+              </button>
+              <button
+                className="map-add__option map-add__option--wishlist"
+                onClick={() => handleSelectAddType('wishlist')}
+              >
+                ★ Por hacer
+              </button>
+            </div>
+          )}
+          <button
+            className={`map-add__btn${showAddMenu ? ' map-add__btn--open' : ''}`}
+            onClick={() => setShowAddMenu((v) => !v)}
+            aria-label="Agregar lugar"
+          >
+            +
+          </button>
+        </div>
       </div>
+
+      {/* Modal agregar ya hicimos */}
+      <Modal
+        isOpen={addType === 'visited'}
+        onClose={handleCloseAddModal}
+        title="Agregar a Ya hicimos"
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
+        <PlaceForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          loading={saving}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
+        />
+        {addForm.dialog}
+      </Modal>
+
+      {/* Modal agregar por hacer */}
+      <Modal
+        isOpen={addType === 'wishlist'}
+        onClose={handleCloseAddModal}
+        title="Agregar a Por hacer"
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
+        <WishlistForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          loading={saving}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
+        />
+        {addForm.dialog}
+      </Modal>
 
       {/* Modal "Ya fuimos" */}
       {convertPlace && (
