@@ -159,7 +159,7 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
           <form className="cine-form__search-row" onSubmit={handleSearch}>
             <input
               className="form-input"
-              placeholder="Ej: Gossip Girl, Con Todos Menos Conmigo, Rapunzel..."
+              placeholder="Ej: Gossip Girl, Con Todos Menos Conmigo, Enredados..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus

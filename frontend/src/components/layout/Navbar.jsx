@@ -12,6 +12,7 @@ const links = [
   { to: '/cartitas',   label: 'Cartitas',    icon: '💌' },
   { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
   { to: '/cine',       label: 'Cine',        icon: '🎬' },
+  { to: '/outfits',   label: 'Outfits',     icon: '👗' },
 ];
 
 export default function Navbar() {
