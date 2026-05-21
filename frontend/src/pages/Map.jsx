@@ -100,7 +100,7 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
-  const [addView, setAddView] = useState(null); // { center, zoom } al abrir el form
+  const [addBounds, setAddBounds] = useState(null); // bounds del mapa al abrir el form
 
   // Agregar lugar desde el mapa
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -153,8 +153,8 @@ export default function MapPage() {
 
   const handleSelectAddType = (type) => {
     if (leafletMapRef.current) {
-      const c = leafletMapRef.current.getCenter();
-      setAddView({ center: [c.lat, c.lng], zoom: leafletMapRef.current.getZoom() });
+      const b = leafletMapRef.current.getBounds();
+      setAddBounds([[b.getSouth(), b.getWest()], [b.getNorth(), b.getEast()]]);
     }
     setShowAddMenu(false);
     setAddType(type);
@@ -331,8 +331,7 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
-          initialCenter={addView?.center}
-          initialZoom={addView?.zoom}
+          initialBounds={addBounds}
         />
         {addForm.dialog}
       </Modal>
@@ -351,8 +350,7 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
-          initialCenter={addView?.center}
-          initialZoom={addView?.zoom}
+          initialBounds={addBounds}
         />
         {addForm.dialog}
       </Modal>

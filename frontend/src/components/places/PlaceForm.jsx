@@ -16,7 +16,7 @@ const EMPTY_FORM = {
   longitude: null,
 };
 
-export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialCenter, initialZoom }) {
+export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialBounds }) {
   const formRef = useRef();
 
   useEffect(() => {
@@ -89,8 +89,7 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
           lat={form.latitude}
           lng={form.longitude}
           onChange={handleLocationChange}
-          initialCenter={initialCenter}
-          initialZoom={initialZoom}
+          initialBounds={initialBounds}
         />
       </div>
 

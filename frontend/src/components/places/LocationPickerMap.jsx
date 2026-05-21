@@ -26,9 +26,16 @@ const pickerIcon = L.divIcon({
   iconAnchor: [17, 30],
 });
 
-// Componente interno: escucha clicks y mueve la vista cuando se busca
-function MapController({ onMapClick, flyTo }) {
+// Componente interno: escucha clicks, mueve la vista al buscar y ajusta bounds iniciales
+function MapController({ onMapClick, flyTo, initialBounds }) {
   const map = useMap();
+
+  // Ajustar al bounds del mapa principal al montar (sin animación)
+  useEffect(() => {
+    if (initialBounds) {
+      map.fitBounds(initialBounds, { animate: false, padding: [0, 0] });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useMapEvents({
     click(e) {
@@ -36,8 +43,6 @@ function MapController({ onMapClick, flyTo }) {
     },
   });
 
-  // flyTo se actualiza cuando el usuario busca un lugar por nombre.
-  // Moverlo a useEffect evita ejecutar side-effects durante el render.
   useEffect(() => {
     if (flyTo) {
       map.flyTo([flyTo.lat, flyTo.lng], 15, { duration: 1 });
@@ -50,14 +55,14 @@ function MapController({ onMapClick, flyTo }) {
 const DEFAULT_CENTER = [-34.6037, -58.3816]; // Buenos Aires
 const DEFAULT_ZOOM = 12;
 
-export default function LocationPickerMap({ lat, lng, onChange, initialCenter, initialZoom }) {
+export default function LocationPickerMap({ lat, lng, onChange, initialBounds }) {
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchStatus, setSearchStatus] = useState(null); // 'notfound' | null
   const [flyTo, setFlyTo] = useState(null);
 
   const hasPin = lat != null && lng != null;
-  const center = hasPin ? [lat, lng] : (initialCenter ?? DEFAULT_CENTER);
+  const center = hasPin ? [lat, lng] : DEFAULT_CENTER;
 
   const handleMapClick = useCallback(
     (newLat, newLng) => {
@@ -122,7 +127,7 @@ export default function LocationPickerMap({ lat, lng, onChange, initialCenter, i
       <div className="location-picker__map">
         <MapContainer
           center={center}
-          zoom={hasPin ? 15 : (initialZoom ?? DEFAULT_ZOOM)}
+          zoom={hasPin ? 15 : DEFAULT_ZOOM}
           style={{ width: '100%', height: '100%' }}
           zoomControl
         >
@@ -130,7 +135,7 @@ export default function LocationPickerMap({ lat, lng, onChange, initialCenter, i
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='© <a href="https://openstreetmap.org">OpenStreetMap</a>'
           />
-          <MapController onMapClick={handleMapClick} flyTo={flyTo} />
+          <MapController onMapClick={handleMapClick} flyTo={flyTo} initialBounds={initialBounds} />
           {hasPin && <Marker position={[lat, lng]} icon={pickerIcon} />}
         </MapContainer>
 

@@ -10,7 +10,7 @@ const EMPTY_FORM = {
   longitude: null,
 };
 
-export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialCenter, initialZoom }) {
+export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialBounds }) {
   const formRef = useRef();
 
   useEffect(() => {
@@ -91,8 +91,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           lat={form.latitude}
           lng={form.longitude}
           onChange={handleLocationChange}
-          initialCenter={initialCenter}
-          initialZoom={initialZoom}
+          initialBounds={initialBounds}
         />
       </div>
 
