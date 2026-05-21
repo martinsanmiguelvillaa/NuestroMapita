@@ -114,7 +114,9 @@ export default function Outfits() {
   }, [selectedUser]);
 
   function handleSelectUser(userKey) {
+    if (busy) return;
     setSelectedUser(userKey);
+    setLoadingSession(true);
     localStorage.setItem(SELECTED_USER_KEY, userKey);
     setSession(null);
     setOutfit(null);
