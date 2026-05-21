@@ -7,7 +7,7 @@
 
 .outfits-page__inner {
   width: 100%;
-  max-width: 540px;
+  max-width: 560px;
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
@@ -31,19 +31,42 @@
   margin: 0;
 }
 
-/* Error */
-.outfits-page__error {
+/* User selector */
+.outfits-page__user-selector {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  text-align: center;
-  color: var(--color-text-mid);
-  padding: var(--space-8) 0;
+  gap: var(--space-3);
+  justify-content: center;
 }
 
-.outfits-page__btn-retry {
-  margin-top: var(--space-2);
+.outfits-page__user-btn {
+  flex: 1;
+  max-width: 160px;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-beige-mid);
+  background: var(--color-white);
+  color: var(--color-text-mid);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.outfits-page__user-btn:hover:not(:disabled) {
+  border-color: var(--color-brown);
+  color: var(--color-brown);
+}
+
+.outfits-page__user-btn.active {
+  background: var(--color-brown);
+  border-color: var(--color-brown);
+  color: var(--color-white);
+}
+
+.outfits-page__user-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Loading */
@@ -88,7 +111,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.outfits-page__result-city {
+.outfits-page__weather-meta {
   font-size: var(--text-sm);
   color: var(--color-text-light);
   margin: 0;
@@ -104,7 +127,6 @@
   border-bottom: 1px solid var(--color-beige);
 }
 
-/* Outfit items */
 .outfits-page__items {
   display: flex;
   flex-direction: column;
@@ -131,7 +153,6 @@
   line-height: 1.5;
 }
 
-/* Extras */
 .outfits-page__extras {
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-beige);
@@ -174,6 +195,106 @@
   flex-shrink: 0;
 }
 
+/* Refresh area (ocasión + botón) */
+.outfits-page__refresh-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.outfits-page__refresh-area .btn {
+  width: 100%;
+}
+
+/* Preferences section */
+.outfits-page__prefs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-beige-mid);
+}
+
+.outfits-page__prefs-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.outfits-page__prefs-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  margin: -var(--space-2) 0 0;
+}
+
+.outfits-page__pref-form {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.outfits-page__pref-form .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.outfits-page__prefs-empty {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  text-align: center;
+  padding: var(--space-4) 0;
+  margin: 0;
+}
+
+.outfits-page__prefs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.outfits-page__pref-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-cream);
+  border: 1px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.outfits-page__pref-text {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.outfits-page__pref-delete {
+  background: none;
+  border: none;
+  color: var(--color-text-light);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+  min-width: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.outfits-page__pref-delete:hover:not(:disabled) {
+  color: var(--color-error);
+  background: var(--color-rose-light);
+}
+
 /* Mobile */
 @media (max-width: 480px) {
   .outfits-page {
@@ -186,5 +307,9 @@
 
   .outfits-page__result {
     padding: var(--space-5);
+  }
+
+  .outfits-page__pref-form {
+    flex-direction: column;
   }
 }
