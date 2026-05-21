@@ -31,46 +31,19 @@
   margin: 0;
 }
 
-/* Search area */
-.outfits-page__search-area {
+/* Error */
+.outfits-page__error {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-}
-
-.outfits-page__form {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.outfits-page__input {
-  flex: 1;
-  min-width: 0;
-}
-
-.outfits-page__btn-search {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.outfits-page__divider {
-  display: flex;
   align-items: center;
-  gap: var(--space-3);
-  color: var(--color-text-light);
-  font-size: var(--text-sm);
+  gap: var(--space-4);
+  text-align: center;
+  color: var(--color-text-mid);
+  padding: var(--space-8) 0;
 }
 
-.outfits-page__divider::before,
-.outfits-page__divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-beige-mid);
-}
-
-.outfits-page__btn-location {
-  width: 100%;
+.outfits-page__btn-retry {
+  margin-top: var(--space-2);
 }
 
 /* Loading */

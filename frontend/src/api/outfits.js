@@ -10,10 +10,6 @@ async function outfitFetch(path) {
   return data;
 }
 
-export function getOutfitByCity(city) {
-  return outfitFetch(`/outfit/${encodeURIComponent(city)}`);
-}
-
 export function getOutfitByLocation(lat, lon) {
   return outfitFetch(`/outfit/location?lat=${lat}&lon=${lon}`);
 }

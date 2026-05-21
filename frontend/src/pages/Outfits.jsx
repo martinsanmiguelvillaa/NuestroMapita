@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { getOutfitByCity, getOutfitByLocation } from '../api/outfits';
+import { useState, useEffect } from 'react';
+import { getOutfitByLocation } from '../api/outfits';
 import { useToast } from '../context/ToastContext';
 import '../styles/outfits.css';
 
@@ -11,34 +11,39 @@ const OUTFIT_ITEMS = [
 
 export default function Outfits() {
   const toast = useToast();
-  const [city, setCity] = useState('');
   const [outfit, setOutfit] = useState(null);
   const [cityName, setCityName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [locating, setLocating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  async function handleSearch(e) {
-    e.preventDefault();
-    if (!city.trim()) return;
-    setLoading(true);
-    setOutfit(null);
-    try {
-      const data = await getOutfitByCity(city.trim());
-      setOutfit(data);
-      setCityName(city.trim());
-    } catch (err) {
-      toast.error(err.message || 'No se pudo obtener el outfit');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleLocation() {
+  useEffect(() => {
     if (!navigator.geolocation) {
-      toast.error('Tu navegador no soporta geolocalización');
+      setError('Tu navegador no soporta geolocalización');
+      setLoading(false);
       return;
     }
-    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const data = await getOutfitByLocation(coords.latitude, coords.longitude);
+          setOutfit(data);
+          setCityName('tu ubicación');
+        } catch (err) {
+          setError(err.message || 'No se pudo obtener el outfit');
+        } finally {
+          setLoading(false);
+        }
+      },
+      () => {
+        setError('No se pudo obtener tu ubicación. Revisá los permisos de localización.');
+        setLoading(false);
+      }
+    );
+  }, []);
+
+  async function handleRetry() {
+    setLoading(true);
+    setError(null);
     setOutfit(null);
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
@@ -47,72 +52,43 @@ export default function Outfits() {
           setOutfit(data);
           setCityName('tu ubicación');
         } catch (err) {
-          toast.error(err.message || 'No se pudo obtener el outfit');
+          setError(err.message || 'No se pudo obtener el outfit');
         } finally {
-          setLocating(false);
+          setLoading(false);
         }
       },
       () => {
-        toast.error('No se pudo obtener tu ubicación');
-        setLocating(false);
+        setError('No se pudo obtener tu ubicación. Revisá los permisos de localización.');
+        setLoading(false);
       }
     );
   }
-
-  const busy = loading || locating;
 
   return (
     <div className="outfits-page">
       <div className="outfits-page__inner">
         <header className="outfits-page__header">
           <h1 className="outfits-page__title">¿Qué me pongo?</h1>
-          <p className="outfits-page__subtitle">
-            Outfit del día según el clima real
-          </p>
+          <p className="outfits-page__subtitle">Outfit del día según el clima real</p>
         </header>
 
-        <div className="outfits-page__search-area">
-          <form className="outfits-page__form" onSubmit={handleSearch}>
-            <input
-              id="outfit-city"
-              className="form-input outfits-page__input"
-              type="text"
-              placeholder="Ingresá una ciudad..."
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              disabled={busy}
-            />
-            <button
-              type="submit"
-              className="btn btn-primary outfits-page__btn-search"
-              disabled={busy || !city.trim()}
-            >
-              {loading ? 'Buscando...' : 'Buscar'}
-            </button>
-          </form>
-
-          <div className="outfits-page__divider">
-            <span>o</span>
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-secondary outfits-page__btn-location"
-            onClick={handleLocation}
-            disabled={busy}
-          >
-            {locating ? 'Obteniendo ubicación...' : '📍 Usar mi ubicación'}
-          </button>
-        </div>
-
-        {busy && (
+        {loading && (
           <div className="outfits-page__loading">
             <div className="outfits-page__spinner" />
             <p>Consultando el clima y armando tu outfit...</p>
           </div>
         )}
 
-        {outfit && !busy && (
+        {error && !loading && (
+          <div className="outfits-page__error">
+            <p>{error}</p>
+            <button className="btn btn-primary" onClick={handleRetry}>
+              Reintentar
+            </button>
+          </div>
+        )}
+
+        {outfit && !loading && (
           <div className="outfits-page__result">
             <p className="outfits-page__result-city">Outfit para {cityName}</p>
 
@@ -137,6 +113,10 @@ export default function Outfits() {
                 </ul>
               </div>
             )}
+
+            <button className="btn btn-secondary outfits-page__btn-retry" onClick={handleRetry}>
+              Actualizar
+            </button>
           </div>
         )}
       </div>
