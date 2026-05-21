@@ -508,7 +508,7 @@
   }
 
   .map-add {
-    bottom: calc(var(--mobile-nav-height) + var(--space-4) + env(safe-area-inset-bottom));
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
     right: var(--space-4);
   }
 }
