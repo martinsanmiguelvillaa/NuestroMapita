@@ -147,17 +147,22 @@ export default function Outfits() {
   }
 
   async function handleDeletePref(pref) {
-    confirm('Eliminar preferencia', `¿Eliminar "${pref.preference}"?`, async () => {
-      setDeletingPrefId(pref.id);
-      try {
-        await deletePreference(session.userId, session.token, pref.id);
-        setPreferences(prev => prev.filter(p => p.id !== pref.id));
-      } catch (err) {
-        toast.error(err.message || 'No se pudo eliminar la preferencia');
-      } finally {
-        setDeletingPrefId(null);
-      }
+    const confirmed = await confirm({
+      title: 'Eliminar preferencia',
+      message: `¿Eliminar "${pref.preference}"?`,
+      confirmLabel: 'Eliminar',
+      danger: true,
     });
+    if (!confirmed) return;
+    setDeletingPrefId(pref.id);
+    try {
+      await deletePreference(session.userId, session.token, pref.id);
+      setPreferences(prev => prev.filter(p => p.id !== pref.id));
+    } catch (err) {
+      toast.error(err.message || 'No se pudo eliminar la preferencia');
+    } finally {
+      setDeletingPrefId(null);
+    }
   }
 
   const busy = loadingSession || loadingOutfit;
