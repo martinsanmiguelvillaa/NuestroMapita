@@ -4,6 +4,7 @@ export const USERS = {
   van: {
     key: 'van',
     name: 'Van',
+    last_name: 'Mapita',
     mail: 'van@nuestromapita.app',
     password: 'VanMapita2024!',
     gender: 'femenino',
@@ -13,6 +14,7 @@ export const USERS = {
   martin: {
     key: 'martin',
     name: 'Martín',
+    last_name: 'Mapita',
     mail: 'martin@nuestromapita.app',
     password: 'MartinMapita2024!',
     gender: 'masculino',
@@ -40,6 +42,7 @@ async function registerUser(userKey) {
       method: 'POST',
       body: JSON.stringify({
         name: u.name,
+        last_name: u.last_name,
         gender: u.gender,
         mail: u.mail,
         phone_number: u.phone_number,
