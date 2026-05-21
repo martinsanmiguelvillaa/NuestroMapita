@@ -100,7 +100,7 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
-  const [mapView, setMapView] = useState(null); // { center, zoom }
+  const [addCenter, setAddCenter] = useState(null); // centro del mapa al abrir el form
 
   // Agregar lugar desde el mapa
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -108,6 +108,7 @@ export default function MapPage() {
   const [saving, setSaving] = useState(false);
   const addForm = useDirtyForm();
   const addMenuRef = useRef(null);
+  const leafletMapRef = useRef(null);
 
   const load = async () => {
     try {
@@ -151,6 +152,10 @@ export default function MapPage() {
   };
 
   const handleSelectAddType = (type) => {
+    if (leafletMapRef.current) {
+      const c = leafletMapRef.current.getCenter();
+      setAddCenter([c.lat, c.lng]);
+    }
     setShowAddMenu(false);
     setAddType(type);
   };
@@ -280,7 +285,7 @@ export default function MapPage() {
             onConvert={handleConvert}
             flyToPin={flyToPin}
             onFlyToDone={() => setFlyToPin(null)}
-            onViewChange={setMapView}
+            mapRef={leafletMapRef}
           />
         )}
 
@@ -326,7 +331,7 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
-          initialCenter={mapView?.center}
+          initialCenter={addCenter}
         />
         {addForm.dialog}
       </Modal>
@@ -345,7 +350,7 @@ export default function MapPage() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
-          initialCenter={mapView?.center}
+          initialCenter={addCenter}
         />
         {addForm.dialog}
       </Modal>

@@ -5,7 +5,7 @@
  * Este fix se aplica al inicio de este archivo.
  */
 import { useEffect, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StarRating from '../places/StarRating';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -53,14 +53,10 @@ function FlyToPin({ pin, onDone, markersRef }) {
   return null;
 }
 
-// Helper: reportar el centro actual al padre
-function MapTracker({ onViewChange }) {
-  const map = useMapEvents({
-    moveend() {
-      const c = map.getCenter();
-      onViewChange({ center: [c.lat, c.lng], zoom: map.getZoom() });
-    },
-  });
+// Helper: exponer la instancia del mapa al padre vía ref
+function MapRefCapture({ mapRef }) {
+  const map = useMap();
+  mapRef.current = map;
   return null;
 }
 
@@ -317,7 +313,7 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
  * - filter: 'all' | 'visited' | 'wishlist'
  * - onConvert: callback cuando se toca "Ya fuimos" en el popup
  */
-export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert, flyToPin, onFlyToDone, onViewChange }) {
+export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert, flyToPin, onFlyToDone, mapRef }) {
   const allPins = useMemo(() => [...visitedPins, ...wishlistPins], [visitedPins, wishlistPins]);
   const markersRef = useRef({});
   const defaultCenter = [-34.6037, -58.3816]; // Buenos Aires como default
@@ -338,11 +334,11 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
         attribution='© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
       />
 
+      {/* Capturar la instancia del mapa */}
+      {mapRef && <MapRefCapture mapRef={mapRef} />}
+
       {/* Ajustar el mapa a los pines visibles */}
       {allPins.length > 0 && <MapFitter pins={allPins} />}
-
-      {/* Rastrear el centro actual */}
-      {onViewChange && <MapTracker onViewChange={onViewChange} />}
 
       {/* Volar al pin seleccionado desde el buscador */}
       {flyToPin && <FlyToPin pin={flyToPin} onDone={onFlyToDone} markersRef={markersRef} />}
