@@ -26,6 +26,13 @@ const pickerIcon = L.divIcon({
   iconAnchor: [17, 30],
 });
 
+const tripPickerIcon = L.divIcon({
+  html: `<span class="map-trip-pin">✈️</span>`,
+  className: '',
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+});
+
 // Componente interno: escucha clicks, mueve la vista al buscar y ajusta bounds iniciales
 function MapController({ onMapClick, flyTo, initialBounds }) {
   const map = useMap();
@@ -55,7 +62,7 @@ function MapController({ onMapClick, flyTo, initialBounds }) {
 const DEFAULT_CENTER = [-34.6037, -58.3816]; // Buenos Aires
 const DEFAULT_ZOOM = 12;
 
-export default function LocationPickerMap({ lat, lng, onChange, initialBounds }) {
+export default function LocationPickerMap({ lat, lng, onChange, initialBounds, variant }) {
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchStatus, setSearchStatus] = useState(null); // 'notfound' | null
@@ -136,7 +143,7 @@ export default function LocationPickerMap({ lat, lng, onChange, initialBounds })
             attribution='© <a href="https://openstreetmap.org">OpenStreetMap</a>'
           />
           <MapController onMapClick={handleMapClick} flyTo={flyTo} initialBounds={initialBounds} />
-          {hasPin && <Marker position={[lat, lng]} icon={pickerIcon} />}
+          {hasPin && <Marker position={[lat, lng]} icon={variant === 'trip' ? tripPickerIcon : pickerIcon} />}
         </MapContainer>
 
         {!hasPin && (

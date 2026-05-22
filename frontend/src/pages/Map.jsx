@@ -406,6 +406,7 @@ export default function MapPage() {
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
           initialBounds={addBounds}
+          variant="trip"
         />
         {addForm.dialog}
       </Modal>

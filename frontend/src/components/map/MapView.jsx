@@ -36,6 +36,14 @@ const makeIcon = (colorClass, delayMs = 0) => L.divIcon({
   popupAnchor: [0, -34],
 });
 
+const makeTripIcon = (delayMs = 0) => L.divIcon({
+  html: `<span class="map-trip-pin" style="animation-delay:${delayMs}ms">✈️</span>`,
+  className: '',
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -22],
+});
+
 // Helper: volar a un pin y abrir su popup
 function FlyToPin({ pin, onDone, markersRef }) {
   const map = useMap();
@@ -396,7 +404,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins
       {/* Pines de viajecitos */}
       {showTrips &&
         tripsPins.map((pin, i) => (
-          <HoverMarker key={`t-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--trip', i * 35)} markerKey={`trip-${pin.id}`} markersRef={markersRef}>
+          <HoverMarker key={`t-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeTripIcon(i * 35)} markerKey={`trip-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300} autoPan={false}>
               <TripPopup pin={pin} onConvertTrip={onConvertTrip} />
             </Popup>
