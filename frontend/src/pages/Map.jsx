@@ -6,7 +6,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { getMapPins } from '../api/map';
 import { createVisited } from '../api/placesVisited';
 import { createWishlist } from '../api/placesWishlist';
-import { uploadPhotos, uploadWishlistPhotos } from '../api/photos';
+import { createTrip } from '../api/trips';
+import { uploadPhotos, uploadWishlistPhotos, uploadTripPhotos } from '../api/photos';
 import MapView from '../components/map/MapView';
 import ConvertModal from '../components/places/ConvertModal';
 import Modal from '../components/ui/Modal';
@@ -14,9 +15,10 @@ import PlaceForm from '../components/places/PlaceForm';
 import WishlistForm from '../components/places/WishlistForm';
 import { useDirtyForm } from '../hooks/useDirtyForm.jsx';
 import { useToast } from '../context/ToastContext';
+import { convertTripToVisited } from '../api/trips';
 import '../styles/map.css';
 
-function MapSearch({ visited, wishlist, onSelect }) {
+function MapSearch({ visited, wishlist, trips, onSelect }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
@@ -27,9 +29,10 @@ function MapSearch({ visited, wishlist, onSelect }) {
     const all = [
       ...visited.map((p) => ({ ...p, _type: 'visited' })),
       ...wishlist.map((p) => ({ ...p, _type: 'wishlist' })),
+      ...trips.map((p) => ({ ...p, _type: 'trip' })),
     ];
     return all.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 8);
-  }, [query, visited, wishlist]);
+  }, [query, visited, wishlist, trips]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -95,10 +98,12 @@ export default function MapPage() {
   const toast = useToast();
   const [visited, setVisited] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
+  const [convertTrip, setConvertTrip] = useState(null);
   const [flyToPin, setFlyToPin] = useState(null);
   const [addBounds, setAddBounds] = useState(null); // bounds del mapa al abrir el form
 
@@ -115,6 +120,7 @@ export default function MapPage() {
       const data = await getMapPins();
       setVisited(data.visited || []);
       setWishlist(data.wishlist || []);
+      setTrips(data.trips || []);
     } catch (err) {
       console.error(err);
       setLoadError(true);
@@ -137,10 +143,22 @@ export default function MapPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, [showAddMenu]);
 
-  const totalPins = visited.length + wishlist.length;
+  const totalPins = visited.length + wishlist.length + trips.length;
 
   const handleConvert = (pin) => {
     setConvertPlace({
+      id: pin.id,
+      name: pin.name,
+      address: pin.address,
+      description: pin.description,
+      google_maps_url: pin.google_maps_url,
+      latitude: pin.lat,
+      longitude: pin.lon,
+    });
+  };
+
+  const handleConvertTrip = (pin) => {
+    setConvertTrip({
       id: pin.id,
       name: pin.name,
       address: pin.address,
@@ -174,6 +192,10 @@ export default function MapPage() {
         const newPlace = await createVisited(data);
         if (files?.length) await uploadPhotos(newPlace.id, files);
         toast.success('Lugar agregado a Ya hicimos');
+      } else if (addType === 'trip') {
+        const newPlace = await createTrip(data);
+        if (files?.length) await uploadTripPhotos(newPlace.id, files);
+        toast.success('Viajecito agregado');
       } else {
         const newPlace = await createWishlist(data);
         if (files?.length) await uploadWishlistPhotos(newPlace.id, files);
@@ -219,6 +241,7 @@ export default function MapPage() {
             { value: 'all',      label: 'Todos' },
             { value: 'visited',  label: 'Ya hicimos' },
             { value: 'wishlist', label: 'Por hacer' },
+            { value: 'trip',     label: '✈️ Viajecitos' },
           ].map(({ value, label }) => (
             <button
               key={value}
@@ -234,6 +257,7 @@ export default function MapPage() {
           <MapSearch
             visited={visited}
             wishlist={wishlist}
+            trips={trips}
             onSelect={(pin) => setFlyToPin(pin)}
           />
         )}
@@ -241,11 +265,15 @@ export default function MapPage() {
         <div className="map-legend">
           <div className="map-legend-item">
             <div className="map-legend-dot map-legend-dot--visited" />
-            <span>Visitado ({visited.length})</span>
+            <span>Ya hicimos ({visited.length})</span>
           </div>
           <div className="map-legend-item">
             <div className="map-legend-dot map-legend-dot--wishlist" />
             <span>Por hacer ({wishlist.length})</span>
+          </div>
+          <div className="map-legend-item">
+            <div className="map-legend-dot map-legend-dot--trip" />
+            <span>Viajecitos ({trips.length})</span>
           </div>
         </div>
 
@@ -281,8 +309,10 @@ export default function MapPage() {
           <MapView
             visitedPins={visited}
             wishlistPins={wishlist}
+            tripsPins={trips}
             filter={filter}
             onConvert={handleConvert}
+            onConvertTrip={handleConvertTrip}
             flyToPin={flyToPin}
             onFlyToDone={() => setFlyToPin(null)}
             mapRef={leafletMapRef}
@@ -304,6 +334,12 @@ export default function MapPage() {
                 onClick={() => handleSelectAddType('wishlist')}
               >
                 ★ Por hacer
+              </button>
+              <button
+                className="map-add__option map-add__option--trip"
+                onClick={() => handleSelectAddType('trip')}
+              >
+                ✈️ Viajecito
               </button>
             </div>
           )}
@@ -355,13 +391,43 @@ export default function MapPage() {
         {addForm.dialog}
       </Modal>
 
-      {/* Modal "Ya fuimos" */}
+      {/* Modal agregar viajecito */}
+      <Modal
+        isOpen={addType === 'trip'}
+        onClose={handleCloseAddModal}
+        title="Agregar Viajecito"
+        fullscreen
+        isDirty={addForm.isDirty}
+      >
+        <WishlistForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          loading={saving}
+          onDirtyChange={addForm.setDirty}
+          submitRef={addForm.submitRef}
+          initialBounds={addBounds}
+        />
+        {addForm.dialog}
+      </Modal>
+
+      {/* Modal "Ya fuimos" — wishlist */}
       {convertPlace && (
         <ConvertModal
           place={convertPlace}
           isOpen={!!convertPlace}
           onClose={() => setConvertPlace(null)}
           onConverted={() => { setConvertPlace(null); load(); }}
+        />
+      )}
+
+      {/* Modal "¡Ya fuimos!" — viajecito */}
+      {convertTrip && (
+        <ConvertModal
+          place={convertTrip}
+          isOpen={!!convertTrip}
+          onClose={() => setConvertTrip(null)}
+          onConverted={() => { setConvertTrip(null); load(); }}
+          convertFn={convertTripToVisited}
         />
       )}
     </div>

@@ -180,6 +180,35 @@ function WishlistPopup({ pin, onConvert }) {
   );
 }
 
+// Popup para un viajecito
+function TripPopup({ pin, onConvertTrip }) {
+  return (
+    <div className="map-popup">
+      <span className="map-popup__type map-popup__type--trip">✈️ Viajecito</span>
+      <h3 className="map-popup__name">{pin.name}</h3>
+      {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
+      {pin.description && (
+        <p className="map-popup__info" style={{ fontStyle: 'italic' }}>"{pin.description}"</p>
+      )}
+      <div className="map-popup__actions">
+        {pin.google_maps_url && (
+          <a href={pin.google_maps_url} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm">
+            Ver en Maps
+          </a>
+        )}
+        {pin.social_url && (
+          <a href={pin.social_url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
+            Ver reel
+          </a>
+        )}
+        <button className="btn btn-rose btn-sm" onClick={() => onConvertTrip?.(pin)}>
+          ¡Ya fuimos!
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Marker con popup que:
 // - se abre al hacer hover sobre el corazón
 // - se mantiene abierto si el mouse pasa a la tarjeta
@@ -313,14 +342,15 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
  * - filter: 'all' | 'visited' | 'wishlist'
  * - onConvert: callback cuando se toca "Ya fuimos" en el popup
  */
-export default function MapView({ visitedPins = [], wishlistPins = [], filter = 'all', onConvert, flyToPin, onFlyToDone, mapRef }) {
-  const allPins = useMemo(() => [...visitedPins, ...wishlistPins], [visitedPins, wishlistPins]);
+export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins = [], filter = 'all', onConvert, onConvertTrip, flyToPin, onFlyToDone, mapRef }) {
+  const allPins = useMemo(() => [...visitedPins, ...wishlistPins, ...tripsPins], [visitedPins, wishlistPins, tripsPins]);
   const markersRef = useRef({});
   const defaultCenter = [-34.6037, -58.3816]; // Buenos Aires como default
   const defaultZoom = 12;
 
-  const showVisited = filter === 'all' || filter === 'visited';
+  const showVisited  = filter === 'all' || filter === 'visited';
   const showWishlist = filter === 'all' || filter === 'wishlist';
+  const showTrips    = filter === 'all' || filter === 'trip';
 
   return (
     <MapContainer
@@ -359,6 +389,16 @@ export default function MapView({ visitedPins = [], wishlistPins = [], filter = 
           <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--wishlist', i * 35)} markerKey={`wishlist-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300} autoPan={false}>
               <WishlistPopup pin={pin} onConvert={onConvert} />
+            </Popup>
+          </HoverMarker>
+        ))}
+
+      {/* Pines de viajecitos */}
+      {showTrips &&
+        tripsPins.map((pin, i) => (
+          <HoverMarker key={`t-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--trip', i * 35)} markerKey={`trip-${pin.id}`} markersRef={markersRef}>
+            <Popup minWidth={240} maxWidth={300} autoPan={false}>
+              <TripPopup pin={pin} onConvertTrip={onConvertTrip} />
             </Popup>
           </HoverMarker>
         ))}

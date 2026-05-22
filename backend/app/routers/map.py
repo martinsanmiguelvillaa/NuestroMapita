@@ -5,6 +5,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.place_visited import PlaceVisited
 from app.models.place_wishlist import PlaceWishlist
+from app.models.place_trip import PlaceTrip
 
 router = APIRouter(prefix="/map", tags=["Mapa"])
 
@@ -28,6 +29,12 @@ def get_map_pins(
     wishlist = (
         db.query(PlaceWishlist)
         .filter(PlaceWishlist.latitude.isnot(None), PlaceWishlist.longitude.isnot(None))
+        .all()
+    )
+
+    trips = (
+        db.query(PlaceTrip)
+        .filter(PlaceTrip.latitude.isnot(None), PlaceTrip.longitude.isnot(None))
         .all()
     )
 
@@ -61,5 +68,19 @@ def get_map_pins(
                 "lon": float(p.longitude),
             }
             for p in wishlist
+        ],
+        "trips": [
+            {
+                "id": p.id,
+                "type": "trip",
+                "name": p.name,
+                "address": p.address,
+                "description": p.description,
+                "google_maps_url": p.google_maps_url,
+                "social_url": p.social_url,
+                "lat": float(p.latitude),
+                "lon": float(p.longitude),
+            }
+            for p in trips
         ],
     }

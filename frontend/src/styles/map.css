@@ -101,6 +101,12 @@
   stroke-width: 1;
 }
 
+.map-heart--trip {
+  fill: #6B9DB8;
+  stroke: white;
+  stroke-width: 1;
+}
+
 /* --- Popup del mapa (tarjeta al tocar un pin) --- */
 .leaflet-popup-content-wrapper {
   border-radius: var(--radius-lg) !important;
@@ -158,6 +164,11 @@
 .map-popup__type--wishlist {
   background: var(--color-rose-light);
   color: var(--color-brown-dark);
+}
+
+.map-popup__type--trip {
+  background: #ddeef7;
+  color: #3a6f8a;
 }
 
 .map-popup__photo {
@@ -285,6 +296,7 @@
 
 .map-search__result-dot--visited  { background: var(--color-brown); }
 .map-search__result-dot--wishlist { background: var(--color-rose-dark); }
+.map-search__result-dot--trip     { background: #6B9DB8; }
 
 .map-search__result-name {
   font-size: var(--text-sm);
@@ -344,8 +356,9 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-.map-legend-dot--visited { background: var(--color-brown); }
+.map-legend-dot--visited  { background: var(--color-brown); }
 .map-legend-dot--wishlist { background: var(--color-rose-dark); }
+.map-legend-dot--trip     { background: #6B9DB8; }
 
 /* =========================================
    LOCATION PICKER (selector de ubicación en formularios)
@@ -494,6 +507,15 @@
 
 .map-add__option--wishlist:hover {
   background: #c09090;
+}
+
+.map-add__option--trip {
+  background: #6B9DB8;
+  color: var(--color-white);
+}
+
+.map-add__option--trip:hover {
+  background: #5a8aa3;
 }
 
 /* Mobile: mapa ocupa toda la pantalla */
