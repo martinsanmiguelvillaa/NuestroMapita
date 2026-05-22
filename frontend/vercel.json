@@ -1,15 +1,6 @@
 {
   "rewrites": [
-    { "source": "/auth/:path*",            "destination": "https://nuestromapita-production.up.railway.app/auth/:path*" },
-    { "source": "/places/:path*",          "destination": "https://nuestromapita-production.up.railway.app/places/:path*" },
-    { "source": "/photos/:path*",          "destination": "https://nuestromapita-production.up.railway.app/photos/:path*" },
-    { "source": "/letters/:path*",         "destination": "https://nuestromapita-production.up.railway.app/letters/:path*" },
-    { "source": "/recipes/:path*",         "destination": "https://nuestromapita-production.up.railway.app/recipes/:path*" },
-    { "source": "/cine/:path*",            "destination": "https://nuestromapita-production.up.railway.app/cine/:path*" },
-    { "source": "/recommendations/:path*", "destination": "https://nuestromapita-production.up.railway.app/recommendations/:path*" },
-    { "source": "/push/:path*",            "destination": "https://nuestromapita-production.up.railway.app/push/:path*" },
-    { "source": "/search/:path*",          "destination": "https://nuestromapita-production.up.railway.app/search/:path*" },
-    { "source": "/map/:path*",             "destination": "https://nuestromapita-production.up.railway.app/map/:path*" },
-    { "source": "/(.*)",                   "destination": "/index.html" }
+    { "source": "/api/:path*", "destination": "https://nuestromapita-production.up.railway.app/:path*" },
+    { "source": "/(.*)",       "destination": "/index.html" }
   ]
 }
