@@ -39,10 +39,11 @@
   object-fit: contain;
 }
 
-/* Desktop: el scroll-area fluye naturalmente junto a brand y config */
+/* Desktop: el scroll-area empuja todo el bloque links+config a la derecha */
 .navbar__scroll-area {
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 .navbar__links {
