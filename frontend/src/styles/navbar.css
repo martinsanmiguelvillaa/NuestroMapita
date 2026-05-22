@@ -189,17 +189,26 @@
     overflow: hidden;
   }
 
-  /* Fade derecho para indicar que hay más items */
-  .navbar::after {
+  /* Fades: izquierdo solo si hay scroll, derecho solo si no llegó al final */
+  .navbar--fade-right::after,
+  .navbar--fade-left::before {
     content: '';
     position: absolute;
-    right: 0;
     top: 0;
     width: 28px;
     height: var(--mobile-nav-height);
-    background: linear-gradient(to right, transparent, var(--color-white));
     pointer-events: none;
     z-index: 1;
+  }
+
+  .navbar--fade-right::after {
+    right: 0;
+    background: linear-gradient(to right, transparent, var(--color-white));
+  }
+
+  .navbar--fade-left::before {
+    left: 0;
+    background: linear-gradient(to left, transparent, var(--color-white));
   }
 
   .navbar__brand {

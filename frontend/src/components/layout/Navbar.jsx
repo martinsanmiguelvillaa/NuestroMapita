@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
@@ -20,6 +20,9 @@ export default function Navbar() {
   const { logout } = useAuth();
   const [confirming, setConfirming] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
+  const [fadeLeft, setFadeLeft] = useState(false);
+  const [fadeRight, setFadeRight] = useState(false);
+  const linksRef = useRef(null);
   const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
 
   useEffect(() => {
@@ -29,9 +32,31 @@ export default function Navbar() {
     return () => document.removeEventListener('keydown', handler);
   }, [configOpen]);
 
+  useEffect(() => {
+    const el = linksRef.current;
+    if (!el) return;
+    const update = () => {
+      setFadeLeft(el.scrollLeft > 4);
+      setFadeRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    };
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      el.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  const navClass = [
+    'navbar',
+    fadeLeft  ? 'navbar--fade-left'  : '',
+    fadeRight ? 'navbar--fade-right' : '',
+  ].filter(Boolean).join(' ');
+
   return (
     <>
-      <nav className="navbar">
+      <nav className={navClass}>
         {/* Marca / título (solo visible en desktop) */}
         <Link to="/" className="navbar__brand">
           <img src="/icons/icono-app.png" alt="" className="navbar__brand-icon" />
@@ -39,7 +64,7 @@ export default function Navbar() {
         </Link>
 
         {/* Links de navegación */}
-        <ul className="navbar__links">
+        <ul className="navbar__links" ref={linksRef}>
           {links.map(({ to, label, icon }) => (
             <li key={to}>
               <NavLink
