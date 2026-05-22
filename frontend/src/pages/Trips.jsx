@@ -291,7 +291,7 @@ export default function Trips() {
       setLoading(false);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error(err);
+      toast.error('No se pudieron cargar los viajecitos');
       setLoading(false);
     }
   }, [search]);

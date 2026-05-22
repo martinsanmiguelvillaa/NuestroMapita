@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
 import { polaroidUrl, fullUrl } from '../utils/cloudinary';
+import { useToast } from '../context/ToastContext';
 import '../styles/home.css';
 import '../styles/photos.css';
 
@@ -171,6 +172,7 @@ function HomeLightbox({ photo, onClose }) {
 
 // ── Página principal ───────────────────────────────────────────────
 export default function Home() {
+  const toast = useToast();
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
   const [previewLetters, setPreviewLetters] = useState([]);
@@ -201,7 +203,7 @@ export default function Home() {
       }
       setRecentPhotos(all.slice(0, 8));
     } catch (err) {
-      console.error('Error cargando home:', err);
+      toast.error('No se pudo cargar el inicio');
     } finally {
       setLoading(false);
     }

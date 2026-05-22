@@ -29,7 +29,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
       const data = await getCineItem(itemId);
       setItem(data);
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo cargar la película');
     } finally {
       setLoading(false);
     }

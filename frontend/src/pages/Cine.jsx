@@ -57,7 +57,7 @@ export default function Cine() {
       setItems(data);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error(err);
+      toast.error('No se pudo cargar el cine');
     } finally {
       setLoading(false);
     }

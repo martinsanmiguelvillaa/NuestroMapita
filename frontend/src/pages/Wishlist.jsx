@@ -310,7 +310,7 @@ export default function Wishlist() {
       setLoading(false);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error(err);
+      toast.error('No se pudo cargar la lista');
       setLoading(false);
     }
   }, [search]);

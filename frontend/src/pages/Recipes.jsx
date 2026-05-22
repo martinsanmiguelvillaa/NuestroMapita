@@ -46,7 +46,7 @@ export default function Recipes() {
       setRecipes(data);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error(err);
+      toast.error('No se pudieron cargar las recetas');
     } finally {
       setLoading(false);
     }

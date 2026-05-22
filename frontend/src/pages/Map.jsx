@@ -122,7 +122,7 @@ export default function MapPage() {
       setWishlist(data.wishlist || []);
       setTrips(data.trips || []);
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo cargar el mapa');
       setLoadError(true);
     } finally {
       setLoading(false);

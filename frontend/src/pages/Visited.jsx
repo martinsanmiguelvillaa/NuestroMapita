@@ -203,7 +203,7 @@ export default function Visited() {
       setLoading(false);
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.error(err);
+      toast.error('No se pudieron cargar los lugares visitados');
       setLoading(false);
     }
   }, [sort, search, revisitFilter]);

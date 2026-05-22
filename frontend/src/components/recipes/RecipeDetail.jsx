@@ -20,7 +20,7 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
       const data = await getRecipe(recipeId);
       setRecipe(data);
     } catch (err) {
-      console.error(err);
+      toast.error('No se pudo cargar la receta');
     } finally {
       setLoading(false);
     }
