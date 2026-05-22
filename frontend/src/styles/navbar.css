@@ -175,7 +175,7 @@
   gap: var(--space-3);
 }
 
-/* --- Mobile: bottom nav --- */
+/* --- Mobile: bottom nav scrollable, solo iconos --- */
 @media (max-width: 768px) {
   .navbar {
     top: auto;
@@ -183,9 +183,23 @@
     height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
     border-top: 1.5px solid var(--color-beige-mid);
     border-bottom: none;
-    padding: 0 var(--space-2);
+    padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
     box-shadow: 0 -2px 12px rgba(74, 55, 40, 0.1);
+    overflow: hidden;
+  }
+
+  /* Fade derecho para indicar que hay más items */
+  .navbar::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 28px;
+    height: var(--mobile-nav-height);
+    background: linear-gradient(to right, transparent, var(--color-white));
+    pointer-events: none;
+    z-index: 1;
   }
 
   .navbar__brand {
@@ -194,36 +208,63 @@
 
   .navbar__links {
     flex: 1;
-    justify-content: space-around;
+    display: flex;
+    align-items: center;
     gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    height: var(--mobile-nav-height);
+    padding: 0 var(--space-2);
+  }
+
+  .navbar__links::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ocultar etiquetas de texto en mobile */
+  .navbar__link span:not(.navbar__link-icon),
+  .navbar__logout span:not(.navbar__link-icon) {
+    display: none;
   }
 
   .navbar__link {
+    flex: 0 0 auto;
     flex-direction: column;
-    gap: 2px;
-    padding: var(--space-2) var(--space-1);
-    font-size: 10px;
+    gap: 0;
+    width: 52px;
+    height: 48px;
+    padding: 0;
     border-radius: var(--radius-md);
-    flex: 1;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .navbar__link-icon {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
+    line-height: 1;
   }
 
   .navbar__logout {
-    font-size: 10px;
-    padding: var(--space-2) var(--space-1);
-    flex-direction: column;
+    flex: 0 0 auto;
+    width: 52px;
+    height: 48px;
+    padding: 0;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
-    gap: 2px;
+    justify-content: center;
+    font-size: var(--text-sm);
+  }
+
+  .navbar__config-wrap {
+    flex: 0 0 auto;
   }
 
   .navbar__config-menu {
     top: auto;
     bottom: calc(100% + 8px);
-    right: 0;
+    right: 8px;
   }
 }
