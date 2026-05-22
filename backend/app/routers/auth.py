@@ -76,7 +76,7 @@ def login(data: LoginRequest, request: Request, response: Response):
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
     response.set_cookie(key=COOKIE_NAME, value=token, **COOKIE_KWARGS)
-    return {"ok": True}
+    return {"ok": True, "token": token}
 
 
 @router.post("/logout")

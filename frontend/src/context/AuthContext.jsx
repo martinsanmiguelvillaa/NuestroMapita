@@ -7,6 +7,7 @@
  */
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { checkAuth, logout as logoutApi } from '../api/auth';
+import { saveToken, clearToken } from '../api/client';
 
 const AuthContext = createContext(null);
 
@@ -23,7 +24,8 @@ export function AuthProvider({ children }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const login = () => {
+  const login = (token) => {
+    if (token) saveToken(token);
     explicitLoginRef.current = true;
     setIsAuthenticated(true);
     setIsLoading(false);
@@ -35,6 +37,7 @@ export function AuthProvider({ children }) {
     } catch {
       // Si falla el endpoint, igual limpiamos el estado local
     }
+    clearToken();
     setIsAuthenticated(false);
   };
 

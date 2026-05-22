@@ -7,12 +7,26 @@
  */
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const TOKEN_KEY = 'mapita_token';
+
+export function saveToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 async function apiFetch(path, options = {}) {
   const headers = { ...options.headers };
 
   if (!(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
+  }
+
+  const stored = localStorage.getItem(TOKEN_KEY);
+  if (stored) {
+    headers['Authorization'] = `Bearer ${stored}`;
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
