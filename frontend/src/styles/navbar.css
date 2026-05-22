@@ -272,8 +272,10 @@
   }
 
   .navbar__config-menu {
+    position: fixed;
     top: auto;
-    bottom: calc(100% + 8px);
+    bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom) + 8px);
     right: 8px;
+    left: auto;
   }
 }
