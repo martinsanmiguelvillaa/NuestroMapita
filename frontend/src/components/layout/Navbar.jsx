@@ -63,35 +63,38 @@ export default function Navbar() {
           Nuestro Mapita
         </Link>
 
-        {/* Links de navegación */}
-        <ul className="navbar__links" ref={linksRef}>
-          {links.map(({ to, label, icon }) => (
-            <li key={to}>
-              <NavLink
-                to={to}
-                end={to === '/'}
-                className={({ isActive }) => `navbar__link${isActive ? ' active' : ''}`}
-              >
-                <span className="navbar__link-icon">{icon}</span>
-                <span>{label}</span>
-              </NavLink>
-            </li>
-          ))}
+        {/* Links de navegación — envueltos en un div que maneja los fades */}
+        <div className="navbar__scroll-area">
+          <ul className="navbar__links" ref={linksRef}>
+            {links.map(({ to, label, icon }) => (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  end={to === '/'}
+                  className={({ isActive }) => `navbar__link${isActive ? ' active' : ''}`}
+                >
+                  <span className="navbar__link-icon">{icon}</span>
+                  <span>{label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          {/* Config */}
-          <li className="navbar__config-wrap">
-            <button
-              className="navbar__logout"
-              onClick={() => setConfigOpen((v) => !v)}
-              title="Configuración"
-            >
-              <span className="navbar__link-icon">⚙️</span>
-              <span>Config</span>
-            </button>
-            {configOpen && (
-              <>
-                <div className="navbar__config-backdrop" onClick={() => setConfigOpen(false)} />
-                <div className="navbar__config-menu">
+        {/* Config — fuera del ul para que iOS no recorte el touch */}
+        <div className="navbar__config-wrap">
+          <button
+            className="navbar__logout"
+            onClick={() => setConfigOpen((v) => !v)}
+            title="Configuración"
+          >
+            <span className="navbar__link-icon">⚙️</span>
+            <span>Config</span>
+          </button>
+          {configOpen && (
+            <>
+              <div className="navbar__config-backdrop" onClick={() => setConfigOpen(false)} />
+              <div className="navbar__config-menu">
                 {supported && permission !== 'denied' && (
                   <button
                     className="navbar__config-item"
@@ -109,10 +112,9 @@ export default function Navbar() {
                   <span>Cerrar sesión</span>
                 </button>
               </div>
-              </>
-            )}
-          </li>
-        </ul>
+            </>
+          )}
+        </div>
       </nav>
 
       {confirming && (

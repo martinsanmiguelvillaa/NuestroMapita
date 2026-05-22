@@ -38,6 +38,11 @@
   object-fit: contain;
 }
 
+/* En desktop el scroll-area es transparente (solo envuelve la ul) */
+.navbar__scroll-area {
+  display: contents;
+}
+
 .navbar__links {
   display: flex;
   align-items: center;
@@ -186,37 +191,44 @@
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom);
     box-shadow: 0 -2px 12px rgba(74, 55, 40, 0.1);
-    overflow: hidden;
-  }
-
-  /* Fades: izquierdo solo si hay scroll, derecho solo si no llegó al final */
-  .navbar--fade-right::after,
-  .navbar--fade-left::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    width: 28px;
-    height: var(--mobile-nav-height);
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .navbar--fade-right::after {
-    right: 0;
-    background: linear-gradient(to right, transparent, var(--color-white));
-  }
-
-  .navbar--fade-left::before {
-    left: 0;
-    background: linear-gradient(to left, transparent, var(--color-white));
+    overflow: visible;
   }
 
   .navbar__brand {
     display: none;
   }
 
-  .navbar__links {
+  /* Wrapper que clipea la lista y muestra los fades */
+  .navbar__scroll-area {
     flex: 1;
+    position: relative;
+    overflow: hidden;
+    height: var(--mobile-nav-height);
+  }
+
+  /* Fades sobre el scroll-area */
+  .navbar--fade-right .navbar__scroll-area::after,
+  .navbar--fade-left .navbar__scroll-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .navbar--fade-right .navbar__scroll-area::after {
+    right: 0;
+    background: linear-gradient(to right, transparent, var(--color-white));
+  }
+
+  .navbar--fade-left .navbar__scroll-area::before {
+    left: 0;
+    background: linear-gradient(to left, transparent, var(--color-white));
+  }
+
+  .navbar__links {
     display: flex;
     align-items: center;
     gap: 0;
@@ -255,6 +267,18 @@
     line-height: 1;
   }
 
+  /* Botón de config: fuera del scroll, siempre visible a la derecha */
+  .navbar__config-wrap {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    height: var(--mobile-nav-height);
+    padding-right: var(--space-1);
+    background: var(--color-white);
+    position: relative;
+    z-index: 2;
+  }
+
   .navbar__logout {
     flex: 0 0 auto;
     width: 52px;
@@ -265,10 +289,6 @@
     align-items: center;
     justify-content: center;
     font-size: var(--text-sm);
-  }
-
-  .navbar__config-wrap {
-    flex: 0 0 auto;
   }
 
   .navbar__config-menu {
