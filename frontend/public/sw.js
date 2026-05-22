@@ -1,7 +1,12 @@
 // Service Worker — PWA + Web Push
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request)));
+// Solo interceptar GETs del mismo origen; dejar pasar el resto sin tocar
+// (el blanket fetch handler rompía requests en iOS)
+self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+});
 
 // Recibir notificación push
 self.addEventListener('push', (e) => {

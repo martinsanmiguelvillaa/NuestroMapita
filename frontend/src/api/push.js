@@ -1,17 +1,14 @@
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import apiFetch from './client';
 
 export async function getVapidPublicKey() {
-  const res = await fetch(`${API_BASE}/push/vapid-public-key`, { credentials: 'include' });
-  const data = await res.json();
+  const data = await apiFetch('/push/vapid-public-key', { skipRedirect: true });
   return data.publicKey;
 }
 
 export async function subscribePush(subscription) {
   const keys = subscription.toJSON().keys;
-  await fetch(`${API_BASE}/push/subscribe`, {
+  await apiFetch('/push/subscribe', {
     method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       endpoint: subscription.endpoint,
       p256dh: keys.p256dh,
@@ -22,10 +19,8 @@ export async function subscribePush(subscription) {
 
 export async function unsubscribePush(subscription) {
   const keys = subscription.toJSON().keys;
-  await fetch(`${API_BASE}/push/unsubscribe`, {
+  await apiFetch('/push/unsubscribe', {
     method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       endpoint: subscription.endpoint,
       p256dh: keys.p256dh,
