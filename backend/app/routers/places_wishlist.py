@@ -25,6 +25,14 @@ def reorder_all(
     _: bool = Depends(get_current_user),
 ):
     """Reordena toda la lista de una vez. Recibe los IDs en el nuevo orden deseado."""
+    if not data.ordered_ids:
+        return {"ok": True}
+    existing_ids = {
+        row.id for row in db.query(PlaceWishlist.id).filter(PlaceWishlist.id.in_(data.ordered_ids)).all()
+    }
+    missing = [pid for pid in data.ordered_ids if pid not in existing_ids]
+    if missing:
+        raise HTTPException(status_code=422, detail=f"IDs no encontrados: {missing}")
     for index, place_id in enumerate(data.ordered_ids):
         db.query(PlaceWishlist).filter(PlaceWishlist.id == place_id).update(
             {"order_index": index}

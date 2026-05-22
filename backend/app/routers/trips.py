@@ -24,6 +24,14 @@ def reorder_all(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
+    if not data.ordered_ids:
+        return {"ok": True}
+    existing_ids = {
+        row.id for row in db.query(PlaceTrip.id).filter(PlaceTrip.id.in_(data.ordered_ids)).all()
+    }
+    missing = [pid for pid in data.ordered_ids if pid not in existing_ids]
+    if missing:
+        raise HTTPException(status_code=422, detail=f"IDs no encontrados: {missing}")
     for index, place_id in enumerate(data.ordered_ids):
         db.query(PlaceTrip).filter(PlaceTrip.id == place_id).update(
             {"order_index": index}
