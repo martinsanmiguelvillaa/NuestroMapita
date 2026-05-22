@@ -454,6 +454,7 @@ export default function Trips() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
+          variant="trip"
         />
       </Modal>
       {addForm.dialog}
@@ -479,6 +480,7 @@ export default function Trips() {
             loading={saving}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
+            variant="trip"
           />
         )}
       </Modal>
