@@ -482,6 +482,7 @@ export default function Wishlist() {
           loading={saving}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
+          variant="wishlist"
         />
       </Modal>
       {addForm.dialog}
@@ -507,6 +508,7 @@ export default function Wishlist() {
             loading={saving}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
+            variant="wishlist"
           />
         )}
       </Modal>

@@ -387,6 +387,7 @@ export default function MapPage() {
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
           initialBounds={addBounds}
+          variant="wishlist"
         />
         {addForm.dialog}
       </Modal>

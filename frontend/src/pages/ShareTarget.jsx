@@ -164,6 +164,7 @@ export default function ShareTarget() {
           loading={saving}
           onDirtyChange={setDirty}
           submitRef={submitRef}
+          variant="wishlist"
         />
       </Modal>
 

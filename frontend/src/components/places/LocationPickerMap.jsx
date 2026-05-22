@@ -26,6 +26,13 @@ const pickerIcon = L.divIcon({
   iconAnchor: [17, 30],
 });
 
+const wishlistPickerIcon = L.divIcon({
+  html: `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" class="map-heart map-heart--wishlist"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>`,
+  className: '',
+  iconSize: [34, 34],
+  iconAnchor: [17, 30],
+});
+
 const tripPickerIcon = L.divIcon({
   html: `<span class="map-trip-pin">✈️</span>`,
   className: '',
@@ -143,7 +150,12 @@ export default function LocationPickerMap({ lat, lng, onChange, initialBounds, v
             attribution='© <a href="https://openstreetmap.org">OpenStreetMap</a>'
           />
           <MapController onMapClick={handleMapClick} flyTo={flyTo} initialBounds={initialBounds} />
-          {hasPin && <Marker position={[lat, lng]} icon={variant === 'trip' ? tripPickerIcon : pickerIcon} />}
+          {hasPin && (
+            <Marker
+              position={[lat, lng]}
+              icon={variant === 'trip' ? tripPickerIcon : variant === 'wishlist' ? wishlistPickerIcon : pickerIcon}
+            />
+          )}
         </MapContainer>
 
         {!hasPin && (
