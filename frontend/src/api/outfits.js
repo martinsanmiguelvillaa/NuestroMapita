@@ -10,7 +10,8 @@ export async function getUserOutfit(userKey) {
 }
 
 export async function getPreferences(userKey) {
-  return apiFetch(`/outfits/${userKey}/preferences`);
+  const data = await apiFetch(`/outfits/${userKey}/preferences`);
+  return data.preferences;
 }
 
 export async function addPreference(userKey, text) {
