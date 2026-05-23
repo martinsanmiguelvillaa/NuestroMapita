@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     OUTFITS_MARTIN_PASSWORD: str = ""
 
     # CORS: lista separada por comas de orígenes permitidos
-    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:80"
+    ALLOWED_ORIGINS: str = ""
 
     # Cookie segura (True en producción HTTPS, False en dev HTTP)
     COOKIE_SECURE: bool = True
