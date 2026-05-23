@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   USERS,
-  ensureSession,
-  clearSession,
   getUserOutfit,
   getPreferences,
   addPreference,
@@ -87,64 +85,41 @@ export default function Outfits() {
   const confirm = useConfirm();
 
   const [selectedUser, setSelectedUser] = useState(() => localStorage.getItem(SELECTED_USER_KEY));
-  const [session, setSession] = useState(null);
   const [outfit, setOutfit] = useState(null);
   const [weather, setWeather] = useState(null);
   const [preferences, setPreferences] = useState([]);
   const [occasion, setOccasion] = useState('');
   const [newPref, setNewPref] = useState('');
   const [loadingOutfit, setLoadingOutfit] = useState(false);
-  const [loadingSession, setLoadingSession] = useState(false);
   const [addingPref, setAddingPref] = useState(false);
   const [deletingPrefId, setDeletingPrefId] = useState(null);
 
-  const initSession = useCallback(async (userKey) => {
-    setLoadingSession(true);
-    setOutfit(null);
-    setPreferences([]);
-    try {
-      const s = await ensureSession(userKey);
-      setSession(s);
-      return s;
-    } catch {
-      toast.error('No se pudo conectar con la API de outfits');
-      return null;
-    } finally {
-      setLoadingSession(false);
-    }
-  }, []);
-
-  const fetchOutfit = useCallback(async (s, prefs, occasionText) => {
+  const fetchOutfit = useCallback(async (userKey, occasionText) => {
     setLoadingOutfit(true);
     let tempPrefId = null;
     try {
       if (occasionText.trim()) {
-        await addPreference(s.userId, s.token, `Ocasión: ${occasionText.trim()}`);
-        const updated = await getPreferences(s.userId, s.token);
+        await addPreference(userKey, `Ocasión: ${occasionText.trim()}`);
+        const updated = await getPreferences(userKey);
         const temp = updated.find(p => p.preference.startsWith('Ocasión: '));
         tempPrefId = temp?.id ?? null;
       }
-      const { outfit: o, weather: w } = await getUserOutfit(s.userId, s.token);
+      const { outfit: o, weather: w } = await getUserOutfit(userKey);
       setOutfit(o);
       setWeather(w);
     } catch (err) {
-      if (err.message?.toLowerCase().includes('unauthorized') || err.message?.includes('401')) {
-        clearSession(selectedUser);
-        toast.error('Sesión expirada, recargá la página');
-      } else {
-        toast.error(err.message || 'No se pudo obtener el outfit');
-      }
+      toast.error(err.message || 'No se pudo obtener el outfit');
     } finally {
       if (tempPrefId) {
-        try { await deletePreference(s.userId, s.token, tempPrefId); } catch { /* no crítico */ }
+        try { await deletePreference(userKey, tempPrefId); } catch { /* no crítico */ }
       }
       setLoadingOutfit(false);
     }
-  }, [selectedUser]);
+  }, []);
 
-  const loadPreferences = useCallback(async (s) => {
+  const loadPreferences = useCallback(async (userKey) => {
     try {
-      const prefs = await getPreferences(s.userId, s.token);
+      const prefs = await getPreferences(userKey);
       setPreferences(prefs);
       return prefs;
     } catch {
@@ -156,11 +131,9 @@ export default function Outfits() {
     if (!selectedUser) return;
     let cancelled = false;
     (async () => {
-      const s = await initSession(selectedUser);
-      if (!s || cancelled) return;
-      const prefs = await loadPreferences(s);
+      await loadPreferences(selectedUser);
       if (cancelled) return;
-      await fetchOutfit(s, prefs, '');
+      await fetchOutfit(selectedUser, '');
     })();
     return () => { cancelled = true; };
   }, [selectedUser]);
@@ -168,29 +141,28 @@ export default function Outfits() {
   function handleSelectUser(userKey) {
     if (busy || userKey === selectedUser) return;
     setSelectedUser(userKey);
-    setLoadingSession(true);
+    setLoadingOutfit(true);
     localStorage.setItem(SELECTED_USER_KEY, userKey);
-    setSession(null);
     setOutfit(null);
     setPreferences([]);
     setOccasion('');
   }
 
   async function handleRefresh() {
-    if (!session) return;
-    const prefs = await loadPreferences(session);
-    await fetchOutfit(session, prefs, occasion);
+    if (!selectedUser) return;
+    await loadPreferences(selectedUser);
+    await fetchOutfit(selectedUser, occasion);
     setOccasion('');
   }
 
   async function handleAddPref(e) {
     e.preventDefault();
-    if (!newPref.trim() || !session) return;
+    if (!newPref.trim() || !selectedUser) return;
     setAddingPref(true);
     try {
-      await addPreference(session.userId, session.token, newPref.trim());
+      await addPreference(selectedUser, newPref.trim());
       setNewPref('');
-      await loadPreferences(session);
+      await loadPreferences(selectedUser);
     } catch (err) {
       toast.error(err.message || 'No se pudo agregar la preferencia');
     } finally {
@@ -208,7 +180,7 @@ export default function Outfits() {
     if (!confirmed) return;
     setDeletingPrefId(pref.id);
     try {
-      await deletePreference(session.userId, session.token, pref.id);
+      await deletePreference(selectedUser, pref.id);
       setPreferences(prev => prev.filter(p => p.id !== pref.id));
     } catch (err) {
       toast.error(err.message || 'No se pudo eliminar la preferencia');
@@ -217,7 +189,7 @@ export default function Outfits() {
     }
   }
 
-  const busy = loadingSession || loadingOutfit;
+  const busy = loadingOutfit;
 
   return (
     <div className="outfits-page">
@@ -244,7 +216,7 @@ export default function Outfits() {
         {busy && (
           <div className="outfits-page__loading">
             <div className="outfits-page__spinner" />
-            <p>{loadingSession ? 'Iniciando sesión...' : 'Armando tu outfit...'}</p>
+            <p>Armando tu outfit...</p>
           </div>
         )}
 

@@ -44,6 +44,13 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
 
+    # Outfits (API externa clima-en-outfits)
+    OUTFITS_API_URL: str = ""
+    OUTFITS_VAN_MAIL: str = ""
+    OUTFITS_VAN_PASSWORD: str = ""
+    OUTFITS_MARTIN_MAIL: str = ""
+    OUTFITS_MARTIN_PASSWORD: str = ""
+
     # CORS: lista separada por comas de orígenes permitidos
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:80"
 
