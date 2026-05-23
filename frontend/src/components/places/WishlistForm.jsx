@@ -69,7 +69,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           className="form-input"
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
-          placeholder="Ej: Monti"
+          placeholder={variant === 'trip' ? 'Ej: Zanzibar, Italia...' : 'Ej: Monti'}
           required
         />
       </div>
