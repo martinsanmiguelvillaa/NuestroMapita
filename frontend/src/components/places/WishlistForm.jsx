@@ -80,7 +80,7 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
           className="form-textarea"
           value={form.description}
           onChange={(e) => set('description', e.target.value)}
-          placeholder="Ej: vimos un reel, tienen mucha pinta las papas..."
+          placeholder={variant === 'trip' ? 'Ej: porque siempre quise ir, vimos reels re lindos...' : 'Ej: vimos un reel, tienen mucha pinta las papas...'}
           rows={3}
         />
       </div>
