@@ -33,9 +33,9 @@ function ProtectedRoute() {
 
 export default function App() {
   return (
+    <ToastProvider>
     <AuthProvider>
       <ConfirmProvider>
-      <ToastProvider>
       <BrowserRouter>
         <Routes>
           {/* Página de login (sin navbar) */}
@@ -65,8 +65,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-      </ToastProvider>
       </ConfirmProvider>
     </AuthProvider>
+    </ToastProvider>
   );
 }

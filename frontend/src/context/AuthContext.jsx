@@ -8,10 +8,12 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { checkAuth, logout as logoutApi } from '../api/auth';
 import { saveToken, clearToken } from '../api/client';
+import { useToast } from './ToastContext';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  const toast = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   // Evita que checkAuth() pise el estado si el usuario ya hizo login explícito
@@ -20,7 +22,14 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     checkAuth()
       .then(() => { if (!explicitLoginRef.current) setIsAuthenticated(true); })
-      .catch(() => { if (!explicitLoginRef.current) setIsAuthenticated(false); })
+      .catch((err) => {
+        if (!explicitLoginRef.current) {
+          setIsAuthenticated(false);
+          if (err?.message !== 'Unauthorized') {
+            toast.error('No se pudo verificar la sesión. Revisá tu conexión.');
+          }
+        }
+      })
       .finally(() => setIsLoading(false));
   }, []);
 
