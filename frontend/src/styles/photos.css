@@ -78,7 +78,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-black-35);
   border: none;
   color: white;
   width: 32px;
@@ -95,7 +95,7 @@
   transition: opacity 0.2s, background 0.15s;
 }
 .cover-photo:hover .cover-photo__arrow { opacity: 1; }
-.cover-photo__arrow:hover { background: rgba(0, 0, 0, 0.6); }
+.cover-photo__arrow:hover { background: var(--color-black-60); }
 .cover-photo__arrow--prev { left: 6px; }
 .cover-photo__arrow--next { right: 6px; }
 
@@ -103,7 +103,7 @@
   position: absolute;
   bottom: 6px;
   right: 8px;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-black-45);
   color: white;
   font-size: 11px;
   padding: 2px 7px;
@@ -117,7 +117,7 @@
   position: absolute;
   bottom: 8px;
   left: 8px;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-black-45);
   border: none;
   color: white;
   font-size: 11px;
@@ -136,7 +136,7 @@
   position: absolute;
   inset: 0;
   cursor: grab;
-  z-index: 3;
+  z-index: var(--z-raised);
   touch-action: none; /* evita que el browser scrollee mientras ajustás */
 }
 .cover-photo__adjust-overlay:active {
@@ -149,17 +149,17 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--color-black-65);
   padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  z-index: 5;
+  z-index: calc(var(--z-raised) + 3);
 }
 
 .cover-photo__adjust-hint {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-white-90);
   font-size: 11px;
   flex: 1;
 }
@@ -188,7 +188,7 @@
 .cover-photo__adjust-save:hover { background: var(--color-beige); }
 .cover-photo__adjust-save:disabled { opacity: 0.6; cursor: default; }
 .cover-photo__adjust-cancel {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-white-15);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
@@ -237,7 +237,7 @@ video::-webkit-media-controls-start-playback-button {
 .photo-gallery__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(74, 55, 40, 0.5);
+  background: var(--color-brown-overlay-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -255,7 +255,7 @@ video::-webkit-media-controls-start-playback-button {
 }
 
 .photo-gallery__delete {
-  background: rgba(255,255,255,0.9);
+  background: var(--color-white-90);
   border: none;
   border-radius: var(--radius-full);
   width: 32px;
@@ -333,7 +333,7 @@ video::-webkit-media-controls-start-playback-button {
   top: 5px;
   left: 5px;
   background: rgba(0, 0, 0, 0.55);
-  color: #f5c518;
+  color: var(--color-cover-star);
   font-size: 12px;
   line-height: 1;
   padding: 3px 5px;
@@ -344,7 +344,7 @@ video::-webkit-media-controls-start-playback-button {
 
 /* Botón "usar como portada" en overlay de miniatura */
 .photo-gallery__cover-btn {
-  background: rgba(255,255,255,0.9);
+  background: var(--color-white-90);
   border: none;
   border-radius: var(--radius-full);
   width: 32px;
@@ -362,7 +362,7 @@ video::-webkit-media-controls-start-playback-button {
 
 /* Botón expandir en overlay de miniatura */
 .photo-gallery__expand {
-  background: rgba(255,255,255,0.9);
+  background: var(--color-white-90);
   border: none;
   border-radius: var(--radius-full);
   width: 32px;
@@ -382,8 +382,8 @@ video::-webkit-media-controls-start-playback-button {
 .lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 300;
+  background: var(--color-black-95);
+  z-index: var(--z-overlay);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -403,7 +403,7 @@ video::-webkit-media-controls-start-playback-button {
   position: absolute;
   top: var(--space-4);
   right: var(--space-4);
-  background: rgba(255,255,255,0.15);
+  background: var(--color-white-15);
   border: none;
   color: white;
   width: 44px;
@@ -417,14 +417,14 @@ video::-webkit-media-controls-start-playback-button {
   transition: var(--transition-fast);
   z-index: 10;
 }
-.lightbox__close:hover { background: rgba(255,255,255,0.3); }
+.lightbox__close:hover { background: var(--color-white-30); }
 
 .lightbox__counter {
   position: absolute;
   top: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  color: rgba(255,255,255,0.7);
+  color: var(--color-white-70);
   font-size: var(--text-sm);
   font-family: var(--font-body);
 }
@@ -434,7 +434,7 @@ video::-webkit-media-controls-start-playback-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.15);
+  background: var(--color-white-15);
   border: none;
   color: white;
   width: 52px;
@@ -450,7 +450,7 @@ video::-webkit-media-controls-start-playback-button {
   z-index: 10;
   user-select: none;
 }
-.lightbox__arrow:hover { background: rgba(255,255,255,0.3); }
+.lightbox__arrow:hover { background: var(--color-white-30); }
 .lightbox__arrow--prev { left: var(--space-4); }
 .lightbox__arrow--next { right: var(--space-4); }
 
@@ -462,8 +462,8 @@ video::-webkit-media-controls-start-playback-button {
 }
 
 .lightbox__action-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--color-white-15);
+  border: 1px solid var(--color-white-30);
   color: white;
   border-radius: var(--radius-full);
   padding: 6px 16px;
@@ -473,18 +473,18 @@ video::-webkit-media-controls-start-playback-button {
   transition: var(--transition-fast);
 }
 .lightbox__action-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--color-white-28);
 }
 .lightbox__action-btn--danger:hover {
-  background: rgba(200, 60, 60, 0.55);
-  border-color: rgba(255, 100, 100, 0.5);
+  background: var(--color-cover-danger);
+  border-color: var(--color-cover-danger-border);
 }
 .lightbox__action-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
 .lightbox__action-btn--active {
-  color: #f5c518;
+  color: var(--color-cover-star);
   border-color: rgba(245, 197, 24, 0.5);
 }
 

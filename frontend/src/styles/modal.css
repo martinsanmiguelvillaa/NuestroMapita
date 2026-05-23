@@ -21,8 +21,8 @@
 .unsaved-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(74, 55, 40, 0.5);
-  z-index: 300;
+  background: var(--color-brown-overlay-strong);
+  z-index: var(--z-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -71,8 +71,8 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 12, 6, 0.78);
-  z-index: 200;
+  background: var(--color-dark-overlay);
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,7 +176,7 @@
     align-items: flex-end;
     padding: 0;
     padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
-    background: rgba(20, 12, 6, 0.82);
+    background: var(--color-dark-overlay-strong);
   }
 
   .modal-fullscreen {

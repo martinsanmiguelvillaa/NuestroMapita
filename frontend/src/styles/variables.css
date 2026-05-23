@@ -88,6 +88,88 @@
   --bg-recipes: url('/backgrounds/fondo-recetas.png');
   --bg-cine: url('/backgrounds/fondo-cine.png');
   --bg-outfits: url('/backgrounds/fondo-outfits.png');
+
+  /* Paleta faltante */
+  --color-beige-light: #FEFBF3;
+
+  /* Overlays de marca */
+  --color-cream-overlay: rgba(253, 246, 236, 0.82);
+  --color-cream-overlay-light: rgba(253, 246, 236, 0.75);
+  --color-cream-overlay-strong: rgba(253, 246, 236, 0.85);
+  --color-brown-overlay: rgba(74, 55, 40, 0.35);
+  --color-brown-overlay-mid: rgba(74, 55, 40, 0.45);
+  --color-brown-overlay-strong: rgba(74, 55, 40, 0.5);
+  --color-dark-overlay: rgba(20, 12, 6, 0.78);
+  --color-dark-overlay-strong: rgba(20, 12, 6, 0.82);
+
+  /* Overlays negros (galería, lightbox) */
+  --color-black-35: rgba(0, 0, 0, 0.35);
+  --color-black-45: rgba(0, 0, 0, 0.45);
+  --color-black-55: rgba(0, 0, 0, 0.55);
+  --color-black-60: rgba(0, 0, 0, 0.60);
+  --color-black-65: rgba(0, 0, 0, 0.65);
+  --color-black-95: rgba(0, 0, 0, 0.95);
+
+  /* Overlays blancos (controles de galería) */
+  --color-white-15: rgba(255, 255, 255, 0.15);
+  --color-white-25: rgba(255, 255, 255, 0.25);
+  --color-white-28: rgba(255, 255, 255, 0.28);
+  --color-white-30: rgba(255, 255, 255, 0.30);
+  --color-white-70: rgba(255, 255, 255, 0.70);
+  --color-white-80: rgba(255, 255, 255, 0.80);
+  --color-white-88: rgba(255, 255, 255, 0.88);
+  --color-white-90: rgba(255, 255, 255, 0.90);
+  --color-white-92: rgba(255, 255, 255, 0.92);
+
+  /* Alertas */
+  --color-error-bg: #fde8e8;
+  --color-error-border: #f5c6c6;
+  --color-success-bg: #e8f5e8;
+  --color-success-border: #c6e0c6;
+
+  /* Cine — favoritos y series */
+  --color-cine-fav: #c05070;
+  --color-cine-fav-hover: #d0607a;
+  --color-cine-fav-bg: #fdf0f3;
+  --color-cine-series: #7a3a5a;
+  --color-cine-watched-bg: rgba(107, 158, 107, 0.15);
+  --color-cine-watched-text: #3a6e3a;
+  --color-cine-watched-border: rgba(107, 158, 107, 0.30);
+  --color-cine-error-bg: #fdf0f0;
+
+  /* Recetas */
+  --color-recipe-dulce: #9a3f5c;
+
+  /* Mapa — viajes */
+  --color-trip: #6B9DB8;
+  --color-trip-dark: #5a8aa3;
+  --color-trip-bg: #ddeef7;
+  --color-trip-text: #3a6f8a;
+
+  /* Lugares — revisitar */
+  --color-revisit-yes-bg: #e8f5e9;
+  --color-revisit-yes-text: #2e7d32;
+  --color-revisit-no-bg: #fce4e4;
+  --color-revisit-no-text: #b71c1c;
+
+  /* Galería — portada destacada */
+  --color-cover-star: #f5c518;
+  --color-cover-star-hover: #c8960c;
+  --color-cover-danger: rgba(200, 60, 60, 0.55);
+  --color-cover-danger-border: rgba(255, 100, 100, 0.50);
+
+  /* Z-index scale */
+  --z-below: -2;
+  --z-base: 1;
+  --z-raised: 2;
+  --z-map-controls: 50;
+  --z-banner: 90;
+  --z-config: 200;
+  --z-modal: 200;
+  --z-navbar: 250;
+  --z-overlay: 300;
+  --z-search: 1000;
+  --z-toast: 1100;
 }
 
 @media (max-width: 768px) {

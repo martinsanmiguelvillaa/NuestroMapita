@@ -13,7 +13,7 @@
   background-color: var(--color-white);
   border-bottom: 1.5px solid var(--color-beige-mid);
   box-shadow: var(--shadow-xs);
-  z-index: 250;
+  z-index: var(--z-navbar);
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -114,7 +114,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   min-width: 210px;
-  z-index: 200;
+  z-index: var(--z-config);
   overflow: hidden;
 }
 
@@ -143,21 +143,21 @@
 }
 
 .navbar__config-item--danger:hover {
-  background: #fce4e4;
+  background: var(--color-revisit-no-bg);
 }
 
 .navbar__config-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 199;
+  z-index: calc(var(--z-config) - 1);
 }
 
 /* --- Confirmación de logout --- */
 .logout-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(74, 55, 40, 0.35);
-  z-index: 200;
+  background: var(--color-brown-overlay);
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -223,7 +223,7 @@
     width: 28px;
     height: 100%;
     pointer-events: none;
-    z-index: 1;
+    z-index: var(--z-base);
   }
 
   .navbar--fade-right .navbar__scroll-area::after {
@@ -284,7 +284,7 @@
     padding-right: var(--space-1);
     background: var(--color-white);
     position: relative;
-    z-index: 2;
+    z-index: var(--z-raised);
   }
 
   .navbar__logout {

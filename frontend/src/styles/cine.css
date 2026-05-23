@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.85);
+  background: var(--color-cream-overlay-strong);
   pointer-events: none;
   z-index: -1;
 }
@@ -201,8 +201,8 @@
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
-  background: rgba(255, 255, 255, 0.92);
-  color: #c05070;
+  background: var(--color-white-92);
+  color: var(--color-cine-fav);
   border-radius: var(--radius-full);
   width: 28px;
   height: 28px;
@@ -301,9 +301,9 @@
 
 .cine-card__fav-btn:hover,
 .cine-card__fav-btn.active {
-  border-color: #d0607a;
-  color: #d0607a;
-  background: #fdf0f3;
+  border-color: var(--color-cine-fav-hover);
+  color: var(--color-cine-fav-hover);
+  background: var(--color-cine-fav-bg);
 }
 
 .cine-card__status-btn:hover {
@@ -340,7 +340,7 @@
 
 .cine-badge--series {
   background: var(--color-rose-light);
-  color: #7a3a5a;
+  color: var(--color-cine-series);
 }
 
 .cine-status {
@@ -360,9 +360,9 @@
 }
 
 .cine-status--watched {
-  background: rgba(107, 158, 107, 0.15);
-  color: #3a6e3a;
-  border: 1px solid rgba(107, 158, 107, 0.3);
+  background: var(--color-cine-watched-bg);
+  color: var(--color-cine-watched-text);
+  border: 1px solid var(--color-cine-watched-border);
 }
 
 /* =========================================
@@ -424,7 +424,7 @@
 
 .cine-detail__fav-indicator {
   font-size: var(--text-xs);
-  color: #c05070;
+  color: var(--color-cine-fav);
   font-weight: 700;
 }
 
@@ -474,8 +474,8 @@
 }
 
 .cine-detail__quick-actions .active-fav {
-  color: #c05070;
-  border-color: #d0607a;
+  color: var(--color-cine-fav);
+  border-color: var(--color-cine-fav-hover);
 }
 
 .cine-detail__trailer-btn {
@@ -1107,7 +1107,7 @@
 .rec-panel__error {
   color: var(--color-error);
   font-size: var(--text-sm);
-  background: #fdf0f0;
+  background: var(--color-cine-error-bg);
   border: 1px solid var(--color-error);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
@@ -1207,11 +1207,11 @@
 }
 
 .rec-card__poster-placeholder--movie {
-  background: linear-gradient(135deg, #e8d5bb 0%, #d4b896 100%);
+  background: linear-gradient(135deg, var(--color-beige-mid) 0%, var(--color-beige-dark) 100%);
 }
 
 .rec-card__poster-placeholder--series {
-  background: linear-gradient(135deg, #f5e0e0 0%, #e8c4c4 100%);
+  background: linear-gradient(135deg, var(--color-rose-light) 0%, var(--color-rose) 100%);
 }
 
 .rec-card__body {

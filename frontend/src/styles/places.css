@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.82);
+  background: var(--color-cream-overlay);
   pointer-events: none;
   z-index: -1;
 }
@@ -56,7 +56,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.82);
+  background: var(--color-cream-overlay);
   pointer-events: none;
   z-index: -1;
 }
@@ -127,7 +127,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-black-35);
   border: none;
   color: white;
   width: 32px;
@@ -146,7 +146,7 @@
 .place-card__photo-wrapper:hover .place-card__cover-arrow {
   opacity: 1;
 }
-.place-card__cover-arrow:hover { background: rgba(0, 0, 0, 0.6); }
+.place-card__cover-arrow:hover { background: var(--color-black-60); }
 .place-card__cover-arrow--prev { left: 6px; }
 .place-card__cover-arrow--next { right: 6px; }
 
@@ -154,7 +154,7 @@
   position: absolute;
   bottom: 6px;
   right: 8px;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-black-45);
   color: white;
   font-size: 11px;
   padding: 2px 7px;
@@ -184,7 +184,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-black-35);
   border: none;
   color: white;
   width: 28px;
@@ -201,7 +201,7 @@
   transition: opacity 0.2s;
 }
 .wish-card__cover:hover .wish-card__cover-arrow { opacity: 1; }
-.wish-card__cover-arrow:hover { background: rgba(0, 0, 0, 0.6); }
+.wish-card__cover-arrow:hover { background: var(--color-black-60); }
 .wish-card__cover-arrow--prev { left: 5px; }
 .wish-card__cover-arrow--next { right: 5px; }
 
@@ -209,7 +209,7 @@
   position: absolute;
   bottom: 5px;
   right: 7px;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--color-black-45);
   color: white;
   font-size: 10px;
   padding: 1px 6px;
@@ -276,13 +276,13 @@
 }
 
 .place-card__revisit-badge--yes {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--color-revisit-yes-bg);
+  color: var(--color-revisit-yes-text);
 }
 
 .place-card__revisit-badge--no {
-  background: #fce4e4;
-  color: #b71c1c;
+  background: var(--color-revisit-no-bg);
+  color: var(--color-revisit-no-text);
 }
 
 .place-card__comment {

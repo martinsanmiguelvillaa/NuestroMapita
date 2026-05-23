@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.82);
+  background: var(--color-cream-overlay);
   pointer-events: none;
   z-index: -1;
 }
@@ -55,7 +55,7 @@
 
 /* Tarjeta de carta - estilo papelito / nota */
 .letter-card {
-  background: #FEFBF3;
+  background: var(--color-beige-light);
   border: 1.5px solid var(--color-beige-mid);
   border-radius: var(--radius-lg);
   padding: var(--space-6);

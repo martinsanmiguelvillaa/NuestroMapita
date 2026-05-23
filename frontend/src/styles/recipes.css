@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.82);
+  background: var(--color-cream-overlay);
   pointer-events: none;
   z-index: -1;
 }
@@ -233,7 +233,7 @@
 
 .recipe-badge--dulce {
   background: var(--color-rose-light);
-  color: #9a3f5c;
+  color: var(--color-recipe-dulce);
 }
 
 /* =========================================

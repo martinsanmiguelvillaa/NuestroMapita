@@ -18,7 +18,7 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   position: relative;
-  z-index: 50;
+  z-index: var(--z-map-controls);
 }
 
 .map-page__map {
@@ -63,7 +63,7 @@
 
 /* --- Pins personalizados --- */
 .map-heart {
-  filter: drop-shadow(2px 3px 5px rgba(74, 55, 40, 0.35));
+  filter: drop-shadow(2px 3px 5px var(--color-brown-overlay));
   cursor: pointer;
   overflow: visible;
   transform-origin: 50% 88%;
@@ -171,8 +171,8 @@
 }
 
 .map-popup__type--trip {
-  background: #ddeef7;
-  color: #3a6f8a;
+  background: var(--color-trip-bg);
+  color: var(--color-trip-text);
 }
 
 .map-popup__photo {
@@ -273,7 +273,7 @@
   list-style: none;
   margin: 0;
   padding: var(--space-1) 0;
-  z-index: 1000;
+  z-index: var(--z-search);
   max-height: 260px;
   overflow-y: auto;
 }
@@ -300,7 +300,7 @@
 
 .map-search__result-dot--visited  { background: var(--color-brown); }
 .map-search__result-dot--wishlist { background: var(--color-rose-dark); }
-.map-search__result-dot--trip     { background: #6B9DB8; }
+.map-search__result-dot--trip     { background: var(--color-trip); }
 
 .map-search__result-name {
   font-size: var(--text-sm);
@@ -334,7 +334,7 @@
   font-size: var(--text-sm);
   color: var(--color-text-light);
   font-style: italic;
-  z-index: 1000;
+  z-index: var(--z-search);
 }
 
 /* Leyenda del mapa */
@@ -362,7 +362,7 @@
 
 .map-legend-dot--visited  { background: var(--color-brown); }
 .map-legend-dot--wishlist { background: var(--color-rose-dark); }
-.map-legend-dot--trip     { background: #6B9DB8; }
+.map-legend-dot--trip     { background: var(--color-trip); }
 
 /* =========================================
    LOCATION PICKER (selector de ubicación en formularios)
@@ -398,14 +398,14 @@
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-white-92);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-full);
   padding: 5px 12px;
   font-size: var(--text-xs);
   color: var(--color-text-mid);
   cursor: pointer;
-  z-index: 1000;
+  z-index: var(--z-search);
   font-family: var(--font-body);
   transition: var(--transition-fast);
 }
@@ -421,7 +421,7 @@
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--color-white-92);
   border: 1px solid var(--color-beige-mid);
   border-radius: var(--radius-full);
   padding: 6px 14px;
@@ -429,7 +429,7 @@
   color: var(--color-text-mid);
   pointer-events: none;
   white-space: nowrap;
-  z-index: 1000;
+  z-index: var(--z-search);
 }
 
 /* --- Botón flotante agregar lugar --- */
@@ -437,7 +437,7 @@
   position: absolute;
   bottom: var(--space-6);
   right: var(--space-6);
-  z-index: 1000;
+  z-index: var(--z-search);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -514,12 +514,12 @@
 }
 
 .map-add__option--trip {
-  background: #6B9DB8;
+  background: var(--color-trip);
   color: var(--color-white);
 }
 
 .map-add__option--trip:hover {
-  background: #5a8aa3;
+  background: var(--color-trip-dark);
 }
 
 /* Mobile: mapa ocupa toda la pantalla */
