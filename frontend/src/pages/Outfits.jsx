@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   USERS,
   getUserOutfit,
@@ -8,6 +9,7 @@ import {
 } from '../api/outfits';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
+import { useOutfitNotifications } from '../hooks/useOutfitNotifications';
 import '../styles/outfits.css';
 
 const SELECTED_USER_KEY = 'outfits_selected_user';
@@ -80,11 +82,148 @@ function formatDate(isoString) {
   return date.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
+// ── Card de notificaciones ─────────────────────────────────────────
+function OutfitNotificationCard({ userKey }) {
+  const { status, notifTime, deviceLabel, saving, activate, updateTime, deactivate } =
+    useOutfitNotifications(userKey);
+
+  const [editingTime, setEditingTime] = useState(false);
+  const [pendingTime, setPendingTime] = useState('09:00');
+
+  if (status === 'loading') return null;
+
+  if (status === 'unsupported') {
+    return (
+      <div className="outfit-notif-card outfit-notif-card--muted">
+        <p className="outfit-notif-card__title">🔔 Notificaciones</p>
+        <p className="outfit-notif-card__msg">
+          Este navegador no permite notificaciones web. Probá desde otro navegador o dispositivo.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'denied') {
+    return (
+      <div className="outfit-notif-card outfit-notif-card--muted">
+        <p className="outfit-notif-card__title">🔔 Notificaciones bloqueadas</p>
+        <p className="outfit-notif-card__msg">
+          Las notificaciones están bloqueadas en este navegador. Para activarlas, tenés que habilitarlas
+          desde la configuración del navegador.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'active') {
+    return (
+      <div className="outfit-notif-card outfit-notif-card--active">
+        <div className="outfit-notif-card__header">
+          <p className="outfit-notif-card__title">🔔 Notificaciones activas</p>
+          <span className="outfit-notif-card__badge">Activo en este dispositivo</span>
+        </div>
+        <p className="outfit-notif-card__device">
+          📱 {deviceLabel || 'Este dispositivo'}
+        </p>
+
+        {editingTime ? (
+          <div className="outfit-notif-card__time-row">
+            <input
+              type="time"
+              className="form-input outfit-notif-card__time-input"
+              value={pendingTime}
+              onChange={e => setPendingTime(e.target.value)}
+            />
+            <button
+              className="btn btn-primary btn-sm"
+              disabled={saving}
+              onClick={async () => {
+                await updateTime(pendingTime);
+                setEditingTime(false);
+              }}
+            >
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setEditingTime(false)}
+            >
+              Cancelar
+            </button>
+          </div>
+        ) : (
+          <div className="outfit-notif-card__time-row">
+            <span className="outfit-notif-card__time-display">⏰ Todos los días a las {notifTime} hs</span>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => { setPendingTime(notifTime); setEditingTime(true); }}
+            >
+              Cambiar horario
+            </button>
+          </div>
+        )}
+
+        <button
+          className="btn btn-ghost btn-sm outfit-notif-card__deactivate"
+          disabled={saving}
+          onClick={deactivate}
+        >
+          Desactivar en este dispositivo
+        </button>
+      </div>
+    );
+  }
+
+  // status === 'inactive'
+  return (
+    <div className="outfit-notif-card">
+      <p className="outfit-notif-card__title">🔔 Notificaciones</p>
+      <p className="outfit-notif-card__desc">
+        Activá las notificaciones en este dispositivo para que te llegue tu outfit del día
+        justo cuando lo necesitás.
+      </p>
+
+      <div className="outfit-notif-card__setup">
+        <div className="outfit-notif-card__time-row">
+          <label className="outfit-notif-card__time-label">Horario</label>
+          <input
+            type="time"
+            className="form-input outfit-notif-card__time-input"
+            defaultValue="09:00"
+            id="notif-time-input"
+          />
+        </div>
+        <button
+          className="btn btn-primary"
+          disabled={saving}
+          onClick={() => {
+            const val = document.getElementById('notif-time-input')?.value || '09:00';
+            activate(val);
+          }}
+        >
+          {saving ? 'Activando...' : 'Activar notificaciones en este dispositivo'}
+        </button>
+      </div>
+
+      <p className="outfit-notif-card__hint">
+        Solo vas a recibir notificaciones en este celu o compu. Si querés recibirlas en otro
+        dispositivo, activálas desde ahí también.
+      </p>
+    </div>
+  );
+}
+
+// ── Página principal ───────────────────────────────────────────────
 export default function Outfits() {
   const toast = useToast();
   const confirm = useConfirm();
+  const [searchParams] = useSearchParams();
 
-  const [selectedUser, setSelectedUser] = useState(() => localStorage.getItem(SELECTED_USER_KEY));
+  const [selectedUser, setSelectedUser] = useState(() => {
+    const fromUrl = searchParams.get('user');
+    if (fromUrl && USERS[fromUrl]) return fromUrl;
+    return localStorage.getItem(SELECTED_USER_KEY);
+  });
   const [outfit, setOutfit] = useState(null);
   const [weather, setWeather] = useState(null);
   const [preferences, setPreferences] = useState([]);
@@ -340,6 +479,9 @@ export default function Outfits() {
                 </ul>
               )}
             </section>
+
+            {/* Notificaciones */}
+            <OutfitNotificationCard key={selectedUser} userKey={selectedUser} />
           </>
         )}
       </div>
