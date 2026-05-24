@@ -9,6 +9,10 @@ export async function getUserOutfit(userKey) {
   return apiFetch(`/outfits/${userKey}/outfit`);
 }
 
+export async function getCachedOutfit(userKey) {
+  return apiFetch(`/outfits/${userKey}/cached-outfit`);
+}
+
 export async function getPreferences(userKey) {
   const data = await apiFetch(`/outfits/${userKey}/preferences`);
   return data.preferences;

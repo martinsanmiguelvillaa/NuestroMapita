@@ -8,5 +8,6 @@ from app.models.cine import CineItem, CineComment
 from app.models.recommendation import RecommendationHistory, BlockedRecommendation
 from app.models.push_subscription import PushSubscription
 from app.models.outfit_notification import OutfitNotificationSubscription
+from app.models.outfit_cache import OutfitCache
 
-__all__ = ["PlaceVisited", "Photo", "PlaceWishlist", "Letter", "Recipe", "RecipeComment", "CineItem", "CineComment", "RecommendationHistory", "BlockedRecommendation", "PushSubscription", "OutfitNotificationSubscription"]
+__all__ = ["PlaceVisited", "Photo", "PlaceWishlist", "Letter", "Recipe", "RecipeComment", "CineItem", "CineComment", "RecommendationHistory", "BlockedRecommendation", "PushSubscription", "OutfitNotificationSubscription", "OutfitCache"]

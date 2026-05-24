@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import {
   USERS,
   getUserOutfit,
+  getCachedOutfit,
   getPreferences,
   addPreference,
   deletePreference,
@@ -272,10 +273,23 @@ export default function Outfits() {
   const [addingPref, setAddingPref] = useState(false);
   const [deletingPrefId, setDeletingPrefId] = useState(null);
 
-  const fetchOutfit = useCallback(async (userKey, occasionText) => {
+  const fetchOutfit = useCallback(async (userKey, occasionText, { forceRefresh = false } = {}) => {
     setLoadingOutfit(true);
     let tempPrefId = null;
     try {
+      // Si no hay ocasión especial y no se fuerza refresco, intentar caché primero
+      if (!occasionText.trim() && !forceRefresh) {
+        try {
+          const cached = await getCachedOutfit(userKey);
+          setOutfit(cached.outfit);
+          setWeather(cached.weather);
+          setLoadingOutfit(false);
+          return;
+        } catch {
+          // No hay caché válido, seguir con la API normal
+        }
+      }
+
       if (occasionText.trim()) {
         await addPreference(userKey, `Ocasión: ${occasionText.trim()}`);
         const updated = await getPreferences(userKey);
@@ -329,7 +343,7 @@ export default function Outfits() {
   async function handleRefresh() {
     if (!selectedUser) return;
     await loadPreferences(selectedUser);
-    await fetchOutfit(selectedUser, occasion);
+    await fetchOutfit(selectedUser, occasion, { forceRefresh: true });
     setOccasion('');
   }
 

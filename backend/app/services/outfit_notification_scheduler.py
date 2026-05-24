@@ -4,9 +4,10 @@ Scheduler para notificaciones push de outfits.
 Cada minuto revisa qué suscripciones activas deben recibir su notificación
 según el horario configurado y la timezone de cada dispositivo.
 """
+import json
 import logging
 import time
-from datetime import datetime, date, timezone as dt_timezone
+from datetime import datetime, timezone as dt_timezone
 from zoneinfo import ZoneInfoNotFoundError, ZoneInfo
 
 import requests as http
@@ -14,6 +15,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.database import SessionLocal
 from app.models.outfit_notification import OutfitNotificationSubscription
+from app.models.outfit_cache import OutfitCache
 from app.services.push_service import send_push_to_endpoint
 from app.config import settings
 
@@ -21,14 +23,15 @@ logger = logging.getLogger(__name__)
 
 _scheduler: BackgroundScheduler | None = None
 
-# Cache de sesión reutilizada de outfits (importamos la función helper)
-from app.routers.outfits import _ensure_session, _proxy, _auth_header
+from app.routers.outfits import _proxy, _auth_header
 
 
-def _get_outfit_for_user(user_key: str) -> dict | None:
-    """Obtiene la recomendación de outfit para el usuario dado."""
+def _fetch_and_cache_outfit(user_key: str, db) -> bool:
+    """
+    Llama a la API externa, guarda el resultado en outfit_cache y devuelve True si tuvo éxito.
+    """
     if not settings.OUTFITS_API_URL:
-        return None
+        return False
     try:
         resp = _proxy(
             user_key,
@@ -38,51 +41,38 @@ def _get_outfit_for_user(user_key: str) -> dict | None:
                 timeout=15,
             ),
         )
-        if resp.ok:
-            return resp.json()
+        if not resp.ok:
+            return False
+
+        data = resp.json()
+        outfit = data.get("outfit") or data.get("outfit_recommendation") or data
+        weather = data.get("weather") or {}
+
+        cache = db.query(OutfitCache).filter_by(user_key=user_key).first()
+        if cache:
+            cache.outfit_data = json.dumps(outfit)
+            cache.weather_data = json.dumps(weather)
+            cache.generated_at = datetime.utcnow()
+        else:
+            cache = OutfitCache(
+                user_key=user_key,
+                outfit_data=json.dumps(outfit),
+                weather_data=json.dumps(weather),
+                generated_at=datetime.utcnow(),
+            )
+            db.add(cache)
+        db.commit()
+        return True
+
     except Exception as exc:
-        logger.warning("No se pudo obtener outfit para %s: %s", user_key, exc)
-    return None
-
-
-def _build_notification(user_key: str, outfit_data: dict | None) -> tuple[str, str]:
-    """Arma título y cuerpo de la notificación."""
-    user_name = "Van" if user_key == "van" else "Martín"
-
-    if not outfit_data:
-        return (
-            f"Tu outfit de hoy 💌",
-            f"Entrá a Nuestro Mapita para ver tu recomendación personalizada.",
-        )
-
-    # Intentar extraer info del clima y recomendación
-    weather = outfit_data.get("weather", {})
-    outfit = outfit_data.get("outfit", {})
-
-    temp = weather.get("temperature") or weather.get("temp")
-    city = weather.get("city", "Buenos Aires")
-    summary = outfit.get("summary") or outfit.get("recommendation", "")
-
-    if temp and summary:
-        body = f"{temp}°C en {city}. {summary}"
-    elif summary:
-        body = summary
-    elif temp:
-        body = f"Hace {temp}°C en {city}. Revisá tu recomendación."
-    else:
-        body = "Tu recomendación personalizada te está esperando."
-
-    # Recortar si es muy largo para la notificación
-    if len(body) > 120:
-        body = body[:117] + "..."
-
-    return f"Tu outfit de hoy 💌", body
+        print(f"[outfit-notif] No se pudo cachear outfit para {user_key}: {exc}")
+        return False
 
 
 def send_now(user_key: str, device_id: str, db) -> dict:
     """
-    Envía una notificación de prueba inmediatamente para un user+device específico.
-    Devuelve un dict con el resultado para diagnóstico.
+    Pre-genera el outfit, lo cachea y envía la notificación de prueba.
+    No actualiza last_sent_at.
     """
     sub = (
         db.query(OutfitNotificationSubscription)
@@ -92,8 +82,10 @@ def send_now(user_key: str, device_id: str, db) -> dict:
     if not sub:
         return {"ok": False, "error": "Suscripción no encontrada"}
 
-    outfit_data = _get_outfit_for_user(user_key)
-    title, body = _build_notification(user_key, outfit_data)
+    _fetch_and_cache_outfit(user_key, db)
+
+    title = "Tu outfit de hoy 💌"
+    body = "Ya está lista tu recomendación. Tocá para verla."
     url = f"/outfits?user={user_key}"
 
     success = send_push_to_endpoint(
@@ -106,7 +98,6 @@ def send_now(user_key: str, device_id: str, db) -> dict:
     )
 
     if success:
-        # No actualizar last_sent_at: es un test, no queremos bloquear el envío real del día
         return {"ok": True, "title": title, "body": body}
     else:
         sub.enabled = False
@@ -141,8 +132,11 @@ def _check_and_send() -> None:
                 if current_hhmm != sub.notification_time:
                     continue
 
-                outfit_data = _get_outfit_for_user(sub.user_key)
-                title, body = _build_notification(sub.user_key, outfit_data)
+                # Pre-generar y cachear el outfit antes de notificar
+                _fetch_and_cache_outfit(sub.user_key, db)
+
+                title = "Tu outfit de hoy 💌"
+                body = "Ya está lista tu recomendación. Tocá para verla."
                 url = f"/outfits?user={sub.user_key}"
 
                 success = send_push_to_endpoint(

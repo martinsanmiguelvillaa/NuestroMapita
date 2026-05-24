@@ -1,11 +1,16 @@
+import json
 import time
+from datetime import datetime, timedelta
 
 import requests as http
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.database import get_db
 from app.dependencies import get_current_user
+from app.models.outfit_cache import OutfitCache
 
 router = APIRouter(prefix="/outfits", tags=["Outfits"])
 
@@ -163,6 +168,28 @@ def add_preference(user_key: str, body: PreferenceBody, _: bool = Depends(get_cu
     if not resp.ok:
         raise HTTPException(status_code=resp.status_code, detail="Error al agregar preferencia")
     return resp.json()
+
+
+@router.get("/{user_key}/cached-outfit")
+def get_cached_outfit(
+    user_key: str,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """
+    Devuelve el outfit pre-generado si existe y fue generado en las últimas 12 horas.
+    Si no hay caché válido, devuelve 404 para que el frontend llame al endpoint normal.
+    """
+    cache = db.query(OutfitCache).filter_by(user_key=user_key).first()
+    if not cache:
+        raise HTTPException(status_code=404, detail="Sin caché")
+    if datetime.utcnow() - cache.generated_at > timedelta(hours=12):
+        raise HTTPException(status_code=404, detail="Caché expirado")
+    return {
+        "outfit": json.loads(cache.outfit_data),
+        "weather": json.loads(cache.weather_data),
+        "from_cache": True,
+    }
 
 
 @router.delete("/{user_key}/preferences/{pref_id}", status_code=204)

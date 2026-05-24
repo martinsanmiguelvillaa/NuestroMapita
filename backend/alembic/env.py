@@ -12,7 +12,7 @@ from app.database import Base
 from app.config import settings
 
 # Importar todos los modelos para que Alembic los detecte al hacer autogenerate
-from app.models import place_visited, photo, place_wishlist, letter, name, outfit_notification  # noqa
+from app.models import place_visited, photo, place_wishlist, letter, name, outfit_notification, outfit_cache  # noqa
 
 config = context.config
 
