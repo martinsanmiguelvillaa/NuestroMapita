@@ -215,7 +215,7 @@ export default function Home() {
     { to: '/mapa',        icon: '🗺️', name: 'Mapa',       desc: 'Ver todos en el mapa' },
     { to: '/visitados',   icon: '✓', name: 'Ya hicimos',  desc: `${stats.visited} lugar${stats.visited !== 1 ? 'es' : ''}` },
     { to: '/por-visitar', icon: '★', name: 'Por hacer',   desc: `${stats.wishlist} pendiente${stats.wishlist !== 1 ? 's' : ''}` },
-    { to: '/cartitas',    icon: '💌', name: 'Cartitas',    desc: `${stats.letters} guardada${stats.letters !== 1 ? 's' : ''}` },
+    { to: '/nombres',     icon: '👶', name: 'Nombres',     desc: 'Ranking de nombres' },
     { to: '/recetas',     icon: '🍴', name: 'Recetas',     desc: 'Ver nuestras recetas' },
     { to: '/cine',        icon: '🎬', name: 'Cine',        desc: 'Películas y series' },
     { to: '/viajecitos',  icon: '✈️', name: 'Viajecitos',  desc: 'Nuestros próximos viajes' },
