@@ -132,22 +132,14 @@ def _check_and_send() -> None:
 
                 now_local = now_utc.astimezone(tz)
                 current_hhmm = now_local.strftime("%H:%M")
-                today = now_local.date()
 
                 print(
                     f"[outfit-notif] user={sub.user_key} device={sub.device_id[:8]} "
-                    f"hora_local={current_hhmm} hora_config={sub.notification_time} "
-                    f"last_sent={sub.last_sent_at}"
+                    f"hora_local={current_hhmm} hora_config={sub.notification_time}"
                 )
 
                 if current_hhmm != sub.notification_time:
                     continue
-
-                if sub.last_sent_at:
-                    last_sent_local = sub.last_sent_at.replace(tzinfo=dt_timezone.utc).astimezone(tz)
-                    if last_sent_local.date() == today:
-                        print(f"[outfit-notif] ya enviado hoy → skip user={sub.user_key}")
-                        continue
 
                 outfit_data = _get_outfit_for_user(sub.user_key)
                 title, body = _build_notification(sub.user_key, outfit_data)
