@@ -79,6 +79,42 @@ def _build_notification(user_key: str, outfit_data: dict | None) -> tuple[str, s
     return f"Tu outfit de hoy 💌", body
 
 
+def send_now(user_key: str, device_id: str, db) -> dict:
+    """
+    Envía una notificación de prueba inmediatamente para un user+device específico.
+    Devuelve un dict con el resultado para diagnóstico.
+    """
+    sub = (
+        db.query(OutfitNotificationSubscription)
+        .filter_by(user_key=user_key, device_id=device_id)
+        .first()
+    )
+    if not sub:
+        return {"ok": False, "error": "Suscripción no encontrada"}
+
+    outfit_data = _get_outfit_for_user(user_key)
+    title, body = _build_notification(user_key, outfit_data)
+    url = f"/outfits?user={user_key}"
+
+    success = send_push_to_endpoint(
+        endpoint=sub.endpoint,
+        p256dh=sub.p256dh,
+        auth=sub.auth,
+        title=title,
+        body=body,
+        url=url,
+    )
+
+    if success:
+        sub.last_sent_at = datetime.utcnow()
+        db.commit()
+        return {"ok": True, "title": title, "body": body}
+    else:
+        sub.enabled = False
+        db.commit()
+        return {"ok": False, "error": "Suscripción expirada o inválida — fue deshabilitada"}
+
+
 def _check_and_send() -> None:
     """Job principal: revisa suscripciones activas y envía las que correspondan."""
     db = SessionLocal()
@@ -86,9 +122,10 @@ def _check_and_send() -> None:
         now_utc = datetime.now(dt_timezone.utc)
         subs = db.query(OutfitNotificationSubscription).filter_by(enabled=True).all()
 
+        print(f"[outfit-notif] job tick UTC={now_utc.strftime('%H:%M')} subs_activas={len(subs)}")
+
         for sub in subs:
             try:
-                # Convertir hora actual a la timezone del usuario
                 try:
                     tz = ZoneInfo(sub.timezone)
                 except ZoneInfoNotFoundError:
@@ -98,22 +135,24 @@ def _check_and_send() -> None:
                 current_hhmm = now_local.strftime("%H:%M")
                 today = now_local.date()
 
-                # ¿Coincide el horario configurado?
+                print(
+                    f"[outfit-notif] user={sub.user_key} device={sub.device_id[:8]} "
+                    f"hora_local={current_hhmm} hora_config={sub.notification_time} "
+                    f"last_sent={sub.last_sent_at}"
+                )
+
                 if current_hhmm != sub.notification_time:
                     continue
 
-                # ¿Ya se envió hoy?
                 if sub.last_sent_at:
                     last_sent_local = sub.last_sent_at.replace(tzinfo=dt_timezone.utc).astimezone(tz)
                     if last_sent_local.date() == today:
+                        print(f"[outfit-notif] ya enviado hoy → skip user={sub.user_key}")
                         continue
 
-                # Obtener recomendación y enviar
                 outfit_data = _get_outfit_for_user(sub.user_key)
                 title, body = _build_notification(sub.user_key, outfit_data)
-
-                user_key = sub.user_key
-                url = f"/outfits?user={user_key}"
+                url = f"/outfits?user={sub.user_key}"
 
                 success = send_push_to_endpoint(
                     endpoint=sub.endpoint,
@@ -127,26 +166,17 @@ def _check_and_send() -> None:
                 if success:
                     sub.last_sent_at = datetime.utcnow()
                     db.commit()
-                    logger.info(
-                        "Notificación de outfit enviada → user=%s device=%s",
-                        sub.user_key,
-                        sub.device_id[:8],
-                    )
+                    print(f"[outfit-notif] ✓ enviado user={sub.user_key} device={sub.device_id[:8]}")
                 else:
-                    # Suscripción expirada — deshabilitar
                     sub.enabled = False
                     db.commit()
-                    logger.info(
-                        "Suscripción expirada deshabilitada → user=%s device=%s",
-                        sub.user_key,
-                        sub.device_id[:8],
-                    )
+                    print(f"[outfit-notif] ✗ suscripción expirada → deshabilitada user={sub.user_key} device={sub.device_id[:8]}")
 
             except Exception as exc:
-                logger.warning("Error procesando suscripción id=%s: %s", sub.id, exc)
+                print(f"[outfit-notif] ERROR suscripción id={sub.id}: {exc}")
 
     except Exception as exc:
-        logger.error("Error en job de notificaciones de outfits: %s", exc)
+        print(f"[outfit-notif] ERROR general: {exc}")
     finally:
         db.close()
 
@@ -160,6 +190,7 @@ def start_scheduler() -> None:
     # Corre cada minuto en el segundo 0
     _scheduler.add_job(_check_and_send, "cron", second=0, id="outfit_notifications")
     _scheduler.start()
+    print("[outfit-notif] Scheduler iniciado — job cada minuto.")
     logger.info("Scheduler de notificaciones de outfits iniciado.")
 
 

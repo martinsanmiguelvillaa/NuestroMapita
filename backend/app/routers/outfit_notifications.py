@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.outfit_notification import OutfitNotificationSubscription
+from app.services.outfit_notification_scheduler import send_now
 from app.schemas.outfit_notification import (
     OutfitNotificationSubscribeRequest,
     OutfitNotificationSettingsRequest,
@@ -106,6 +107,20 @@ def update_settings(
 
     db.commit()
     return {"ok": True}
+
+
+@router.post("/test-push", status_code=200)
+def test_push(
+    user_key: str,
+    device_id: str,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Envía una notificación de prueba inmediatamente (para diagnóstico)."""
+    result = send_now(user_key, device_id, db)
+    if not result["ok"]:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
 
 
 @router.delete("/unsubscribe", status_code=200)

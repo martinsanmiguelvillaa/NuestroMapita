@@ -22,3 +22,8 @@ export const unsubscribeOutfitNotification = (data) =>
     method: 'DELETE',
     body: JSON.stringify(data),
   });
+
+export const testPushNotification = (userKey, deviceId) =>
+  apiFetch(`${BASE}/test-push?user_key=${userKey}&device_id=${encodeURIComponent(deviceId)}`, {
+    method: 'POST',
+  });
