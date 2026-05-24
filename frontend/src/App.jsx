@@ -22,6 +22,7 @@ import Recipes from './pages/Recipes';
 import Cine from './pages/Cine';
 import Outfits from './pages/Outfits';
 import Trips from './pages/Trips';
+import Names from './pages/Names';
 import ShareTarget from './pages/ShareTarget';
 
 // Ruta protegida: si no hay sesión, manda al login
@@ -58,6 +59,7 @@ export default function App() {
               <Route path="/recetas" element={<Recipes />} />
               <Route path="/cine" element={<Cine />} />
               <Route path="/outfits" element={<Outfits />} />
+              <Route path="/nombres" element={<Names />} />
             </Route>
           </Route>
 

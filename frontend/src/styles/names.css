@@ -1,0 +1,658 @@
+/* =========================================
+   NOMBRES — Ranking de nombres
+   ========================================= */
+
+.names-bg {
+  min-height: calc(100vh - var(--navbar-height));
+  background: var(--color-cream);
+}
+
+/* ─── Tabs ─────────────────────────────── */
+.names-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) 0;
+  border-bottom: 2px solid var(--color-beige-mid);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  overflow-x: auto;
+}
+
+.names-tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: var(--space-3) var(--space-5);
+  margin-bottom: -2px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-light);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.names-tab-btn:hover {
+  color: var(--color-brown);
+  background: var(--color-beige);
+}
+
+.names-tab-btn.active {
+  color: var(--color-brown-dark);
+  border-bottom-color: var(--color-brown);
+}
+
+/* ─── Contenido de tabs ──────────────────── */
+.names-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+/* ─── Filtros (chips) ───────────────────── */
+.names-filters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.filter-chip {
+  background: var(--color-beige);
+  border: 1.5px solid var(--color-beige-mid);
+  color: var(--color-text-mid);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-family: var(--font-body);
+}
+
+.filter-chip:hover {
+  border-color: var(--color-brown-light);
+  color: var(--color-brown);
+}
+
+.filter-chip.active {
+  background: var(--color-brown);
+  border-color: var(--color-brown);
+  color: white;
+}
+
+/* ─── Badges de género ──────────────────── */
+.gender-badge {
+  display: inline-block;
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.gender-badge--male {
+  background: #ddeef7;
+  color: #3a6f8a;
+}
+
+.gender-badge--female {
+  background: var(--color-rose-light);
+  color: #9a3f5c;
+}
+
+.gender-badge--unisex {
+  background: #ede8f7;
+  color: #6b4a8a;
+}
+
+/* ─── Formulario de carga ───────────────── */
+.names-form-card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.names-form-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.names-form-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+@media (max-width: 540px) {
+  .names-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.names-gender-options {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.names-gender-btn {
+  background: var(--color-beige);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-full);
+  padding: 6px 16px;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  color: var(--color-text-mid);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-weight: 600;
+}
+
+.names-gender-btn:hover {
+  border-color: var(--color-brown-light);
+  color: var(--color-brown);
+}
+
+.names-gender-btn.active {
+  background: var(--color-brown);
+  border-color: var(--color-brown);
+  color: white;
+}
+
+.names-gender-btn.active.male {
+  background: #3a6f8a;
+  border-color: #3a6f8a;
+}
+
+.names-gender-btn.active.female {
+  background: #9a3f5c;
+  border-color: #9a3f5c;
+}
+
+.names-gender-btn.active.unisex {
+  background: #6b4a8a;
+  border-color: #6b4a8a;
+}
+
+/* ─── Lista de nombres (Cargar tab) ─────── */
+.names-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.name-card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-fast);
+}
+
+.name-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-beige-dark);
+}
+
+.name-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.name-card__text {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.name-card__note {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  margin-top: 2px;
+}
+
+.name-card__ratings-preview {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.rating-pill {
+  background: var(--color-beige);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  font-size: var(--text-xs);
+  color: var(--color-text-mid);
+  font-weight: 600;
+}
+
+.rating-pill--rated {
+  background: var(--color-brown);
+  color: white;
+}
+
+.name-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ─── Selector de perfil ────────────────── */
+.profile-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--space-4);
+}
+
+.profile-selector__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.profile-selector__subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-light);
+  text-align: center;
+  margin-top: -var(--space-4);
+}
+
+.profile-cards {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.profile-card {
+  background: var(--color-white);
+  border: 2px solid var(--color-beige-mid);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8) var(--space-10);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  min-width: 160px;
+}
+
+.profile-card:hover {
+  border-color: var(--color-brown);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.profile-card__avatar {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.profile-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+}
+
+/* ─── Perfil activo banner ───────────────── */
+.active-profile-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-beige);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.active-profile-banner__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ─── Cards de puntuación ───────────────── */
+.rate-card {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-fast);
+}
+
+.rate-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.rate-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.rate-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.rate-card__note {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  margin-bottom: var(--space-3);
+}
+
+/* ─── Botones de rating 1–10 ────────────── */
+.rating-input {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.rating-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-beige-mid);
+  background: var(--color-beige);
+  color: var(--color-text-mid);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rating-btn:hover {
+  border-color: var(--color-brown-light);
+  background: var(--color-beige-mid);
+  color: var(--color-brown);
+}
+
+.rating-btn.selected {
+  background: var(--color-brown);
+  border-color: var(--color-brown);
+  color: white;
+  transform: scale(1.12);
+}
+
+.rating-btn.selected.high {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.rating-feedback {
+  font-size: var(--text-xs);
+  color: var(--color-success);
+  font-weight: 600;
+  margin-left: var(--space-2);
+  animation: fadeInOut 1.6s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateY(2px); }
+  20%  { opacity: 1; transform: translateY(0); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─── Ranking ───────────────────────────── */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ranking-row {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-fast);
+}
+
+.ranking-row:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-beige-dark);
+}
+
+.ranking-row--top1 { border-color: #f5c518; background: #fffdf0; }
+.ranking-row--top2 { border-color: #c0c0c0; background: #fafafa; }
+.ranking-row--top3 { border-color: #cd7f32; background: #fdf8f5; }
+.ranking-row--incomplete { opacity: 0.72; }
+
+.ranking-medal {
+  font-size: 1.6rem;
+  text-align: center;
+  line-height: 1;
+}
+
+.ranking-pos {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-beige);
+  border: 1.5px solid var(--color-beige-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-mid);
+  margin: 0 auto;
+}
+
+.ranking-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.ranking-scores {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: var(--space-1);
+}
+
+.score-chip {
+  background: var(--color-beige);
+  border-radius: var(--radius-full);
+  padding: 2px 10px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-mid);
+}
+
+.score-chip--combined {
+  background: var(--color-brown);
+  color: white;
+}
+
+.score-chip--pending {
+  background: var(--color-beige-mid);
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.match-badge {
+  border-radius: var(--radius-full);
+  padding: 3px 12px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.match-badge--match_perfecto    { background: #fff3c4; color: #856404; }
+.match-badge--muy_buen_acuerdo  { background: #fff8e1; color: #7a6004; }
+.match-badge--gusta_a_ambos     { background: var(--color-success-bg); color: #3a6a3a; }
+.match-badge--opiniones_divididas { background: var(--color-rose-light); color: #8a3030; }
+.match-badge--pendiente_martin  { background: var(--color-beige); color: var(--color-text-light); }
+.match-badge--pendiente_van     { background: var(--color-beige); color: var(--color-text-light); }
+.match-badge--sin_puntuar       { background: var(--color-beige); color: var(--color-text-light); }
+
+.ranking-combined {
+  text-align: right;
+}
+
+.ranking-combined__score {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-brown-dark);
+  font-weight: 700;
+}
+
+.ranking-combined__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+}
+
+/* ─── Ranking filters bar ───────────────── */
+.ranking-controls {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+.ranking-controls select {
+  font-size: var(--text-sm);
+  padding: 6px 10px;
+}
+
+/* ─── Stats header ──────────────────────── */
+.names-stats {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.names-stat {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-5);
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+  min-width: 90px;
+}
+
+.names-stat__number {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  color: var(--color-brown);
+}
+
+.names-stat__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-light);
+  font-weight: 600;
+}
+
+/* ─── Empty states ──────────────────────── */
+.names-empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-text-light);
+}
+
+.names-empty__icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-3);
+}
+
+.names-empty__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--color-text-mid);
+  margin-bottom: var(--space-2);
+}
+
+.names-empty__desc {
+  font-size: var(--text-sm);
+}
+
+/* ─── Search bar ────────────────────────── */
+.names-search {
+  margin-bottom: var(--space-3);
+}
+
+/* ─── Edit inline form ──────────────────── */
+.name-card--editing {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.names-form-inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.names-form-inline__row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ─── Mobile adjustments ─────────────────── */
+@media (max-width: 480px) {
+  .ranking-row {
+    grid-template-columns: 40px 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .ranking-combined {
+    grid-column: 1 / -1;
+    text-align: left;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .rating-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+}

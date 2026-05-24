@@ -14,6 +14,7 @@ const links = [
   { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
   { to: '/cine',       label: 'Cine',        icon: '🎬' },
   { to: '/outfits',   label: 'Outfits',     icon: '👗' },
+  { to: '/nombres',   label: 'Nombres',     icon: '👶' },
 ];
 
 export default function Navbar() {

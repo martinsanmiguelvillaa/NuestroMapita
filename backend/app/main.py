@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine, recommendations, push, trips, outfits
+from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine, recommendations, push, trips, outfits, names
 
 app = FastAPI(
     title="Nuestro Mapita API",
@@ -36,6 +36,7 @@ app.include_router(search.router)
 app.include_router(map.router)
 app.include_router(trips.router)
 app.include_router(outfits.router)
+app.include_router(names.router)
 
 
 @app.get("/health", tags=["Health"])
