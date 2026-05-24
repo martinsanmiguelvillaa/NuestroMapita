@@ -10,7 +10,7 @@ import {
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useOutfitNotifications } from '../hooks/useOutfitNotifications';
-import { testPushNotification } from '../api/outfitNotifications';
+import { testPushNotification, resetLastSent } from '../api/outfitNotifications';
 import '../styles/outfits.css';
 
 const SELECTED_USER_KEY = 'outfits_selected_user';
@@ -101,6 +101,7 @@ function OutfitNotificationCard({ userKey }) {
     setTesting(true);
     setTestResult(null);
     try {
+      await resetLastSent(userKey, deviceId);
       await testPushNotification(userKey, deviceId);
       setTestResult('ok');
     } catch {

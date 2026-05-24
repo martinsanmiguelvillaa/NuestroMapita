@@ -27,3 +27,8 @@ export const testPushNotification = (userKey, deviceId) =>
   apiFetch(`${BASE}/test-push?user_key=${userKey}&device_id=${encodeURIComponent(deviceId)}`, {
     method: 'POST',
   });
+
+export const resetLastSent = (userKey, deviceId) =>
+  apiFetch(`${BASE}/reset-last-sent?user_key=${userKey}&device_id=${encodeURIComponent(deviceId)}`, {
+    method: 'POST',
+  });
