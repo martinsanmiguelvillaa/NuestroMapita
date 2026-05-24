@@ -757,9 +757,6 @@ export default function NamesPage() {
         <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-3xl)', color: 'var(--color-text)', marginBottom: 'var(--space-1)' }}>
           Ranking de nombres
         </h1>
-        <p style={{ color: 'var(--color-text-light)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>
-          Cargá nombres, puntuá cada uno y el sistema arma el ranking combinado.
-        </p>
       </div>
 
       {/* Tabs */}
