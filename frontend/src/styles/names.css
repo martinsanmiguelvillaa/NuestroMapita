@@ -5,6 +5,7 @@
 .names-bg {
   min-height: calc(100vh - var(--navbar-height));
   background: var(--color-cream);
+  overflow-x: hidden;
 }
 
 /* ─── Tabs ─────────────────────────────── */
@@ -480,11 +481,17 @@
   margin: 0 auto;
 }
 
+.ranking-row > div:nth-child(2) {
+  min-width: 0;
+}
+
 .ranking-name {
   font-family: var(--font-heading);
   font-size: var(--text-lg);
   color: var(--color-text);
   margin-bottom: 2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .ranking-scores {

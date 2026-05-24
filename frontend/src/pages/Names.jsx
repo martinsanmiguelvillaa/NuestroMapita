@@ -647,7 +647,7 @@ function RankingTab({ names }) {
                     {isFavorite && <span style={{ fontSize: '0.85rem' }} title="Ambos le pusieron 9 o más">❤️ Favorito</span>}
                   </div>
                   {entry.note && (
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-light)', marginBottom: '6px' }}>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-light)', marginBottom: '6px', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                       {entry.note}
                     </div>
                   )}
