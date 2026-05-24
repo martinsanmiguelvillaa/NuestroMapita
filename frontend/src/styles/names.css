@@ -369,47 +369,38 @@
   margin-bottom: var(--space-3);
 }
 
-/* ─── Botones de rating 1–10 ────────────── */
+/* ─── Botones de rating (alitas) ────────── */
 .rating-input {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
-.rating-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-beige-mid);
-  background: var(--color-beige);
-  color: var(--color-text-mid);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  font-family: var(--font-body);
+.rating-wing-btn {
+  background: none;
+  border: none;
+  padding: 2px;
   cursor: pointer;
-  transition: var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.12s ease;
+  border-radius: var(--radius-sm);
 }
 
-.rating-btn:hover {
-  border-color: var(--color-brown-light);
-  background: var(--color-beige-mid);
-  color: var(--color-brown);
+.rating-wing-btn:hover {
+  transform: scale(1.18) translateY(-1px);
 }
 
-.rating-btn.selected {
-  background: var(--color-brown);
-  border-color: var(--color-brown);
-  color: white;
-  transform: scale(1.12);
+.rating-wing-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 
-.rating-btn.selected.high {
-  background: var(--color-success);
-  border-color: var(--color-success);
+.rating-wing-btn:disabled:hover {
+  transform: none;
 }
 
 .rating-feedback {
@@ -650,9 +641,8 @@
     align-items: center;
   }
 
-  .rating-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 10px;
+  .rating-wing-btn svg {
+    width: 18px;
+    height: 15px;
   }
 }

@@ -78,20 +78,59 @@ function GenderBadge({ gender }) {
   );
 }
 
+// ─── WingIcon ────────────────────────────────────────────────────────
+function WingIcon({ filled, high }) {
+  const color = filled
+    ? high ? 'var(--color-success)' : 'var(--color-brown)'
+    : 'var(--color-beige-dark)';
+  return (
+    <svg
+      viewBox="0 0 24 20"
+      width="22"
+      height="18"
+      aria-hidden="true"
+      style={{ display: 'block', transition: 'all 0.15s ease' }}
+    >
+      {/* Ala izquierda */}
+      <path
+        d="M12 17 C12 17, 3 13, 2 7 C1 3, 5 1, 8 4 C10 6, 11 10, 12 13 Z"
+        fill={filled ? color : 'none'}
+        stroke={color}
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      {/* Ala derecha */}
+      <path
+        d="M12 17 C12 17, 21 13, 22 7 C23 3, 19 1, 16 4 C14 6, 13 10, 12 13 Z"
+        fill={filled ? color : 'none'}
+        stroke={color}
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      {/* Cuerpo central */}
+      <ellipse cx="12" cy="15" rx="1.2" ry="3" fill={color} />
+    </svg>
+  );
+}
+
 // ─── RatingInput ─────────────────────────────────────────────────────
 function RatingInput({ value, onChange, saving }) {
+  const [hovered, setHovered] = useState(null);
+  const active = hovered ?? value ?? 0;
+
   return (
-    <div className="rating-input" aria-label="Puntuación del 1 al 10">
+    <div className="rating-input" aria-label="Puntuación del 1 al 10" onMouseLeave={() => setHovered(null)}>
       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
         <button
           key={n}
           type="button"
-          className={`rating-btn${value === n ? ` selected${n >= 7 ? ' high' : ''}` : ''}`}
+          className="rating-wing-btn"
           onClick={() => onChange(n)}
+          onMouseEnter={() => setHovered(n)}
           disabled={saving}
-          title={`Puntuar ${n}`}
+          title={`${n}/10`}
         >
-          {n}
+          <WingIcon filled={n <= active} high={n >= 7} />
         </button>
       ))}
     </div>
