@@ -254,11 +254,18 @@ def set_cover_photo(
             Photo.place_visited_id == photo.place_visited_id,
             Photo.id != photo_id,
         ).order_by(Photo.sort_order, Photo.created_at).all()
-    else:
+    elif photo.place_wishlist_id:
         siblings = db.query(Photo).filter(
             Photo.place_wishlist_id == photo.place_wishlist_id,
             Photo.id != photo_id,
         ).order_by(Photo.sort_order, Photo.created_at).all()
+    elif photo.place_trip_id:
+        siblings = db.query(Photo).filter(
+            Photo.place_trip_id == photo.place_trip_id,
+            Photo.id != photo_id,
+        ).order_by(Photo.sort_order, Photo.created_at).all()
+    else:
+        raise HTTPException(status_code=400, detail="Foto no asociada a ningún lugar")
 
     photo.sort_order = 0
     for i, sibling in enumerate(siblings):
