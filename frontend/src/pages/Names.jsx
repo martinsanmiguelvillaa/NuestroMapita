@@ -406,11 +406,10 @@ function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
         </p>
         <div className="profile-cards">
           {[
-            { id: 'martin', label: 'Martín', avatar: '👦🏻' },
-            { id: 'van',    label: 'Van',    avatar: '👧🏻' },
+            { id: 'martin', label: 'Martín', avatar: null },
+            { id: 'van',    label: 'Van',    avatar: null },
           ].map(({ id, label, avatar }) => (
             <button key={id} className="profile-card" onClick={() => onProfileChange(id)}>
-              <span className="profile-card__avatar">{avatar}</span>
               <span className="profile-card__name">{label}</span>
             </button>
           ))}
@@ -420,7 +419,6 @@ function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
   }
 
   const profileLabel = activeProfile === 'martin' ? 'Martín' : 'Van';
-  const profileAvatar = activeProfile === 'martin' ? '👦🏻' : '👧🏻';
 
   const rated   = names.filter((n) => n.ratings.some((r) => r.person === activeProfile));
   const unrated = names.filter((n) => !n.ratings.some((r) => r.person === activeProfile));
@@ -438,7 +436,6 @@ function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
       {/* Banner perfil activo */}
       <div className="active-profile-banner">
         <div className="active-profile-banner__info">
-          <span style={{ fontSize: '1.4rem' }}>{profileAvatar}</span>
           <span>Puntuando como <strong>{profileLabel}</strong></span>
           <span className="rating-pill rating-pill--rated">{rated.length}/{names.length} puntuados</span>
         </div>
