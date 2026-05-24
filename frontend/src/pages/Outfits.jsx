@@ -89,6 +89,7 @@ function OutfitNotificationCard({ userKey }) {
 
   const [editingTime, setEditingTime] = useState(false);
   const [pendingTime, setPendingTime] = useState('09:00');
+  const [setupTime, setSetupTime] = useState('09:00');
 
   if (status === 'loading') return null;
 
@@ -189,17 +190,14 @@ function OutfitNotificationCard({ userKey }) {
           <input
             type="time"
             className="form-input outfit-notif-card__time-input"
-            defaultValue="09:00"
-            id="notif-time-input"
+            value={setupTime}
+            onChange={e => setSetupTime(e.target.value)}
           />
         </div>
         <button
           className="btn btn-primary"
           disabled={saving}
-          onClick={() => {
-            const val = document.getElementById('notif-time-input')?.value || '09:00';
-            activate(val);
-          }}
+          onClick={() => activate(setupTime)}
         >
           {saving ? 'Activando...' : 'Activar notificaciones en este dispositivo'}
         </button>
