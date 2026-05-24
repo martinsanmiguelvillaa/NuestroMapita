@@ -17,6 +17,7 @@ class PlaceVisited(Base):
     would_revisit = Column(Boolean, nullable=True)
     latitude = Column(Numeric(10, 7), nullable=True)
     longitude = Column(Numeric(10, 7), nullable=True)
+    source = Column(String(20), nullable=True)   # 'trip' | 'wishlist' | None
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 

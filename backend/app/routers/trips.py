@@ -195,6 +195,7 @@ def convert_to_visited(
         comment=data.comment or trip.description,
         visit_date=data.visit_date,
         rating=data.rating,
+        source="trip",
     )
     db.add(visited)
     db.flush()

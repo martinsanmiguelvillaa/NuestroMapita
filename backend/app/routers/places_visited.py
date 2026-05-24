@@ -9,8 +9,10 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.place_visited import PlaceVisited
 from app.models.place_wishlist import PlaceWishlist
+from app.models.place_trip import PlaceTrip
 from app.schemas.place_visited import PlaceVisitedCreate, PlaceVisitedUpdate, PlaceVisitedResponse
 from app.schemas.place_wishlist import PlaceWishlistResponse
+from app.schemas.place_trip import PlaceTripResponse
 from app.services.cloudinary_service import delete_image
 
 router = APIRouter(prefix="/places/visited", tags=["Lugares visitados"])
@@ -164,3 +166,37 @@ def convert_back_to_wishlist(
     db.commit()
     db.refresh(wish)
     return wish
+
+
+@router.post("/{place_id}/convert-back-to-trip", response_model=PlaceTripResponse, status_code=201)
+def convert_back_to_trip(
+    place_id: int,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Devuelve un lugar visitado (originado desde un viajecito) a la lista de viajecitos."""
+    place = db.query(PlaceVisited).filter(PlaceVisited.id == place_id).first()
+    if not place:
+        raise HTTPException(status_code=404, detail="Lugar no encontrado")
+
+    trip = PlaceTrip(
+        name=place.name,
+        description=place.comment,
+        address=place.address,
+        google_maps_url=place.google_maps_url,
+        latitude=place.latitude,
+        longitude=place.longitude,
+    )
+    db.add(trip)
+    db.flush()
+
+    db.query(Photo).filter(Photo.place_visited_id == place_id).update(
+        {"place_visited_id": None, "place_trip_id": trip.id},
+        synchronize_session=False,
+    )
+    db.expire(place, ["photos"])
+
+    db.delete(place)
+    db.commit()
+    db.refresh(trip)
+    return trip

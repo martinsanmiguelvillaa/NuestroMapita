@@ -205,6 +205,7 @@ def convert_to_visited(
         comment=data.comment or wish.description,
         visit_date=data.visit_date,
         rating=data.rating,
+        source="wishlist",
     )
     db.add(visited)
     db.flush()  # obtener visited.id antes del commit

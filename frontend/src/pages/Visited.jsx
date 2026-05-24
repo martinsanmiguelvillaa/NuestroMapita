@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getVisited, createVisited, updateVisited, deleteVisited, convertBackToWishlist } from '../api/placesVisited';
+import { getVisited, createVisited, updateVisited, deleteVisited, convertBackToWishlist, convertBackToTrip } from '../api/placesVisited';
 import { useConfirm } from '../context/ConfirmContext';
 import { useToast } from '../context/ToastContext';
 import { uploadPhotos } from '../api/photos';
@@ -61,15 +61,21 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   };
 
   const handleConvertBack = async () => {
+    const isTrip = place.source === 'trip';
+    const destination = isTrip ? 'Viajecitos' : 'Por hacer';
     const ok = await confirm({
-      title: `¿Devolver "${place.name}" a Por hacer?`,
+      title: `¿Devolver "${place.name}" a ${destination}?`,
       message: 'Se moverán las fotos pero se perderán el rating y la fecha.',
       confirmLabel: 'Devolver',
     });
     if (!ok) return;
     setConvertingBack(true);
     try {
-      await convertBackToWishlist(place.id);
+      if (isTrip) {
+        await convertBackToTrip(place.id);
+      } else {
+        await convertBackToWishlist(place.id);
+      }
       onDelete?.();
     } catch (err) {
       toast.error('Error: ' + err.message);
@@ -173,7 +179,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
           onClick={handleConvertBack}
           disabled={convertingBack}
         >
-          {convertingBack ? '...' : '↩ Mover a Por hacer'}
+          {convertingBack ? '...' : place.source === 'trip' ? '↩ Mover a Viajecitos' : '↩ Mover a Por hacer'}
         </button>
       </div>
     </div>

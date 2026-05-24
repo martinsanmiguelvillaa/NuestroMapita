@@ -24,3 +24,6 @@ export const deleteVisited = (id) =>
 
 export const convertBackToWishlist = (id) =>
   apiFetch(`${BASE}/${id}/convert-back`, { method: 'POST' });
+
+export const convertBackToTrip = (id) =>
+  apiFetch(`${BASE}/${id}/convert-back-to-trip`, { method: 'POST' });

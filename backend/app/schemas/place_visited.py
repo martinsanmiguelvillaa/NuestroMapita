@@ -62,6 +62,7 @@ class PlaceVisitedResponse(BaseModel):
     would_revisit: Optional[bool]
     latitude: Optional[Decimal]
     longitude: Optional[Decimal]
+    source: Optional[str]
     created_at: datetime
     updated_at: datetime
     photos: List[PhotoResponse] = Field(default_factory=list)
