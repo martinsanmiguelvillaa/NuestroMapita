@@ -116,11 +116,27 @@ def test_push(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Envía una notificación de prueba inmediatamente (para diagnóstico)."""
+    """Envía una notificación de prueba inmediatamente. No modifica last_sent_at."""
     result = send_now(user_key, device_id, db)
     if not result["ok"]:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
+
+
+@router.post("/reset-last-sent", status_code=200)
+def reset_last_sent(
+    user_key: str,
+    device_id: str,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Resetea last_sent_at para que el scheduler pueda enviar hoy (útil para testear)."""
+    sub = _get_sub(db, user_key, device_id)
+    if not sub:
+        raise HTTPException(status_code=404, detail="Suscripción no encontrada")
+    sub.last_sent_at = None
+    db.commit()
+    return {"ok": True}
 
 
 @router.delete("/unsubscribe", status_code=200)

@@ -106,8 +106,7 @@ def send_now(user_key: str, device_id: str, db) -> dict:
     )
 
     if success:
-        sub.last_sent_at = datetime.utcnow()
-        db.commit()
+        # No actualizar last_sent_at: es un test, no queremos bloquear el envío real del día
         return {"ok": True, "title": title, "body": body}
     else:
         sub.enabled = False
