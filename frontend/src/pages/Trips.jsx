@@ -329,10 +329,11 @@ export default function Trips() {
     }
   };
 
-  const handleUpdate = async (data) => {
+  const handleUpdate = async (data, files) => {
     setSaving(true);
     try {
       await updateTrip(editing.id, data);
+      if (files?.length) await uploadTripPhotos(editing.id, files);
       editForm.setDirty(false);
       setEditing(null);
       load();

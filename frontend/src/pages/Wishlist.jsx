@@ -350,10 +350,11 @@ export default function Wishlist() {
     }
   };
 
-  const handleUpdate = async (data) => {
+  const handleUpdate = async (data, files) => {
     setSaving(true);
     try {
       await updateWishlist(editing.id, data);
+      if (files?.length) await uploadWishlistPhotos(editing.id, files);
       editForm.setDirty(false);
       setEditing(null);
       load();

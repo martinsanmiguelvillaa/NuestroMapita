@@ -136,6 +136,11 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
         >
           📷 {photoFiles.length > 0 ? `${photoFiles.length} foto${photoFiles.length !== 1 ? 's' : ''} seleccionada${photoFiles.length !== 1 ? 's' : ''}` : 'Seleccionar fotos'}
         </button>
+        {photoFiles.length > 0 && (
+          <span className="form-hint" style={{ display: 'block', marginTop: '4px' }}>
+            Se subirán al guardar
+          </span>
+        )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>

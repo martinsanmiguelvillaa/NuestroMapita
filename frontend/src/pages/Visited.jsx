@@ -235,10 +235,11 @@ export default function Visited() {
     }
   };
 
-  const handleUpdate = async (data) => {
+  const handleUpdate = async (data, files) => {
     setSaving(true);
     try {
       await updateVisited(editing.id, data);
+      if (files?.length) await uploadPhotos(editing.id, files);
       editForm.setDirty(false);
       setEditing(null);
       load();
