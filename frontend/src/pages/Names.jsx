@@ -467,7 +467,6 @@ function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
                 {l}
               </button>
             ))}
-            <span style={{ width: 1, background: 'var(--color-beige-mid)', margin: '0 4px', alignSelf: 'stretch' }} />
             {[
               { v: 'all',    l: 'Todos' },
               { v: 'unrated', l: 'Sin puntuar' },
