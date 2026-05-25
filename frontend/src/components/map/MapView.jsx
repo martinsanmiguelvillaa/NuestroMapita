@@ -167,6 +167,11 @@ function WishlistPopup({ pin, onConvert, onEdit }) {
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--wishlist">Por hacer</span>
+      {pin.first_photo && (
+        /\/video\/upload\//.test(pin.first_photo)
+          ? <AutoPlayVideo src={pin.first_photo} className="map-popup__photo" />
+          : <img src={pin.first_photo} alt="" className="map-popup__photo" />
+      )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
       {pin.description && (
@@ -199,6 +204,11 @@ function TripPopup({ pin, onConvertTrip, onEdit }) {
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--trip">✈️ Viajecito</span>
+      {pin.first_photo && (
+        /\/video\/upload\//.test(pin.first_photo)
+          ? <AutoPlayVideo src={pin.first_photo} className="map-popup__photo" />
+          : <img src={pin.first_photo} alt="" className="map-popup__photo" />
+      )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
       {pin.description && (

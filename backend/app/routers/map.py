@@ -28,12 +28,14 @@ def get_map_pins(
 
     wishlist = (
         db.query(PlaceWishlist)
+        .options(selectinload(PlaceWishlist.photos))
         .filter(PlaceWishlist.latitude.isnot(None), PlaceWishlist.longitude.isnot(None))
         .all()
     )
 
     trips = (
         db.query(PlaceTrip)
+        .options(selectinload(PlaceTrip.photos))
         .filter(PlaceTrip.latitude.isnot(None), PlaceTrip.longitude.isnot(None))
         .all()
     )
@@ -66,6 +68,7 @@ def get_map_pins(
                 "social_url": p.social_url,
                 "lat": float(p.latitude),
                 "lon": float(p.longitude),
+                "first_photo": p.photos[0].cloudinary_url if p.photos else None,
             }
             for p in wishlist
         ],
@@ -80,6 +83,7 @@ def get_map_pins(
                 "social_url": p.social_url,
                 "lat": float(p.latitude),
                 "lon": float(p.longitude),
+                "first_photo": p.photos[0].cloudinary_url if p.photos else None,
             }
             for p in trips
         ],
