@@ -38,7 +38,6 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
   );
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialData?.image_url || null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const set = (field, value) => {
@@ -74,28 +73,17 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
       notes: form.notes.trim() || null,
     };
 
-    if (initialData?.id) {
-      // Edición: cerrar modal inmediatamente, guardar en background
-      onClose?.();
-      try {
-        let saved = await updateRecipe(initialData.id, payload);
-        if (photoFile) saved = await uploadRecipePhoto(saved.id, photoFile);
-        onSaved?.(saved);
-      } catch (err) {
-        toast.error('No se pudo guardar: ' + err.message);
-      }
-    } else {
-      // Creación: esperar al save antes de cerrar
-      setLoading(true);
-      try {
-        let saved = await createRecipe(payload);
-        if (photoFile) saved = await uploadRecipePhoto(saved.id, photoFile);
-        onSaved?.(saved);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    onClose?.();
+    const tid = toast.loading('Guardando receta...');
+    try {
+      let saved = initialData?.id
+        ? await updateRecipe(initialData.id, payload)
+        : await createRecipe(payload);
+      if (photoFile) saved = await uploadRecipePhoto(saved.id, photoFile);
+      toast.resolve(tid, initialData?.id ? 'Receta actualizada' : 'Receta guardada');
+      onSaved?.(saved);
+    } catch (err) {
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
     }
   };
 
@@ -218,12 +206,8 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
             Cancelar
           </button>
         )}
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading
-            ? 'Guardando...'
-            : initialData?.id
-              ? 'Guardar cambios'
-              : 'Agregar receta'}
+        <button type="submit" className="btn btn-primary">
+          {initialData?.id ? 'Guardar cambios' : 'Agregar receta'}
         </button>
       </div>
     </form>

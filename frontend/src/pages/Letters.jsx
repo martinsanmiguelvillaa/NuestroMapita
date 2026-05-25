@@ -70,7 +70,8 @@ export default function Letters() {
         isDirty={addForm.isDirty}
       >
         <LetterForm
-          onSaved={() => { addForm.setDirty(false); setShowForm(false); load(); }}
+          onClose={() => { addForm.setDirty(false); setShowForm(false); }}
+          onSaved={() => load()}
           onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}

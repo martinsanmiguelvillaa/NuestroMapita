@@ -159,7 +159,8 @@ export default function Recipes() {
         isDirty={addForm.isDirty}
       >
         <RecipeForm
-          onSaved={(r) => { addForm.setDirty(false); handleFormSaved(r); }}
+          onClose={() => { addForm.setDirty(false); setShowForm(false); }}
+          onSaved={() => load()}
           onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}

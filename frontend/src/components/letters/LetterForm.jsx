@@ -18,7 +18,6 @@ export default function LetterForm({ initialData = null, onSaved, onClose, onCan
       : EMPTY_FORM
   );
   const [photoFile, setPhotoFile] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const set = (field, value) => {
@@ -39,28 +38,17 @@ export default function LetterForm({ initialData = null, onSaved, onClose, onCan
       letter_date: form.letter_date || null,
     };
 
-    if (initialData) {
-      // Edición: cerrar modal inmediatamente, guardar en background
-      onClose?.();
-      try {
-        let saved = await updateLetter(initialData.id, payload);
-        if (photoFile) await uploadLetterPhoto(saved.id, photoFile);
-        onSaved?.();
-      } catch (err) {
-        toast.error('No se pudo guardar: ' + err.message);
-      }
-    } else {
-      // Creación: esperar al save antes de cerrar
-      setLoading(true);
-      try {
-        let saved = await createLetter(payload);
-        if (photoFile) await uploadLetterPhoto(saved.id, photoFile);
-        onSaved?.();
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    onClose?.();
+    const tid = toast.loading('Guardando cartita...');
+    try {
+      let saved = initialData
+        ? await updateLetter(initialData.id, payload)
+        : await createLetter(payload);
+      if (photoFile) await uploadLetterPhoto(saved.id, photoFile);
+      toast.resolve(tid, initialData ? 'Cartita actualizada' : 'Cartita guardada');
+      onSaved?.();
+    } catch (err) {
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
     }
   };
 
@@ -121,8 +109,8 @@ export default function LetterForm({ initialData = null, onSaved, onClose, onCan
             Cancelar
           </button>
         )}
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Guardando...' : initialData ? 'Guardar cambios' : 'Escribir cartita'}
+        <button type="submit" className="btn btn-primary">
+          {initialData ? 'Guardar cambios' : 'Escribir cartita'}
         </button>
       </div>
     </form>

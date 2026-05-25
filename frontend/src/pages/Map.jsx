@@ -210,6 +210,8 @@ export default function MapPage() {
     const { type, data: original } = editPlace;
     editForm.setDirty(false);
     setEditPlace(null);
+    const isTrip = type === 'trip';
+    const tid = toast.loading('Guardando cambios...');
     try {
       if (type === 'visited') {
         await updateVisited(original.id, data);
@@ -221,10 +223,10 @@ export default function MapPage() {
         await updateTrip(original.id, data);
         if (files?.length) await uploadTripPhotos(original.id, files);
       }
-      toast.success('Lugar actualizado');
+      toast.resolve(tid, isTrip ? 'Viajecito actualizado' : 'Lugar actualizado');
       load();
     } catch (err) {
-      toast.error('No se pudo guardar: ' + err.message);
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
       load();
     }
   };

@@ -53,7 +53,6 @@ export default function CineForm({ initialData, onSaved, onClose, onCancel, onDi
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [showManual, setShowManual] = useState(isEdit);
   const [form, setForm] = useState(isEdit ? itemToForm(initialData) : EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const handleSearch = async (e) => {
@@ -134,26 +133,18 @@ export default function CineForm({ initialData, onSaved, onClose, onCancel, onDi
       year: form.year || null,
     };
 
-    if (isEdit && initialData?.id) {
-      // Edición: cerrar modal inmediatamente, guardar en background
-      onClose?.();
-      try {
+    onClose?.();
+    const tid = toast.loading('Guardando...');
+    try {
+      if (isEdit && initialData?.id) {
         await updateCineItem(initialData.id, payload);
-        onSaved();
-      } catch (err) {
-        toast.error('No se pudo guardar: ' + (err.message || 'Error desconocido'));
-      }
-    } else {
-      // Creación: esperar al save antes de cerrar
-      setSaving(true);
-      try {
+      } else {
         await createCineItem(payload);
-        onSaved();
-      } catch (err) {
-        setError(err.message || 'No se pudo guardar');
-      } finally {
-        setSaving(false);
       }
+      toast.resolve(tid, isEdit ? 'Guardado' : 'Agregado al cine');
+      onSaved();
+    } catch (err) {
+      toast.reject(tid, 'No se pudo guardar: ' + (err.message || 'Error desconocido'));
     }
   };
 
@@ -419,8 +410,8 @@ export default function CineForm({ initialData, onSaved, onClose, onCancel, onDi
           <button type="button" className="btn btn-ghost" onClick={onCancel}>
             Cancelar
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Guardando...' : (isEdit && initialData?.id) ? 'Guardar cambios' : 'Agregar'}
+          <button type="submit" className="btn btn-primary">
+            {(isEdit && initialData?.id) ? 'Guardar cambios' : 'Agregar'}
           </button>
         </div>
       </div>

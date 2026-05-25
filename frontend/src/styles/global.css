@@ -470,21 +470,19 @@ img {
 .toast-container {
   position: fixed;
   bottom: calc(var(--mobile-nav-height) + var(--space-4));
-  left: 50%;
-  transform: translateX(-50%);
+  right: var(--space-4);
   z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  align-items: center;
+  align-items: flex-end;
   pointer-events: none;
-  width: min(420px, calc(100vw - 2rem));
+  width: min(300px, calc(100vw - 2rem));
 }
 
 .toast {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
@@ -495,6 +493,11 @@ img {
   width: 100%;
 }
 
+.toast__message {
+  flex: 1;
+  min-width: 0;
+}
+
 .toast--error {
   background: var(--color-error);
   color: #fff;
@@ -503,6 +506,26 @@ img {
 .toast--success {
   background: var(--color-success);
   color: #fff;
+}
+
+.toast--loading {
+  background: #444;
+  color: #fff;
+}
+
+.toast__spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .toast__close {

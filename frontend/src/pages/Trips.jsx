@@ -277,7 +277,6 @@ export default function Trips() {
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const addForm = useDirtyForm();
   const editForm = useDirtyForm();
@@ -317,15 +316,16 @@ export default function Trips() {
   });
 
   const handleCreate = async (data, files) => {
-    setSaving(true);
+    addForm.setDirty(false);
+    setShowForm(false);
+    const tid = toast.loading('Guardando viajecito...');
     try {
       const newPlace = await createTrip(data);
       if (files?.length) await uploadTripPhotos(newPlace.id, files);
-      addForm.setDirty(false);
-      setShowForm(false);
+      toast.resolve(tid, 'Viajecito guardado');
       load();
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
     }
   };
 
@@ -333,12 +333,14 @@ export default function Trips() {
     const id = editing.id;
     editForm.setDirty(false);
     setEditing(null);
+    const tid = toast.loading('Guardando cambios...');
     try {
       await updateTrip(id, data);
       if (files?.length) await uploadTripPhotos(id, files);
+      toast.resolve(tid, 'Viajecito actualizado');
       load();
     } catch (err) {
-      toast.error('No se pudo guardar: ' + err.message);
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
       load();
     }
   };
@@ -453,7 +455,7 @@ export default function Trips() {
         <WishlistForm
           onSubmit={handleCreate}
           onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
-          loading={saving}
+          loading={false}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
           variant="trip"

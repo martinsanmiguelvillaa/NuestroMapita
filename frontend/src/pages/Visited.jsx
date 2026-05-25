@@ -194,7 +194,6 @@ export default function Visited() {
   const [revisitFilter, setRevisitFilter] = useState(null); // null | true
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [saving, setSaving] = useState(false);
   const addForm = useDirtyForm();
   const editForm = useDirtyForm();
 
@@ -221,17 +220,16 @@ export default function Visited() {
   }, [load]);
 
   const handleCreate = async (data, files) => {
-    setSaving(true);
+    addForm.setDirty(false);
+    setShowForm(false);
+    const tid = toast.loading('Guardando lugar...');
     try {
       const newPlace = await createVisited(data);
-      if (files?.length) {
-        await uploadPhotos(newPlace.id, files);
-      }
-      addForm.setDirty(false);
-      setShowForm(false);
+      if (files?.length) await uploadPhotos(newPlace.id, files);
+      toast.resolve(tid, 'Lugar agregado a Ya hicimos');
       load();
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
     }
   };
 
@@ -239,12 +237,14 @@ export default function Visited() {
     const id = editing.id;
     editForm.setDirty(false);
     setEditing(null);
+    const tid = toast.loading('Guardando cambios...');
     try {
       await updateVisited(id, data);
       if (files?.length) await uploadPhotos(id, files);
+      toast.resolve(tid, 'Lugar actualizado');
       load();
     } catch (err) {
-      toast.error('No se pudo guardar: ' + err.message);
+      toast.reject(tid, 'No se pudo guardar: ' + err.message);
       load();
     }
   };
@@ -311,7 +311,7 @@ export default function Visited() {
         <PlaceForm
           onSubmit={handleCreate}
           onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
-          loading={saving}
+          loading={false}
           onDirtyChange={addForm.setDirty}
           submitRef={addForm.submitRef}
         />

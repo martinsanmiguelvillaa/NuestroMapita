@@ -227,7 +227,8 @@ export default function Cine() {
           isDirty={addForm.isDirty}
         >
           <CineForm
-            onSaved={() => { addForm.setDirty(false); handleFormSaved(); }}
+            onClose={() => { addForm.setDirty(false); setShowForm(false); }}
+            onSaved={() => load()}
             onCancel={() => addForm.handleAttemptClose(() => setShowForm(false))}
             onDirtyChange={addForm.setDirty}
             submitRef={addForm.submitRef}
