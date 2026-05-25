@@ -198,14 +198,16 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
             )}
             <div className="photo-gallery__overlay">
               <button
+                type="button"
                 className="photo-gallery__expand"
-                onClick={() => setLightboxIndex(i)}
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); }}
                 title="Ver foto"
               >
                 ⤢
               </button>
               {onCoverSet && i !== 0 && (
                 <button
+                  type="button"
                   className="photo-gallery__cover-btn"
                   onClick={(e) => { e.stopPropagation(); handleSetCover(photo, i); }}
                   disabled={settingCover === photo.id}
@@ -216,8 +218,9 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               )}
               {canDelete && (
                 <button
+                  type="button"
                   className="photo-gallery__delete"
-                  onClick={() => handleDelete(photo)}
+                  onClick={(e) => { e.stopPropagation(); handleDelete(photo); }}
                   disabled={deleting === photo.id}
                   title="Eliminar foto"
                 >
@@ -238,11 +241,12 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           </div>
 
           {/* Botón cerrar */}
-          <button className="lightbox__close" onClick={close}>×</button>
+          <button type="button" className="lightbox__close" onClick={close}>×</button>
 
           {/* Flecha anterior */}
           {localPhotos.length > 1 && (
             <button
+              type="button"
               className="lightbox__arrow lightbox__arrow--prev"
               onClick={(e) => { e.stopPropagation(); prev(); }}
             >
@@ -273,6 +277,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           {/* Flecha siguiente */}
           {localPhotos.length > 1 && (
             <button
+              type="button"
               className="lightbox__arrow lightbox__arrow--next"
               onClick={(e) => { e.stopPropagation(); next(); }}
             >
@@ -284,6 +289,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
           <div className="lightbox__actions" onClick={(e) => e.stopPropagation()}>
             {onCoverSet && (
               <button
+                type="button"
                 className={`lightbox__action-btn${lightboxIndex === 0 ? ' lightbox__action-btn--active' : ''}`}
                 onClick={() => handleSetCover(current, lightboxIndex)}
                 disabled={settingCover === current.id || lightboxIndex === 0}
@@ -293,6 +299,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               </button>
             )}
             <button
+              type="button"
               className="lightbox__action-btn"
               onClick={() => handleDownload(current)}
               title="Descargar foto"
@@ -301,6 +308,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
             </button>
             {canDelete && (
               <button
+                type="button"
                 className="lightbox__action-btn lightbox__action-btn--danger"
                 onClick={() => handleDelete(current)}
                 disabled={deleting === current.id}
