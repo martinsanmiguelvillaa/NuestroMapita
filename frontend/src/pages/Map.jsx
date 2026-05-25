@@ -4,9 +4,9 @@
  */
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { getMapPins } from '../api/map';
-import { createVisited } from '../api/placesVisited';
-import { createWishlist } from '../api/placesWishlist';
-import { createTrip } from '../api/trips';
+import { createVisited, updateVisited, getVisitedById } from '../api/placesVisited';
+import { createWishlist, updateWishlist, getWishlistById } from '../api/placesWishlist';
+import { createTrip, updateTrip, getTripById } from '../api/trips';
 import { uploadPhotos, uploadWishlistPhotos, uploadTripPhotos } from '../api/photos';
 import MapView from '../components/map/MapView';
 import ConvertModal from '../components/places/ConvertModal';
@@ -104,6 +104,9 @@ export default function MapPage() {
   const [loadError, setLoadError] = useState(false);
   const [convertPlace, setConvertPlace] = useState(null);
   const [convertTrip, setConvertTrip] = useState(null);
+  const [editPlace, setEditPlace] = useState(null);   // { type: 'visited'|'wishlist'|'trip', data: {...} }
+  const [editSaving, setEditSaving] = useState(false);
+  const editForm = useDirtyForm();
   const [flyToPin, setFlyToPin] = useState(null);
   const [addBounds, setAddBounds] = useState(null); // bounds del mapa al abrir el form
 
@@ -167,6 +170,66 @@ export default function MapPage() {
       latitude: pin.lat,
       longitude: pin.lon,
     });
+  };
+
+  const handleEditVisited = async (pin) => {
+    try {
+      const data = await getVisitedById(pin.id);
+      setEditPlace({ type: 'visited', data });
+    } catch {
+      toast.error('No se pudo cargar el lugar');
+    }
+  };
+
+  const handleEditWishlist = async (pin) => {
+    try {
+      const data = await getWishlistById(pin.id);
+      setEditPlace({ type: 'wishlist', data });
+    } catch {
+      toast.error('No se pudo cargar el lugar');
+    }
+  };
+
+  const handleEditTrip = async (pin) => {
+    try {
+      const data = await getTripById(pin.id);
+      setEditPlace({ type: 'trip', data });
+    } catch {
+      toast.error('No se pudo cargar el lugar');
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    editForm.handleAttemptClose(() => {
+      setEditPlace(null);
+      editForm.setDirty(false);
+    });
+  };
+
+  const handleUpdate = async (data, files) => {
+    if (!editPlace) return;
+    setEditSaving(true);
+    try {
+      const { type, data: original } = editPlace;
+      if (type === 'visited') {
+        await updateVisited(original.id, data);
+        if (files?.length) await uploadPhotos(original.id, files);
+      } else if (type === 'wishlist') {
+        await updateWishlist(original.id, data);
+        if (files?.length) await uploadWishlistPhotos(original.id, files);
+      } else {
+        await updateTrip(original.id, data);
+        if (files?.length) await uploadTripPhotos(original.id, files);
+      }
+      toast.success('Lugar actualizado');
+      editForm.setDirty(false);
+      setEditPlace(null);
+      load();
+    } catch (err) {
+      toast.error('No se pudo guardar: ' + err.message);
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const handleSelectAddType = (type) => {
@@ -313,6 +376,9 @@ export default function MapPage() {
             filter={filter}
             onConvert={handleConvert}
             onConvertTrip={handleConvertTrip}
+            onEditVisited={handleEditVisited}
+            onEditWishlist={handleEditWishlist}
+            onEditTrip={handleEditTrip}
             flyToPin={flyToPin}
             onFlyToDone={() => setFlyToPin(null)}
             mapRef={leafletMapRef}
@@ -432,6 +498,71 @@ export default function MapPage() {
           convertFn={convertTripToVisited}
         />
       )}
+
+      {/* Modal editar — Ya hicimos */}
+      <Modal
+        isOpen={editPlace?.type === 'visited'}
+        onClose={handleCloseEditModal}
+        title="Editar lugar"
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
+        {editPlace?.type === 'visited' && (
+          <PlaceForm
+            initialData={editPlace.data}
+            onSubmit={handleUpdate}
+            onCancel={handleCloseEditModal}
+            loading={editSaving}
+            onDirtyChange={editForm.setDirty}
+            submitRef={editForm.submitRef}
+          />
+        )}
+        {editForm.dialog}
+      </Modal>
+
+      {/* Modal editar — Por hacer */}
+      <Modal
+        isOpen={editPlace?.type === 'wishlist'}
+        onClose={handleCloseEditModal}
+        title="Editar lugar"
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
+        {editPlace?.type === 'wishlist' && (
+          <WishlistForm
+            initialData={editPlace.data}
+            onSubmit={handleUpdate}
+            onCancel={handleCloseEditModal}
+            loading={editSaving}
+            onDirtyChange={editForm.setDirty}
+            submitRef={editForm.submitRef}
+            variant="wishlist"
+          />
+        )}
+        {editForm.dialog}
+      </Modal>
+
+      {/* Modal editar — Viajecito */}
+      <Modal
+        isOpen={editPlace?.type === 'trip'}
+        onClose={handleCloseEditModal}
+        title="Editar viajecito"
+        fullscreen
+        isDirty={editForm.isDirty}
+      >
+        {editPlace?.type === 'trip' && (
+          <WishlistForm
+            initialData={editPlace.data}
+            onSubmit={handleUpdate}
+            onCancel={handleCloseEditModal}
+            loading={editSaving}
+            onDirtyChange={editForm.setDirty}
+            submitRef={editForm.submitRef}
+            variant="trip"
+          />
+        )}
+        {editForm.dialog}
+      </Modal>
     </div>
   );
 }
