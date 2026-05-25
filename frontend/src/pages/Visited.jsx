@@ -187,6 +187,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
 }
 
 export default function Visited() {
+  const toast = useToast();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
