@@ -190,6 +190,8 @@
   color: var(--color-text);
   margin-bottom: var(--space-2);
   font-style: italic;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .map-popup__info {
