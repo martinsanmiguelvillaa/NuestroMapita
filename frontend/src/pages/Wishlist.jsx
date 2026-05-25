@@ -351,15 +351,16 @@ export default function Wishlist() {
   };
 
   const handleUpdate = async (data, files) => {
-    setSaving(true);
+    const id = editing.id;
+    editForm.setDirty(false);
+    setEditing(null);
     try {
-      await updateWishlist(editing.id, data);
-      if (files?.length) await uploadWishlistPhotos(editing.id, files);
-      editForm.setDirty(false);
-      setEditing(null);
+      await updateWishlist(id, data);
+      if (files?.length) await uploadWishlistPhotos(id, files);
       load();
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      toast.error('No se pudo guardar: ' + err.message);
+      load();
     }
   };
 
@@ -506,7 +507,7 @@ export default function Wishlist() {
             }}
             onSubmit={handleUpdate}
             onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
-            loading={saving}
+            loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="wishlist"

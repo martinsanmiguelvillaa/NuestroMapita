@@ -178,7 +178,8 @@ export default function Recipes() {
       >
         <RecipeForm
           initialData={editing}
-          onSaved={(r) => { editForm.setDirty(false); handleFormSaved(r); }}
+          onClose={() => { editForm.setDirty(false); setEditing(null); }}
+          onSaved={() => load()}
           onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
           onDirtyChange={editForm.setDirty}
           submitRef={editForm.submitRef}

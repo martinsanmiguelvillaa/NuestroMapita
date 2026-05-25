@@ -103,7 +103,8 @@ export default function LetterCard({ letter, onChanged }) {
       >
         <LetterForm
           initialData={letter}
-          onSaved={() => { editForm.setDirty(false); setEditing(false); onChanged?.(); }}
+          onClose={() => { editForm.setDirty(false); setEditing(false); }}
+          onSaved={() => onChanged?.()}
           onCancel={() => editForm.handleAttemptClose(() => setEditing(false))}
           onDirtyChange={editForm.setDirty}
           submitRef={editForm.submitRef}

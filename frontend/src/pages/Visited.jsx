@@ -236,15 +236,16 @@ export default function Visited() {
   };
 
   const handleUpdate = async (data, files) => {
-    setSaving(true);
+    const id = editing.id;
+    editForm.setDirty(false);
+    setEditing(null);
     try {
-      await updateVisited(editing.id, data);
-      if (files?.length) await uploadPhotos(editing.id, files);
-      editForm.setDirty(false);
-      setEditing(null);
+      await updateVisited(id, data);
+      if (files?.length) await uploadPhotos(id, files);
       load();
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      toast.error('No se pudo guardar: ' + err.message);
+      load();
     }
   };
 
@@ -335,7 +336,7 @@ export default function Visited() {
             }}
             onSubmit={handleUpdate}
             onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
-            loading={saving}
+            loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
           />

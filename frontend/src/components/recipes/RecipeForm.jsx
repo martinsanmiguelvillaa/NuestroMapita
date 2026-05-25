@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createRecipe, updateRecipe, uploadRecipePhoto } from '../../api/recipes';
+import { useToast } from '../../context/ToastContext';
 
 const EMPTY_FORM = {
   title: '',
@@ -15,8 +16,9 @@ const EMPTY_FORM = {
  * Si `initialData` está presente, modo edición.
  * `onSaved(recipe)` se llama con la receta guardada.
  */
-export default function RecipeForm({ initialData = null, onSaved, onCancel, onDirtyChange, submitRef }) {
+export default function RecipeForm({ initialData = null, onSaved, onClose, onCancel, onDirtyChange, submitRef }) {
   const formRef = useRef();
+  const toast = useToast();
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -63,33 +65,37 @@ export default function RecipeForm({ initialData = null, onSaved, onCancel, onDi
       return setError('El link de video debe ser una URL válida (http...)');
     }
 
-    setLoading(true);
-    try {
-      const payload = {
-        title: form.title.trim(),
-        category: form.category,
-        ingredients: form.ingredients.trim(),
-        steps: form.steps.trim(),
-        video_url: form.video_url.trim() || null,
-        notes: form.notes.trim() || null,
-      };
+    const payload = {
+      title: form.title.trim(),
+      category: form.category,
+      ingredients: form.ingredients.trim(),
+      steps: form.steps.trim(),
+      video_url: form.video_url.trim() || null,
+      notes: form.notes.trim() || null,
+    };
 
-      let saved;
-      if (initialData?.id) {
-        saved = await updateRecipe(initialData.id, payload);
-      } else {
-        saved = await createRecipe(payload);
+    if (initialData?.id) {
+      // Edición: cerrar modal inmediatamente, guardar en background
+      onClose?.();
+      try {
+        let saved = await updateRecipe(initialData.id, payload);
+        if (photoFile) saved = await uploadRecipePhoto(saved.id, photoFile);
+        onSaved?.(saved);
+      } catch (err) {
+        toast.error('No se pudo guardar: ' + err.message);
       }
-
-      if (photoFile) {
-        saved = await uploadRecipePhoto(saved.id, photoFile);
+    } else {
+      // Creación: esperar al save antes de cerrar
+      setLoading(true);
+      try {
+        let saved = await createRecipe(payload);
+        if (photoFile) saved = await uploadRecipePhoto(saved.id, photoFile);
+        onSaved?.(saved);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      onSaved?.(saved);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 

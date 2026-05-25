@@ -247,7 +247,8 @@ export default function Cine() {
           {editing && (
             <CineForm
               initialData={editing}
-              onSaved={() => { editForm.setDirty(false); handleFormSaved(); }}
+              onClose={() => { editForm.setDirty(false); setEditing(null); }}
+              onSaved={() => load()}
               onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
               onDirtyChange={editForm.setDirty}
               submitRef={editForm.submitRef}

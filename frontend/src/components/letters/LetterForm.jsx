@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { createLetter, updateLetter, uploadLetterPhoto } from '../../api/letters';
+import { useToast } from '../../context/ToastContext';
 
 const EMPTY_FORM = { title: '', body: '', letter_date: '' };
 
-export default function LetterForm({ initialData = null, onSaved, onCancel, onDirtyChange, submitRef }) {
+export default function LetterForm({ initialData = null, onSaved, onClose, onCancel, onDirtyChange, submitRef }) {
   const formRef = useRef();
+  const toast = useToast();
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -31,31 +33,34 @@ export default function LetterForm({ initialData = null, onSaved, onCancel, onDi
     if (!form.title.trim()) return setError('El título es obligatorio');
     if (!form.body.trim()) return setError('El mensaje es obligatorio');
 
-    setLoading(true);
-    try {
-      const payload = {
-        title: form.title.trim(),
-        body: form.body.trim(),
-        letter_date: form.letter_date || null,
-      };
+    const payload = {
+      title: form.title.trim(),
+      body: form.body.trim(),
+      letter_date: form.letter_date || null,
+    };
 
-      let saved;
-      if (initialData) {
-        saved = await updateLetter(initialData.id, payload);
-      } else {
-        saved = await createLetter(payload);
+    if (initialData) {
+      // Edición: cerrar modal inmediatamente, guardar en background
+      onClose?.();
+      try {
+        let saved = await updateLetter(initialData.id, payload);
+        if (photoFile) await uploadLetterPhoto(saved.id, photoFile);
+        onSaved?.();
+      } catch (err) {
+        toast.error('No se pudo guardar: ' + err.message);
       }
-
-      // Si hay foto seleccionada, subirla
-      if (photoFile) {
-        await uploadLetterPhoto(saved.id, photoFile);
+    } else {
+      // Creación: esperar al save antes de cerrar
+      setLoading(true);
+      try {
+        let saved = await createLetter(payload);
+        if (photoFile) await uploadLetterPhoto(saved.id, photoFile);
+        onSaved?.();
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      onSaved?.();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 

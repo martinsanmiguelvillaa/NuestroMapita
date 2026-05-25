@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import StarRating from '../places/StarRating';
 import { searchTmdb, getTmdbDetail, createCineItem, updateCineItem } from '../../api/cine';
+import { useToast } from '../../context/ToastContext';
 
 const EMPTY_FORM = {
   title: '',
@@ -36,9 +37,10 @@ function itemToForm(item) {
   };
 }
 
-export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange, submitRef }) {
+export default function CineForm({ initialData, onSaved, onClose, onCancel, onDirtyChange, submitRef }) {
   const isEdit = !!initialData;
   const formRef = useRef();
+  const toast = useToast();
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -120,7 +122,6 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
     setError('');
     if (!form.title.trim()) { setError('El título es obligatorio'); return; }
 
-    setSaving(true);
     const payload = {
       ...form,
       genres: form.genres
@@ -133,17 +134,26 @@ export default function CineForm({ initialData, onSaved, onCancel, onDirtyChange
       year: form.year || null,
     };
 
-    try {
-      if (isEdit && initialData?.id) {
+    if (isEdit && initialData?.id) {
+      // Edición: cerrar modal inmediatamente, guardar en background
+      onClose?.();
+      try {
         await updateCineItem(initialData.id, payload);
-      } else {
-        await createCineItem(payload);
+        onSaved();
+      } catch (err) {
+        toast.error('No se pudo guardar: ' + (err.message || 'Error desconocido'));
       }
-      onSaved();
-    } catch (err) {
-      setError(err.message || 'No se pudo guardar');
-    } finally {
-      setSaving(false);
+    } else {
+      // Creación: esperar al save antes de cerrar
+      setSaving(true);
+      try {
+        await createCineItem(payload);
+        onSaved();
+      } catch (err) {
+        setError(err.message || 'No se pudo guardar');
+      } finally {
+        setSaving(false);
+      }
     }
   };
 

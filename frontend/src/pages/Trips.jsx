@@ -330,15 +330,16 @@ export default function Trips() {
   };
 
   const handleUpdate = async (data, files) => {
-    setSaving(true);
+    const id = editing.id;
+    editForm.setDirty(false);
+    setEditing(null);
     try {
-      await updateTrip(editing.id, data);
-      if (files?.length) await uploadTripPhotos(editing.id, files);
-      editForm.setDirty(false);
-      setEditing(null);
+      await updateTrip(id, data);
+      if (files?.length) await uploadTripPhotos(id, files);
       load();
-    } finally {
-      setSaving(false);
+    } catch (err) {
+      toast.error('No se pudo guardar: ' + err.message);
+      load();
     }
   };
 
@@ -478,7 +479,7 @@ export default function Trips() {
             }}
             onSubmit={handleUpdate}
             onCancel={() => editForm.handleAttemptClose(() => setEditing(null))}
-            loading={saving}
+            loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="trip"
