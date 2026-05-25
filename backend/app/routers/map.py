@@ -40,6 +40,18 @@ def get_map_pins(
         .all()
     )
 
+    def cover_photo(photos):
+        if not photos:
+            return None
+        p = photos[0]
+        return {
+            "id": p.id,
+            "cloudinary_url": p.cloudinary_url,
+            "resource_type": p.resource_type,
+            "position_x": p.position_x,
+            "position_y": p.position_y,
+        }
+
     return {
         "visited": [
             {
@@ -53,7 +65,7 @@ def get_map_pins(
                 "google_maps_url": p.google_maps_url,
                 "lat": float(p.latitude),
                 "lon": float(p.longitude),
-                "first_photo": p.photos[0].cloudinary_url if p.photos else None,
+                "cover_photo": cover_photo(p.photos),
             }
             for p in visited
         ],
@@ -68,7 +80,7 @@ def get_map_pins(
                 "social_url": p.social_url,
                 "lat": float(p.latitude),
                 "lon": float(p.longitude),
-                "first_photo": p.photos[0].cloudinary_url if p.photos else None,
+                "cover_photo": cover_photo(p.photos),
             }
             for p in wishlist
         ],
@@ -83,7 +95,7 @@ def get_map_pins(
                 "social_url": p.social_url,
                 "lat": float(p.latitude),
                 "lon": float(p.longitude),
-                "first_photo": p.photos[0].cloudinary_url if p.photos else None,
+                "cover_photo": cover_photo(p.photos),
             }
             for p in trips
         ],

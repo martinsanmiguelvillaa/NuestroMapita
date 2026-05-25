@@ -381,6 +381,7 @@ export default function MapPage() {
             flyToPin={flyToPin}
             onFlyToDone={() => setFlyToPin(null)}
             mapRef={leafletMapRef}
+            onPositionSaved={load}
           />
         )}
 

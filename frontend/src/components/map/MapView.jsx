@@ -4,9 +4,10 @@
  * IMPORTANTE: Leaflet necesita un fix especial con Vite para los íconos de marcadores.
  * Este fix se aplica al inicio de este archivo.
  */
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StarRating from '../places/StarRating';
+import CoverPhoto from '../photos/CoverPhoto';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../../styles/map.css';
@@ -130,14 +131,20 @@ function formatDate(dateStr) {
 }
 
 // Popup para un lugar visitado
-function VisitedPopup({ pin, onEdit }) {
+function VisitedPopup({ pin, onEdit, onPositionSaved }) {
+  const [coverIndex, setCoverIndex] = useState(0);
+  const photos = pin.cover_photo ? [pin.cover_photo] : [];
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--visited">Ya hicimos</span>
-      {pin.first_photo && (
-        /\/video\/upload\//.test(pin.first_photo)
-          ? <AutoPlayVideo src={pin.first_photo} className="map-popup__photo" />
-          : <img src={pin.first_photo} alt="" className="map-popup__photo" />
+      {photos.length > 0 && (
+        <CoverPhoto
+          photos={photos}
+          coverIndex={coverIndex}
+          onCoverIndexChange={setCoverIndex}
+          onPositionSaved={onPositionSaved}
+          aspectRatio="16/9"
+        />
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.visit_date && <p className="map-popup__info">📅 {formatDate(pin.visit_date)}</p>}
@@ -163,14 +170,20 @@ function VisitedPopup({ pin, onEdit }) {
 }
 
 // Popup para un lugar por visitar
-function WishlistPopup({ pin, onConvert, onEdit }) {
+function WishlistPopup({ pin, onConvert, onEdit, onPositionSaved }) {
+  const [coverIndex, setCoverIndex] = useState(0);
+  const photos = pin.cover_photo ? [pin.cover_photo] : [];
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--wishlist">Por hacer</span>
-      {pin.first_photo && (
-        /\/video\/upload\//.test(pin.first_photo)
-          ? <AutoPlayVideo src={pin.first_photo} className="map-popup__photo" />
-          : <img src={pin.first_photo} alt="" className="map-popup__photo" />
+      {photos.length > 0 && (
+        <CoverPhoto
+          photos={photos}
+          coverIndex={coverIndex}
+          onCoverIndexChange={setCoverIndex}
+          onPositionSaved={onPositionSaved}
+          aspectRatio="16/9"
+        />
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
@@ -200,14 +213,20 @@ function WishlistPopup({ pin, onConvert, onEdit }) {
 }
 
 // Popup para un viajecito
-function TripPopup({ pin, onConvertTrip, onEdit }) {
+function TripPopup({ pin, onConvertTrip, onEdit, onPositionSaved }) {
+  const [coverIndex, setCoverIndex] = useState(0);
+  const photos = pin.cover_photo ? [pin.cover_photo] : [];
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--trip">✈️ Viajecito</span>
-      {pin.first_photo && (
-        /\/video\/upload\//.test(pin.first_photo)
-          ? <AutoPlayVideo src={pin.first_photo} className="map-popup__photo" />
-          : <img src={pin.first_photo} alt="" className="map-popup__photo" />
+      {photos.length > 0 && (
+        <CoverPhoto
+          photos={photos}
+          coverIndex={coverIndex}
+          onCoverIndexChange={setCoverIndex}
+          onPositionSaved={onPositionSaved}
+          aspectRatio="16/9"
+        />
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
@@ -369,7 +388,7 @@ function HoverMarker({ position, icon, children, markerKey, markersRef }) {
  * - filter: 'all' | 'visited' | 'wishlist'
  * - onConvert: callback cuando se toca "Ya fuimos" en el popup
  */
-export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins = [], filter = 'all', onConvert, onConvertTrip, onEditVisited, onEditWishlist, onEditTrip, flyToPin, onFlyToDone, mapRef }) {
+export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins = [], filter = 'all', onConvert, onConvertTrip, onEditVisited, onEditWishlist, onEditTrip, flyToPin, onFlyToDone, mapRef, onPositionSaved }) {
   const allPins = useMemo(() => [...visitedPins, ...wishlistPins, ...tripsPins], [visitedPins, wishlistPins, tripsPins]);
   const markersRef = useRef({});
   const defaultCenter = [-34.6037, -58.3816]; // Buenos Aires como default
@@ -405,7 +424,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins
         visitedPins.map((pin, i) => (
           <HoverMarker key={`v-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--visited', i * 35)} markerKey={`visited-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300} autoPan={false}>
-              <VisitedPopup pin={pin} onEdit={onEditVisited} />
+              <VisitedPopup pin={pin} onEdit={onEditVisited} onPositionSaved={onPositionSaved} />
             </Popup>
           </HoverMarker>
         ))}
@@ -415,7 +434,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins
         wishlistPins.map((pin, i) => (
           <HoverMarker key={`w-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeIcon('map-heart--wishlist', i * 35)} markerKey={`wishlist-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300} autoPan={false}>
-              <WishlistPopup pin={pin} onConvert={onConvert} onEdit={onEditWishlist} />
+              <WishlistPopup pin={pin} onConvert={onConvert} onEdit={onEditWishlist} onPositionSaved={onPositionSaved} />
             </Popup>
           </HoverMarker>
         ))}
@@ -425,7 +444,7 @@ export default function MapView({ visitedPins = [], wishlistPins = [], tripsPins
         tripsPins.map((pin, i) => (
           <HoverMarker key={`t-${pin.id}`} position={[pin.lat, pin.lon]} icon={makeTripIcon(i * 35)} markerKey={`trip-${pin.id}`} markersRef={markersRef}>
             <Popup minWidth={240} maxWidth={300} autoPan={false}>
-              <TripPopup pin={pin} onConvertTrip={onConvertTrip} onEdit={onEditTrip} />
+              <TripPopup pin={pin} onConvertTrip={onConvertTrip} onEdit={onEditTrip} onPositionSaved={onPositionSaved} />
             </Popup>
           </HoverMarker>
         ))}
