@@ -26,6 +26,8 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
   const [form, setForm] = useState({
     ...EMPTY_FORM,
     ...initialData,
+    comment: initialData.comment ?? '',
+    google_maps_url: initialData.google_maps_url ?? '',
     latitude: initialData.latitude ? parseFloat(initialData.latitude) : null,
     longitude: initialData.longitude ? parseFloat(initialData.longitude) : null,
   });

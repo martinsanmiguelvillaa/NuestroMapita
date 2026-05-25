@@ -20,6 +20,9 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
   const [form, setForm] = useState({
     ...EMPTY_FORM,
     ...initialData,
+    description: initialData.description ?? '',
+    google_maps_url: initialData.google_maps_url ?? '',
+    social_url: initialData.social_url ?? '',
     latitude: initialData.latitude ? parseFloat(initialData.latitude) : null,
     longitude: initialData.longitude ? parseFloat(initialData.longitude) : null,
   });
