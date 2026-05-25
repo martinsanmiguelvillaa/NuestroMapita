@@ -236,6 +236,38 @@ img {
   font-weight: 600;
 }
 
+/* Foto existente en formularios de edición */
+.form-photo-preview {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: var(--color-surface-alt, #f8f8f8);
+  border-radius: 10px;
+}
+
+.form-photo-preview__img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.form-photo-preview__img:hover {
+  opacity: 0.85;
+}
+
+.form-photo-preview__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
 /* --- Cards base --- */
 .card {
   background-color: var(--color-beige);

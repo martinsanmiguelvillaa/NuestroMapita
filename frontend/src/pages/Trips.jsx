@@ -485,6 +485,7 @@ export default function Trips() {
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="trip"
+            liveUpload={(files) => uploadTripPhotos(editing.id, files)}
           />
         )}
       </Modal>

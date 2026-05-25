@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { createLetter, updateLetter, uploadLetterPhoto } from '../../api/letters';
+import { createLetter, updateLetter, uploadLetterPhoto, deleteLetterPhoto } from '../../api/letters';
 import { useToast } from '../../context/ToastContext';
 
 const EMPTY_FORM = { title: '', body: '', letter_date: '' };
@@ -18,11 +18,25 @@ export default function LetterForm({ initialData = null, onSaved, onClose, onCan
       : EMPTY_FORM
   );
   const [photoFile, setPhotoFile] = useState(null);
+  const [livePhotoUrl, setLivePhotoUrl] = useState(initialData?.photo_url ?? null);
+  const [deletingPhoto, setDeletingPhoto] = useState(false);
   const [error, setError] = useState('');
 
   const set = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
     onDirtyChange?.(true);
+  };
+
+  const handleDeletePhoto = async () => {
+    setDeletingPhoto(true);
+    try {
+      await deleteLetterPhoto(initialData.id);
+      setLivePhotoUrl(null);
+    } catch (err) {
+      toast.error('No se pudo eliminar la foto: ' + err.message);
+    } finally {
+      setDeletingPhoto(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -91,15 +105,50 @@ export default function LetterForm({ initialData = null, onSaved, onClose, onCan
 
       <div className="form-group">
         <label className="form-label">Foto (opcional)</label>
+
+        {/* Foto existente en modo edición */}
+        {initialData?.id && livePhotoUrl && !photoFile && (
+          <div className="form-photo-preview">
+            <img
+              src={livePhotoUrl}
+              alt="Foto de la cartita"
+              className="form-photo-preview__img"
+              onClick={() => window.open(livePhotoUrl, '_blank')}
+              title="Ver foto completa"
+            />
+            <div className="form-photo-preview__actions">
+              <a
+                href={livePhotoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost btn-sm"
+              >
+                Ver foto
+              </a>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                onClick={handleDeletePhoto}
+                disabled={deletingPhoto}
+              >
+                {deletingPhoto ? '...' : 'Eliminar foto'}
+              </button>
+            </div>
+          </div>
+        )}
+
         <input
           type="file"
           accept="image/*"
           className="form-input"
-          onChange={(e) => { setPhotoFile(e.target.files[0] || null); onDirtyChange?.(true); }}
+          onChange={(e) => {
+            setPhotoFile(e.target.files[0] || null);
+            onDirtyChange?.(true);
+          }}
           style={{ padding: '8px' }}
         />
-        {initialData?.photo_url && !photoFile && (
-          <p className="form-hint">Ya tiene una foto. Seleccioná otra para reemplazarla.</p>
+        {initialData?.id && livePhotoUrl && !photoFile && (
+          <p className="form-hint">Seleccioná otra foto para reemplazar la actual.</p>
         )}
       </div>
 

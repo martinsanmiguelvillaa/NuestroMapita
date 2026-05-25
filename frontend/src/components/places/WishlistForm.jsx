@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import LocationPickerMap from './LocationPickerMap';
+import PhotoSection from '../photos/PhotoSection';
 
 const EMPTY_FORM = {
   name: '',
@@ -10,8 +11,9 @@ const EMPTY_FORM = {
   longitude: null,
 };
 
-export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialBounds, variant }) {
+export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loading, onDirtyChange, submitRef, initialBounds, variant, liveUpload }) {
   const formRef = useRef();
+  const isEdit = !!initialData?.id;
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -30,6 +32,10 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
   const [photoFiles, setPhotoFiles] = useState([]);
   const photoInputRef = useRef();
 
+  // Edit mode: track live photos state
+  const [livePhotos, setLivePhotos] = useState(initialData?.photos ?? []);
+  const [uploading, setUploading] = useState(false);
+
   const set = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
     onDirtyChange?.(true);
@@ -38,6 +44,21 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
   const handleLocationChange = ({ lat, lng }) => {
     setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
     onDirtyChange?.(true);
+  };
+
+  const handleLiveUpload = async (files) => {
+    if (!liveUpload) return;
+    setUploading(true);
+    try {
+      const newPhotos = await liveUpload(files);
+      if (Array.isArray(newPhotos)) setLivePhotos(prev => [...prev, ...newPhotos]);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handlePhotoDeleted = (photoId) => {
+    setLivePhotos(prev => prev.filter(p => p.id !== photoId));
   };
 
   const handleSubmit = async (e) => {
@@ -124,25 +145,38 @@ export default function WishlistForm({ initialData = {}, onSubmit, onCancel, loa
 
       <div className="form-group">
         <label className="form-label">Fotos <span style={{ fontWeight: 400, color: 'var(--color-text-light)' }}>(opcional)</span></label>
-        <input
-          ref={photoInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          onChange={(e) => { setPhotoFiles(Array.from(e.target.files)); onDirtyChange?.(true); }}
-        />
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={() => photoInputRef.current?.click()}
-        >
-          📷 {photoFiles.length > 0 ? `${photoFiles.length} foto${photoFiles.length !== 1 ? 's' : ''} seleccionada${photoFiles.length !== 1 ? 's' : ''}` : 'Seleccionar fotos'}
-        </button>
-        {photoFiles.length > 0 && (
-          <span className="form-hint" style={{ display: 'block', marginTop: '4px' }}>
-            Se subirán al guardar
-          </span>
+        {isEdit ? (
+          <PhotoSection
+            photos={livePhotos}
+            onUpload={handleLiveUpload}
+            onDelete={() => {}}
+            onCoverSet={() => {}}
+            onPhotoDeleted={handlePhotoDeleted}
+            uploading={uploading}
+          />
+        ) : (
+          <>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={(e) => { setPhotoFiles(Array.from(e.target.files)); onDirtyChange?.(true); }}
+            />
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => photoInputRef.current?.click()}
+            >
+              📷 {photoFiles.length > 0 ? `${photoFiles.length} foto${photoFiles.length !== 1 ? 's' : ''} seleccionada${photoFiles.length !== 1 ? 's' : ''}` : 'Seleccionar fotos'}
+            </button>
+            {photoFiles.length > 0 && (
+              <span className="form-hint" style={{ display: 'block', marginTop: '4px' }}>
+                Se subirán al guardar
+              </span>
+            )}
+          </>
         )}
       </div>
 

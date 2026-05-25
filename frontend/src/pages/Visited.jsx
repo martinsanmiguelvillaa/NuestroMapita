@@ -340,6 +340,7 @@ export default function Visited() {
             loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
+            liveUpload={(files) => uploadPhotos(editing.id, files)}
           />
         )}
       </Modal>

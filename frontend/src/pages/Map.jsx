@@ -514,6 +514,7 @@ export default function MapPage() {
             loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
+            liveUpload={(files) => uploadPhotos(editPlace.data.id, files)}
           />
         )}
         {editForm.dialog}
@@ -536,6 +537,7 @@ export default function MapPage() {
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="wishlist"
+            liveUpload={(files) => uploadWishlistPhotos(editPlace.data.id, files)}
           />
         )}
         {editForm.dialog}
@@ -558,6 +560,7 @@ export default function MapPage() {
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="trip"
+            liveUpload={(files) => uploadTripPhotos(editPlace.data.id, files)}
           />
         )}
         {editForm.dialog}

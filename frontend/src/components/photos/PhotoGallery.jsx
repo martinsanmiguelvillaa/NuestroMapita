@@ -53,7 +53,7 @@ function GalleryVideo({ src, className, onClick }) {
   );
 }
 
-const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, canDelete = true }, ref) {
+const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, onPhotoDeleted, canDelete = true }, ref) {
   const confirm = useConfirm();
   const toast = useToast();
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
@@ -120,6 +120,7 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         return next;
       });
       onDelete?.();
+      onPhotoDeleted?.(photo.id);
     } catch (err) {
       toast.error('No se pudo eliminar la foto: ' + err.message);
     } finally {

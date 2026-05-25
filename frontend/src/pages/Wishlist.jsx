@@ -511,6 +511,7 @@ export default function Wishlist() {
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="wishlist"
+            liveUpload={(files) => uploadWishlistPhotos(editing.id, files)}
           />
         )}
       </Modal>

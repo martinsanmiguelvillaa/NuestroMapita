@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { createRecipe, updateRecipe, uploadRecipePhoto } from '../../api/recipes';
+import { createRecipe, updateRecipe, uploadRecipePhoto, deleteRecipePhoto } from '../../api/recipes';
 import { useToast } from '../../context/ToastContext';
 
 const EMPTY_FORM = {
@@ -38,6 +38,7 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
   );
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialData?.image_url || null);
+  const [deletingPhoto, setDeletingPhoto] = useState(false);
   const [error, setError] = useState('');
 
   const set = (field, value) => {
@@ -51,6 +52,19 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
     onDirtyChange?.(true);
+  };
+
+  const handleDeletePhoto = async () => {
+    setDeletingPhoto(true);
+    try {
+      await deleteRecipePhoto(initialData.id);
+      setPhotoPreview(null);
+      setPhotoFile(null);
+    } catch (err) {
+      toast.error('No se pudo eliminar la foto: ' + err.message);
+    } finally {
+      setDeletingPhoto(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -133,13 +147,47 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
       {/* Foto */}
       <div className="form-group">
         <label className="form-label">Foto (opcional)</label>
-        {photoPreview && (
+
+        {/* Foto existente en modo edición */}
+        {initialData?.id && photoPreview && !photoFile && (
+          <div className="form-photo-preview">
+            <img
+              src={photoPreview}
+              alt="Foto de la receta"
+              className="form-photo-preview__img"
+              onClick={() => window.open(photoPreview, '_blank')}
+              title="Ver foto completa"
+            />
+            <div className="form-photo-preview__actions">
+              <a
+                href={photoPreview}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost btn-sm"
+              >
+                Ver foto
+              </a>
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                onClick={handleDeletePhoto}
+                disabled={deletingPhoto}
+              >
+                {deletingPhoto ? '...' : 'Eliminar foto'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Preview de nueva foto seleccionada */}
+        {photoFile && photoPreview && (
           <img
             src={photoPreview}
             alt="preview"
             className="recipe-form__photo-preview"
           />
         )}
+
         <input
           type="file"
           accept="image/*"
@@ -147,6 +195,9 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
           onChange={handlePhotoChange}
           style={{ padding: '8px' }}
         />
+        {initialData?.id && photoPreview && !photoFile && (
+          <p className="form-hint">Seleccioná otra foto para reemplazar la actual.</p>
+        )}
       </div>
 
       {/* Ingredientes */}

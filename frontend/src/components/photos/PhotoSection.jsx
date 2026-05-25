@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import PhotoGallery from './PhotoGallery';
 import '../../styles/photos.css';
 
-export default function PhotoSection({ photos = [], onUpload, onDelete, onCoverSet, uploading, galleryRef }) {
+export default function PhotoSection({ photos = [], onUpload, onDelete, onCoverSet, onPhotoDeleted, uploading, galleryRef }) {
   const [pendingFiles, setPendingFiles] = useState([]);
   const [error, setError] = useState('');
   const inputRef = useRef();
@@ -31,7 +31,7 @@ export default function PhotoSection({ photos = [], onUpload, onDelete, onCoverS
   return (
     <div className="photo-section">
       {photos.length > 0 && (
-        <PhotoGallery ref={galleryRef} photos={photos} onDelete={onDelete} onCoverSet={onCoverSet} />
+        <PhotoGallery ref={galleryRef} photos={photos} onDelete={onDelete} onCoverSet={onCoverSet} onPhotoDeleted={onPhotoDeleted} />
       )}
 
       {error && (
