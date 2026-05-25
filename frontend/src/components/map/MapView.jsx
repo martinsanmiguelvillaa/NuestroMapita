@@ -8,6 +8,7 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import StarRating from '../places/StarRating';
 import CoverPhoto from '../photos/CoverPhoto';
+import PhotoGallery from '../photos/PhotoGallery';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../../styles/map.css';
@@ -133,18 +134,25 @@ function formatDate(dateStr) {
 // Popup para un lugar visitado
 function VisitedPopup({ pin, onEdit, onPositionSaved }) {
   const [coverIndex, setCoverIndex] = useState(0);
-  const photos = pin.cover_photo ? [pin.cover_photo] : [];
+  const galleryRef = useRef();
+  const photos = pin.photos ?? [];
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--visited">Ya hicimos</span>
       {photos.length > 0 && (
-        <CoverPhoto
-          photos={photos}
-          coverIndex={coverIndex}
-          onCoverIndexChange={setCoverIndex}
-          onPositionSaved={onPositionSaved}
-          aspectRatio="16/9"
-        />
+        <>
+          <CoverPhoto
+            photos={photos}
+            coverIndex={coverIndex}
+            onCoverIndexChange={setCoverIndex}
+            onCoverClick={(idx) => galleryRef.current?.openAt(idx)}
+            onPositionSaved={onPositionSaved}
+            aspectRatio="16/9"
+          />
+          <div style={{ display: 'none' }}>
+            <PhotoGallery ref={galleryRef} photos={photos} canDelete={false} />
+          </div>
+        </>
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.visit_date && <p className="map-popup__info">📅 {formatDate(pin.visit_date)}</p>}
@@ -172,18 +180,25 @@ function VisitedPopup({ pin, onEdit, onPositionSaved }) {
 // Popup para un lugar por visitar
 function WishlistPopup({ pin, onConvert, onEdit, onPositionSaved }) {
   const [coverIndex, setCoverIndex] = useState(0);
-  const photos = pin.cover_photo ? [pin.cover_photo] : [];
+  const galleryRef = useRef();
+  const photos = pin.photos ?? [];
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--wishlist">Por hacer</span>
       {photos.length > 0 && (
-        <CoverPhoto
-          photos={photos}
-          coverIndex={coverIndex}
-          onCoverIndexChange={setCoverIndex}
-          onPositionSaved={onPositionSaved}
-          aspectRatio="16/9"
-        />
+        <>
+          <CoverPhoto
+            photos={photos}
+            coverIndex={coverIndex}
+            onCoverIndexChange={setCoverIndex}
+            onCoverClick={(idx) => galleryRef.current?.openAt(idx)}
+            onPositionSaved={onPositionSaved}
+            aspectRatio="16/9"
+          />
+          <div style={{ display: 'none' }}>
+            <PhotoGallery ref={galleryRef} photos={photos} canDelete={false} />
+          </div>
+        </>
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
@@ -215,18 +230,25 @@ function WishlistPopup({ pin, onConvert, onEdit, onPositionSaved }) {
 // Popup para un viajecito
 function TripPopup({ pin, onConvertTrip, onEdit, onPositionSaved }) {
   const [coverIndex, setCoverIndex] = useState(0);
-  const photos = pin.cover_photo ? [pin.cover_photo] : [];
+  const galleryRef = useRef();
+  const photos = pin.photos ?? [];
   return (
     <div className="map-popup">
       <span className="map-popup__type map-popup__type--trip">✈️ Viajecito</span>
       {photos.length > 0 && (
-        <CoverPhoto
-          photos={photos}
-          coverIndex={coverIndex}
-          onCoverIndexChange={setCoverIndex}
-          onPositionSaved={onPositionSaved}
-          aspectRatio="16/9"
-        />
+        <>
+          <CoverPhoto
+            photos={photos}
+            coverIndex={coverIndex}
+            onCoverIndexChange={setCoverIndex}
+            onCoverClick={(idx) => galleryRef.current?.openAt(idx)}
+            onPositionSaved={onPositionSaved}
+            aspectRatio="16/9"
+          />
+          <div style={{ display: 'none' }}>
+            <PhotoGallery ref={galleryRef} photos={photos} canDelete={false} />
+          </div>
+        </>
       )}
       <h3 className="map-popup__name">{pin.name}</h3>
       {pin.address && <p className="map-popup__info">📍 {pin.address}</p>}
