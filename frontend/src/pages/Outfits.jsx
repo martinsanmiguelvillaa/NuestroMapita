@@ -11,7 +11,6 @@ import {
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useOutfitNotifications } from '../hooks/useOutfitNotifications';
-import { testPushNotification, resetLastSent } from '../api/outfitNotifications';
 import '../styles/outfits.css';
 
 const SELECTED_USER_KEY = 'outfits_selected_user';
@@ -92,26 +91,6 @@ function OutfitNotificationCard({ userKey }) {
   const [editingTime, setEditingTime] = useState(false);
   const [pendingTime, setPendingTime] = useState('09:00');
   const [setupTime, setSetupTime] = useState('09:00');
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState(null);
-
-  const DEVICE_ID_KEY = 'outfit_notification_device_id';
-  const deviceId = localStorage.getItem(DEVICE_ID_KEY);
-
-  const handleTest = async () => {
-    setTesting(true);
-    setTestResult(null);
-    try {
-      await resetLastSent(userKey, deviceId);
-      await testPushNotification(userKey, deviceId);
-      setTestResult('ok');
-    } catch {
-      setTestResult('error');
-    } finally {
-      setTesting(false);
-      setTimeout(() => setTestResult(null), 4000);
-    }
-  };
 
   if (status === 'loading') return null;
 
@@ -185,26 +164,6 @@ function OutfitNotificationCard({ userKey }) {
             </button>
           </div>
         )}
-
-        <div className="outfit-notif-card__time-row" style={{ marginTop: 'var(--space-1)' }}>
-          <button
-            className="btn btn-ghost btn-sm"
-            disabled={testing || saving}
-            onClick={handleTest}
-          >
-            {testing ? 'Enviando...' : 'Probar ahora'}
-          </button>
-          {testResult === 'ok' && (
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-success)' }}>
-              ✓ Notificación enviada
-            </span>
-          )}
-          {testResult === 'error' && (
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-rose)' }}>
-              ✗ Falló el envío — revisá los logs
-            </span>
-          )}
-        </div>
 
         <button
           className="btn btn-ghost btn-sm outfit-notif-card__deactivate"
