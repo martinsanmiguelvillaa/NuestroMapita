@@ -58,6 +58,7 @@ export function useOutfitNotifications(userKey) {
   const [notifTime, setNotifTime] = useState('09:00');
   const [deviceLabel, setDeviceLabel] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const supported = 'serviceWorker' in navigator && 'PushManager' in window;
 
@@ -95,6 +96,7 @@ export function useOutfitNotifications(userKey) {
 
   const activate = async (time = '09:00') => {
     setSaving(true);
+    setError(null);
     try {
       const perm = await Notification.requestPermission();
       if (perm === 'denied') {
@@ -134,6 +136,7 @@ export function useOutfitNotifications(userKey) {
       setStatus('active');
     } catch (err) {
       console.error('Error activando notificaciones de outfit:', err);
+      setError('No se pudieron activar las notificaciones. Intentá de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -141,6 +144,7 @@ export function useOutfitNotifications(userKey) {
 
   const updateTime = async (newTime) => {
     setSaving(true);
+    setError(null);
     try {
       const deviceId = getOrCreateDeviceId();
       await updateOutfitNotificationSettings({
@@ -149,6 +153,10 @@ export function useOutfitNotifications(userKey) {
         notification_time: newTime,
       });
       setNotifTime(newTime);
+    } catch (err) {
+      console.error('Error actualizando horario de notificación:', err);
+      setError('No se pudo actualizar el horario. Intentá de nuevo.');
+      throw err; // propagar para que el componente pueda cancelar la edición
     } finally {
       setSaving(false);
     }
@@ -156,17 +164,29 @@ export function useOutfitNotifications(userKey) {
 
   const deactivate = async () => {
     setSaving(true);
+    setError(null);
     try {
       const deviceId = getOrCreateDeviceId();
       await unsubscribeOutfitNotification({ user_key: userKey, device_id: deviceId });
 
-      // También cancelar la suscripción push en el navegador
+      // Cancelar la suscripción push en el navegador SOLO si ningún otro usuario
+      // del mismo dispositivo tiene notificaciones activas.
+      // (Van y Martín pueden compartir el mismo navegador con endpoints distintos
+      // o incluso el mismo endpoint; cancelarlo afectaría al otro usuario.)
       try {
-        const reg = await navigator.serviceWorker.ready;
-        const pushSub = await reg.pushManager.getSubscription();
-        if (pushSub) await pushSub.unsubscribe();
+        const otherUserKey = userKey === 'van' ? 'martin' : 'van';
+        const otherDeviceId = getOrCreateDeviceId(); // mismo device_id para este navegador
+        const otherStatus = await getOutfitNotificationStatus(otherUserKey, otherDeviceId).catch(() => null);
+        const otherIsActive = otherStatus?.exists && otherStatus?.enabled;
+
+        if (!otherIsActive) {
+          const reg = await navigator.serviceWorker.ready;
+          const pushSub = await reg.pushManager.getSubscription();
+          if (pushSub) await pushSub.unsubscribe();
+        }
       } catch {
-        // Si falla la cancelación en el browser, igual limpiamos el backend
+        // Si falla la verificación, NO cancelamos el push del navegador para no
+        // afectar al otro usuario por error.
       }
 
       setStatus('inactive');
@@ -180,6 +200,7 @@ export function useOutfitNotifications(userKey) {
     notifTime,
     deviceLabel,
     saving,
+    error,
     activate,
     updateTime,
     deactivate,

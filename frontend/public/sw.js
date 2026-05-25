@@ -5,13 +5,23 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 // (el blanket fetch handler rompía requests en iOS)
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request).then(r => r || Response.error())));
 });
 
 // Recibir notificación push
 self.addEventListener('push', (e) => {
   if (!e.data) return;
-  const { title, body, url } = e.data.json();
+  let title = 'Nuestro Mapita';
+  let body = 'Tenés algo nuevo.';
+  let url = '/';
+  try {
+    const payload = e.data.json();
+    title = payload.title || title;
+    body  = payload.body  || body;
+    url   = payload.url   || url;
+  } catch {
+    // Payload no es JSON válido — usamos defaults
+  }
   e.waitUntil(
     self.registration.showNotification(title, {
       body,

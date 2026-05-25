@@ -105,6 +105,12 @@
   font-size: var(--text-xs);
 }
 
+.outfit-notif-card__error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  margin-top: var(--space-2);
+}
+
 /* ─────────────────────────────────────────── */
 .outfits-page {
   min-height: 100%;

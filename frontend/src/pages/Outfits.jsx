@@ -85,7 +85,7 @@ function formatDate(isoString) {
 
 // ── Card de notificaciones ─────────────────────────────────────────
 function OutfitNotificationCard({ userKey }) {
-  const { status, notifTime, deviceLabel, saving, activate, updateTime, deactivate } =
+  const { status, notifTime, deviceLabel, saving, error, activate, updateTime, deactivate } =
     useOutfitNotifications(userKey);
 
   const [editingTime, setEditingTime] = useState(false);
@@ -140,8 +140,12 @@ function OutfitNotificationCard({ userKey }) {
               className="btn btn-primary btn-sm"
               disabled={saving}
               onClick={async () => {
-                await updateTime(pendingTime);
-                setEditingTime(false);
+                try {
+                  await updateTime(pendingTime);
+                  setEditingTime(false);
+                } catch {
+                  // error ya seteado en el hook, no cerramos el editor
+                }
               }}
             >
               {saving ? 'Guardando...' : 'Guardar'}
@@ -172,6 +176,7 @@ function OutfitNotificationCard({ userKey }) {
         >
           Desactivar en este dispositivo
         </button>
+        {error && <p className="outfit-notif-card__error">{error}</p>}
       </div>
     );
   }
@@ -202,6 +207,7 @@ function OutfitNotificationCard({ userKey }) {
         >
           {saving ? 'Activando...' : 'Activar notificaciones en este dispositivo'}
         </button>
+        {error && <p className="outfit-notif-card__error">{error}</p>}
       </div>
 
       <p className="outfit-notif-card__hint">
@@ -371,6 +377,10 @@ export default function Outfits() {
           </div>
         )}
 
+        {selectedUser && (
+          <OutfitNotificationCard key={selectedUser} userKey={selectedUser} />
+        )}
+
         {outfit && weather && !busy && (
           <>
             {/* Ocasión + actualizar */}
@@ -492,8 +502,6 @@ export default function Outfits() {
               )}
             </section>
 
-            {/* Notificaciones */}
-            <OutfitNotificationCard key={selectedUser} userKey={selectedUser} />
           </>
         )}
       </div>
