@@ -105,7 +105,6 @@ export default function MapPage() {
   const [convertPlace, setConvertPlace] = useState(null);
   const [convertTrip, setConvertTrip] = useState(null);
   const [editPlace, setEditPlace] = useState(null);   // { type: 'visited'|'wishlist'|'trip', data: {...} }
-  const [editSaving, setEditSaving] = useState(false);
   const editForm = useDirtyForm();
   const [flyToPin, setFlyToPin] = useState(null);
   const [addBounds, setAddBounds] = useState(null); // bounds del mapa al abrir el form
@@ -208,9 +207,10 @@ export default function MapPage() {
 
   const handleUpdate = async (data, files) => {
     if (!editPlace) return;
-    setEditSaving(true);
+    const { type, data: original } = editPlace;
+    editForm.setDirty(false);
+    setEditPlace(null);
     try {
-      const { type, data: original } = editPlace;
       if (type === 'visited') {
         await updateVisited(original.id, data);
         if (files?.length) await uploadPhotos(original.id, files);
@@ -222,13 +222,10 @@ export default function MapPage() {
         if (files?.length) await uploadTripPhotos(original.id, files);
       }
       toast.success('Lugar actualizado');
-      editForm.setDirty(false);
-      setEditPlace(null);
       load();
     } catch (err) {
       toast.error('No se pudo guardar: ' + err.message);
-    } finally {
-      setEditSaving(false);
+      load();
     }
   };
 
@@ -512,7 +509,7 @@ export default function MapPage() {
             initialData={editPlace.data}
             onSubmit={handleUpdate}
             onCancel={handleCloseEditModal}
-            loading={editSaving}
+            loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
           />
@@ -533,7 +530,7 @@ export default function MapPage() {
             initialData={editPlace.data}
             onSubmit={handleUpdate}
             onCancel={handleCloseEditModal}
-            loading={editSaving}
+            loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="wishlist"
@@ -555,7 +552,7 @@ export default function MapPage() {
             initialData={editPlace.data}
             onSubmit={handleUpdate}
             onCancel={handleCloseEditModal}
-            loading={editSaving}
+            loading={false}
             onDirtyChange={editForm.setDirty}
             submitRef={editForm.submitRef}
             variant="trip"
