@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { createPortal } from 'react-dom';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
 import { thumbUrl, fullUrl } from '../../utils/cloudinary';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -228,8 +229,8 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
         ))}
       </div>
 
-      {/* Lightbox con navegación */}
-      {isOpen && current && (
+      {/* Lightbox con navegación — portal para escapar del stacking context del modal */}
+      {isOpen && current && createPortal(
         <div className="lightbox" onClick={close}>
           {/* Contador */}
           <div className="lightbox__counter" onClick={(e) => e.stopPropagation()}>
@@ -325,7 +326,8 @@ const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, o
               ))}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
