@@ -129,12 +129,22 @@ function VideoPlayer({ src }) {
 }
 
 // ── Lightbox de la galería home ────────────────────────────────────
-function HomeLightbox({ photo, onClose }) {
+function HomeLightbox({ photos, index, onClose }) {
+  const [currentIndex, setCurrentIndex] = useState(index);
+  const photo = photos[currentIndex];
+
+  const prev = useCallback(() => setCurrentIndex((i) => (i - 1 + photos.length) % photos.length), [photos.length]);
+  const next = useCallback(() => setCurrentIndex((i) => (i + 1) % photos.length), [photos.length]);
+
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') prev();
+      else if (e.key === 'ArrowRight') next();
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, [onClose, prev, next]);
 
   const handleDownload = async () => {
     try {
@@ -157,10 +167,27 @@ function HomeLightbox({ photo, onClose }) {
     <div className="lightbox" onClick={onClose}>
       <button className="lightbox__close" onClick={onClose}>×</button>
 
+      {/* Contador */}
+      {photos.length > 1 && (
+        <div className="lightbox__counter" onClick={(e) => e.stopPropagation()}>
+          {currentIndex + 1} / {photos.length}
+        </div>
+      )}
+
+      {/* Flecha anterior */}
+      {photos.length > 1 && (
+        <button
+          type="button"
+          className="lightbox__arrow lightbox__arrow--prev"
+          onClick={(e) => { e.stopPropagation(); prev(); }}
+        >‹</button>
+      )}
+
       {isVideo ? (
         <VideoPlayer key={photo.id} src={photo.cloudinary_url} />
       ) : (
         <img
+          key={photo.id}
           src={fullUrl(photo.cloudinary_url)}
           alt={photo.placeName}
           className="lightbox__img"
@@ -168,11 +195,35 @@ function HomeLightbox({ photo, onClose }) {
         />
       )}
 
+      {/* Flecha siguiente */}
+      {photos.length > 1 && (
+        <button
+          type="button"
+          className="lightbox__arrow lightbox__arrow--next"
+          onClick={(e) => { e.stopPropagation(); next(); }}
+        >›</button>
+      )}
+
       <div className="lightbox__actions" onClick={(e) => e.stopPropagation()}>
         <button className="lightbox__action-btn" onClick={handleDownload}>
           ⬇ Descargar
         </button>
       </div>
+
+      {/* Miniaturas */}
+      {photos.length > 1 && (
+        <div className="lightbox__thumbs" onClick={(e) => e.stopPropagation()}>
+          {photos.map((p, i) => (
+            <img
+              key={p.id}
+              src={polaroidUrl(p.cloudinary_url)}
+              alt=""
+              className={`lightbox__thumb${i === currentIndex ? ' lightbox__thumb--active' : ''}`}
+              onClick={() => setCurrentIndex(i)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -365,7 +416,7 @@ export default function Home() {
   const [recentPhotos, setRecentPhotos] = useState([]);
   const [previewLetters, setPreviewLetters] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [lightboxPhoto, setLightboxPhoto] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
   const [showEmocModal, setShowEmocModal] = useState(false);
   const [fabDismissed, setFabDismissed]   = useState(fabDismissedSession);
   const openEmoc   = useCallback(() => setShowEmocModal(true), []);
@@ -534,7 +585,7 @@ export default function Home() {
           <h2 className="home__section-title" style={{ marginTop: '40px' }}>Galería</h2>
           <div className="home__polaroids">
             {recentPhotos.map((photo) => (
-              <div key={photo.id} className="polaroid" onClick={() => setLightboxPhoto(photo)}>
+              <div key={photo.id} className="polaroid" onClick={() => setLightboxIndex(recentPhotos.indexOf(photo))}>
                 {photo.resource_type === 'video'
                   ? <VideoPolaroid photo={photo} />
                   : <img src={polaroidUrl(photo.cloudinary_url)} alt={photo.placeName} className="polaroid__img" loading="lazy" />
@@ -559,10 +610,11 @@ export default function Home() {
       )}
 
       {/* Lightbox */}
-      {lightboxPhoto && (
+      {lightboxIndex !== null && (
         <HomeLightbox
-          photo={lightboxPhoto}
-          onClose={() => setLightboxPhoto(null)}
+          photos={recentPhotos}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
         />
       )}
 
