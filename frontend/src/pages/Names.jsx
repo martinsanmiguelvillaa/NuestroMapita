@@ -346,7 +346,7 @@ function CargarTab({ names, onCreated, onUpdated, onDeleted }) {
                       </div>
                       {name.note && <div className="name-card__note">{name.note}</div>}
                       <div className="name-card__ratings-preview">
-                        {['martin', 'van'].map((p) => {
+                        {['van', 'martin'].map((p) => {
                           const r = name.ratings.find((rt) => rt.person === p);
                           return (
                             <span key={p} className={`rating-pill${r ? ' rating-pill--rated' : ''}`}>
