@@ -551,6 +551,12 @@
   gap: var(--space-1);
 }
 
+.emoc-modal__inline-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .emoc-modal__empty {
   font-size: var(--text-sm);
   color: var(--color-text-light);

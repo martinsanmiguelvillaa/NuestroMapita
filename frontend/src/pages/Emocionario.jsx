@@ -187,9 +187,43 @@ export function EmotionForm({ onSaved, prefill }) {
 // ─────────────────────────────────────────────
 // Modal de día
 // ─────────────────────────────────────────────
-function DayModal({ day, entries, onClose, onDelete, onEdit }) {
+function DayModal({ day, entries, onClose, onDelete, onSaved }) {
   const confirm = useConfirm();
   const toast   = useToast();
+
+  // Estado de edición inline: id del entry que se está editando
+  const [editingId,  setEditingId]  = useState(null);
+  const [editEmoKey, setEditEmoKey] = useState('');
+  const [editInt,    setEditInt]    = useState(3);
+  const [editNote,   setEditNote]   = useState('');
+  const [saving,     setSaving]     = useState(false);
+
+  const startEdit = (entry) => {
+    setEditingId(entry.id);
+    setEditEmoKey(entry.emotion_key);
+    setEditInt(entry.intensity);
+    setEditNote(entry.note ?? '');
+  };
+
+  const cancelEdit = () => setEditingId(null);
+
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      await updateEmotionalEntry(editingId, {
+        emotion_key: editEmoKey,
+        intensity:   Math.round(editInt),
+        note:        editNote || null,
+      });
+      toast.success('Emoción actualizada');
+      setEditingId(null);
+      await onSaved();
+    } catch {
+      toast.error('No se pudo guardar');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDelete = async (entry) => {
     const ok = await confirm({
@@ -228,25 +262,72 @@ function DayModal({ day, entries, onClose, onDelete, onEdit }) {
                   <div className="emoc-modal__emotion-list">
                     {userEntries.map((entry) => {
                       const em = EMOTION_MAP[entry.emotion_key];
+                      const isEditing = editingId === entry.id;
                       return (
                         <div key={entry.id} className="emoc-modal__emotion-entry">
-                          <div className="emoc-modal__emotion">
-                            <span className="emoc-modal__emoji">{em?.emoji}</span>
-                            <span className="emoc-modal__emotion-label">{em?.label}</span>
-                          </div>
-                          <div className="emoc-modal__intensity-dots">
-                            {[1, 2, 3, 4, 5].map((n) => (
-                              <span key={n}
-                                className={`emoc-intensity-dot${entry.intensity >= n ? ' emoc-intensity-dot--filled' : ''}`} />
-                            ))}
-                          </div>
-                          {entry.note && <p className="emoc-modal__note">{entry.note}</p>}
-                          <div className="emoc-modal__actions">
-                            <button className="emoc-modal__edit-btn"
-                              onClick={() => { onEdit(u.key, entry); onClose(); }}>Editar</button>
-                            <button className="emoc-modal__delete-btn"
-                              onClick={() => handleDelete(entry)}>Eliminar</button>
-                          </div>
+                          {isEditing ? (
+                            <div className="emoc-modal__inline-edit">
+                              <div className="emoc-form__chips">
+                                {EMOTIONS.map((e) => (
+                                  <button key={e.key} type="button"
+                                    className={`emoc-chip${editEmoKey === e.key ? ' emoc-chip--active' : ''}`}
+                                    onClick={() => setEditEmoKey(e.key)}>
+                                    <span className="emoc-chip__emoji">{e.emoji}</span>
+                                    <span className="emoc-chip__label">{e.label}</span>
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="emoc-form__intensity">
+                                <label className="emoc-form__label">
+                                  Intensidad — <span className="emoc-form__intensity-val">{INTENSITY_LABELS[Math.round(editInt)]}</span>
+                                </label>
+                                <div className="emoc-form__slider-row">
+                                  <span className="emoc-form__slider-min">1</span>
+                                  <input type="range" min={1} max={5} step={0.01} value={editInt}
+                                    className="emoc-form__slider"
+                                    onChange={(e) => setEditInt(Number(e.target.value))} />
+                                  <span className="emoc-form__slider-max">5</span>
+                                </div>
+                                <div className="emoc-form__intensity-dots">
+                                  {[1,2,3,4,5].map((n) => (
+                                    <span key={n}
+                                      className={`emoc-intensity-dot${Math.round(editInt) >= n ? ' emoc-intensity-dot--filled' : ''}`} />
+                                  ))}
+                                </div>
+                              </div>
+                              <textarea className="emoc-form__note" rows={2} maxLength={500}
+                                placeholder="Nota opcional…"
+                                value={editNote}
+                                onChange={(e) => setEditNote(e.target.value)} />
+                              <div className="emoc-modal__actions">
+                                <button className="emoc-modal__edit-btn" onClick={cancelEdit} disabled={saving}>
+                                  Cancelar
+                                </button>
+                                <button className="emoc-form__submit" onClick={handleSaveEdit}
+                                  disabled={!editEmoKey || saving} style={{ flex: 1, padding: 'var(--space-1) 0', fontSize: 'var(--text-xs)' }}>
+                                  {saving ? 'Guardando…' : 'Guardar'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="emoc-modal__emotion">
+                                <span className="emoc-modal__emoji">{em?.emoji}</span>
+                                <span className="emoc-modal__emotion-label">{em?.label}</span>
+                              </div>
+                              <div className="emoc-modal__intensity-dots">
+                                {[1,2,3,4,5].map((n) => (
+                                  <span key={n}
+                                    className={`emoc-intensity-dot${entry.intensity >= n ? ' emoc-intensity-dot--filled' : ''}`} />
+                                ))}
+                              </div>
+                              {entry.note && <p className="emoc-modal__note">{entry.note}</p>}
+                              <div className="emoc-modal__actions">
+                                <button className="emoc-modal__edit-btn" onClick={() => startEdit(entry)}>Editar</button>
+                                <button className="emoc-modal__delete-btn" onClick={() => handleDelete(entry)}>Eliminar</button>
+                              </div>
+                            </>
+                          )}
                         </div>
                       );
                     })}
@@ -348,7 +429,6 @@ export default function Emocionario() {
   const [entries,        setEntries]       = useState([]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
-  const [editPrefill,    setEditPrefill]   = useState(null);
 
   const fetchEntriesForMonth = useCallback(async (m) => {
     setLoadingEntries(true);
@@ -367,7 +447,6 @@ export default function Emocionario() {
   }, [selectedMonth, fetchEntriesForMonth]);
 
   const handleEntrySaved = useCallback(async () => {
-    setEditPrefill(null);
     await fetchEntriesForMonth(selectedMonth);
   }, [selectedMonth, fetchEntriesForMonth]);
 
@@ -396,11 +475,6 @@ export default function Emocionario() {
     setEntries((prev) => prev.filter((e) => e.id !== deletedId));
   }, []);
 
-  const handleEdit = (userKey, entry) => {
-    setEditPrefill({ userKey, entry });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <div className="emoc-page">
       <div className="emoc-page__inner">
@@ -409,11 +483,7 @@ export default function Emocionario() {
           <p className="emoc-header__sub">Un diario de cómo se sienten, día a día</p>
         </header>
 
-        <EmotionForm
-          key={editPrefill ? `edit-${editPrefill.entry.id}` : 'new'}
-          prefill={editPrefill}
-          onSaved={handleEntrySaved}
-        />
+        <EmotionForm onSaved={handleEntrySaved} />
 
         <section className="emoc-section">
           <h2 className="emoc-section__title">Calendario emocional</h2>
@@ -437,7 +507,7 @@ export default function Emocionario() {
             entries={selectedDayEntries}
             onClose={() => setSelectedDay(null)}
             onDelete={handleDelete}
-            onEdit={handleEdit}
+            onSaved={handleEntrySaved}
           />
         )}
       </div>
