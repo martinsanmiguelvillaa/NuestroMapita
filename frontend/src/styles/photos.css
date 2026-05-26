@@ -521,3 +521,32 @@ video::-webkit-media-controls-start-playback-button {
   opacity: 1;
   border-color: white;
 }
+
+/* Mobile: acciones y miniaturas fijas al fondo */
+@media (max-width: 768px) {
+  .lightbox {
+    padding: 60px 0 130px;
+    justify-content: center;
+  }
+
+  .lightbox__img {
+    max-height: calc(100dvh - 190px);
+  }
+
+  .lightbox__actions {
+    position: fixed;
+    bottom: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0;
+  }
+
+  .lightbox__thumbs {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0;
+    max-width: 95vw;
+  }
+}
