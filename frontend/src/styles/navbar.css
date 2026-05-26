@@ -49,7 +49,7 @@
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   list-style: none;
 }
 
@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -65,6 +65,13 @@
   text-decoration: none;
   white-space: nowrap;
   transition: var(--transition-fast);
+}
+
+/* Ocultar íconos en desktop — el texto ya identifica cada sección */
+@media (min-width: 769px) {
+  .navbar__link-icon {
+    display: none;
+  }
 }
 .navbar__link:hover {
   background-color: var(--color-beige);
