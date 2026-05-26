@@ -436,67 +436,55 @@
 .emoc-fab {
   position: fixed;
   border: none;
-  background: transparent;
-  padding: 0;
+  /* Fondo glassmorphism que morfea visualmente hacia el modal */
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 28px;
+  padding: 6px 10px;
   cursor: pointer;
   z-index: var(--z-overlay);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  will-change: transform;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(74, 55, 40, 0.08),
+    0 6px 20px rgba(74, 55, 40, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* will-change lo agrega Framer Motion automáticamente para layoutId */
+}
+
+/* El float vive en el elemento interno para no interferir con el layoutId de Framer Motion */
+.emoc-fab__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   animation: emoc-fab-float 5s ease-in-out infinite;
-  transform-origin: center bottom;
-  transition: opacity 0.3s ease-out;
 }
 
 .emoc-fab__cloud {
   display: block;
-  font-size: 3.4rem;
+  font-size: 3rem;
   line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(74, 55, 40, 0.18));
-  transition: filter 0.2s ease-out;
 }
 
 .emoc-fab__face {
   display: block;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   text-align: center;
-  margin-top: -2rem;
+  margin-top: -1.8rem;
   pointer-events: none;
-}
-
-.emoc-fab:hover .emoc-fab__cloud {
-  filter: drop-shadow(0 6px 18px rgba(74, 55, 40, 0.28));
 }
 
 .emoc-fab--dragging {
-  animation: none;
   cursor: grabbing;
 }
 
-.emoc-fab--dragging .emoc-fab__cloud {
-  filter: drop-shadow(0 10px 24px rgba(74, 55, 40, 0.30));
+.emoc-fab--dragging .emoc-fab__inner {
+  animation: none;
 }
 
-/* Nube se contrae suavemente al tocar */
-.emoc-fab--tapped {
-  animation: emoc-fab-burst 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-  pointer-events: none;
-}
-
-/* Nube oculta mientras el modal está abierto */
-.emoc-fab--open {
-  opacity: 0;
-  pointer-events: none;
-}
-
-@keyframes emoc-fab-burst {
-  0%   { transform: scale(1);    opacity: 1; }
-  25%  { transform: scale(1.1);  opacity: 1; }
-  100% { transform: scale(0.2);  opacity: 0; }
-}
-
-/* Flotado sutil — 5px, rotación mínima */
+/* Flotado suave — solo en el inner, no en el botón raíz */
 @keyframes emoc-fab-float {
   0%   { transform: translateY(0px)  rotate(-0.5deg) scale(1);    }
   28%  { transform: translateY(-5px) rotate(0.4deg)  scale(1.015); }

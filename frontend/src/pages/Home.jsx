@@ -8,8 +8,8 @@
  * - Álbum de fotos recientes (polaroids)
  * - Acceso destacado a cartitas
  */
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
-import { animate as motionAnimate, useReducedMotion } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
@@ -173,23 +173,19 @@ function HomeLightbox({ photo, onClose }) {
 }
 
 // ── Botón flotante nube ────────────────────────────────────────────
-function FloatingEmocButton({ onOpen, isOpen }) {
-  const btnRef   = useRef(null);
-  const [pos, setPos]       = useState(null);
+// layoutId="emoc-cloud" → Framer Motion morfea este botón en el modal al abrirse
+function FloatingEmocButton({ onOpen }) {
+  const btnRef = useRef(null);
+  const [pos, setPos]     = useState(null);
   const [dragging, setDragging] = useState(false);
-  const [tapped, setTapped] = useState(false);
-  // toda la lógica de drag en un ref para evitar stale closures
-  const s = useRef({ active: false, moved: false, originX: 0, originY: 0, startX: 0, startY: 0 });
+  const s      = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 });
   const posRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const saved = (() => {
       try { return JSON.parse(localStorage.getItem('emoc-fab-pos')); } catch { return null; }
     })();
-    const initial = saved ?? {
-      x: window.innerWidth - 84,
-      y: Math.round(window.innerHeight * 0.55),
-    };
+    const initial = saved ?? { x: window.innerWidth - 84, y: Math.round(window.innerHeight * 0.55) };
     posRef.current = initial;
     setPos(initial);
   }, []);
@@ -223,11 +219,7 @@ function FloatingEmocButton({ onOpen, isOpen }) {
     s.current.active = false;
     setDragging(false);
     if (!s.current.moved) {
-      const rect = btnRef.current.getBoundingClientRect();
-      // burst animation, luego abre el modal
-      setTapped(true);
-      setTimeout(() => setTapped(false), 320);
-      onOpen(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      onOpen();
     } else {
       try { localStorage.setItem('emoc-fab-pos', JSON.stringify(posRef.current)); } catch {}
     }
@@ -235,115 +227,69 @@ function FloatingEmocButton({ onOpen, isOpen }) {
 
   if (!pos) return null;
 
-  const fabClass = [
-    'emoc-fab',
-    dragging  ? 'emoc-fab--dragging' : '',
-    tapped    ? 'emoc-fab--tapped'   : '',
-    isOpen && !tapped ? 'emoc-fab--open' : '',
-  ].filter(Boolean).join(' ');
-
   return (
-    <button
+    <motion.button
       ref={btnRef}
-      className={fabClass}
-      style={{ left: pos.x, top: pos.y }}
+      layoutId="emoc-cloud"
+      className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}`}
+      style={{ left: pos.x, top: pos.y, borderRadius: 28 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
       aria-label="Registrar emoción"
     >
-      <span className="emoc-fab__cloud">☁️</span>
-      <span className="emoc-fab__face">💭</span>
-    </button>
+      <span className="emoc-fab__inner">
+        <span className="emoc-fab__cloud">☁️</span>
+        <span className="emoc-fab__face">💭</span>
+      </span>
+    </motion.button>
   );
 }
 
 // ── Modal rápido del emocionario ───────────────────────────────────
-function EmocQuickModal({ onClose, origin }) {
+// layoutId="emoc-cloud" → Framer Motion morfea desde el botón nube hasta este modal
+function EmocQuickModal({ onClose }) {
   const prefersReducedMotion = useReducedMotion();
-  const modalRef    = useRef(null);
-  const backdropRef = useRef(null);
-  const deltaRef    = useRef({ x: 0, y: 0 });
-  const closingRef  = useRef(false);
-
-  // Cierra con animación de salida (regresa a la nube) y luego desmonta
-  const doClose = useCallback(async () => {
-    if (closingRef.current) return;
-    closingRef.current = true;
-    if (prefersReducedMotion) { onClose(); return; }
-
-    // Salida coordinada: modal viaja de vuelta a la nube, backdrop se disipa
-    const { x, y } = deltaRef.current;
-    await Promise.all([
-      motionAnimate(
-        backdropRef.current,
-        { opacity: 0 },
-        { duration: 0.22, ease: [0.4, 0, 1, 1] }   // ease-in
-      ),
-      motionAnimate(
-        modalRef.current,
-        { x, y, scale: 0.55, opacity: 0 },
-        { type: 'spring', stiffness: 340, damping: 30, mass: 0.9 }
-      ),
-    ]);
-    onClose();
-  }, [onClose, prefersReducedMotion]);
-
-  // Animación de entrada: mide el modal, salta a la nube, spring al centro
-  useLayoutEffect(() => {
-    const modal    = modalRef.current;
-    const backdrop = backdropRef.current;
-    if (!modal || !backdrop) return;
-
-    if (prefersReducedMotion) {
-      motionAnimate(backdrop, { opacity: [0, 1] }, { duration: 0.25, ease: 'easeOut' });
-      motionAnimate(modal, { opacity: [0, 1], scale: [0.96, 1] }, { duration: 0.25, ease: 'easeOut' });
-      return;
-    }
-
-    // Calcula delta: posición de la nube relativa al centro del modal
-    const rect = modal.getBoundingClientRect();
-    const dx = origin ? origin.x - (rect.left + rect.width  / 2) : 0;
-    const dy = origin ? origin.y - (rect.top  + rect.height / 2) : 0;
-    deltaRef.current = { x: dx, y: dy };
-
-    // Posición inicial instantánea en la nube
-    motionAnimate(backdrop, { opacity: 0 }, { duration: 0 });
-    motionAnimate(modal, { x: dx, y: dy, scale: 0.55, opacity: 0 }, { duration: 0 });
-
-    // Backdrop: expo ease-out suave
-    motionAnimate(
-      backdrop,
-      { opacity: 1 },
-      { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
-    );
-
-    // Modal: spring controlado sin rebote exagerado, parte un frame después del backdrop
-    requestAnimationFrame(() => {
-      motionAnimate(modal, { x: 0, y: 0, scale: 1, opacity: 1 }, {
-        type: 'spring',
-        stiffness: 300,
-        damping: 28,
-        mass: 1,
-        opacity: { duration: 0.18, ease: 'easeOut' }, // opacidad más rápida que el movimiento
-      });
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') doClose(); };
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [doClose]);
+  }, [onClose]);
+
+  const spring = { type: 'spring', stiffness: 300, damping: 28, mass: 1 };
 
   return (
-    <div ref={backdropRef} className="emoc-quick-backdrop" style={{ opacity: 0 }} onClick={doClose}>
-      <div ref={modalRef} className="emoc-quick-modal" style={{ opacity: 0 }} onClick={(e) => e.stopPropagation()}>
-        <button className="emoc-quick-close" onClick={doClose} aria-label="Cerrar">✕</button>
-        <EmotionForm onSaved={doClose} prefill={null} />
-      </div>
-    </div>
+    <motion.div
+      className="emoc-quick-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      onClick={onClose}
+    >
+      {/* Este div comparte layoutId con el botón → Framer Motion anima el morph */}
+      <motion.div
+        layoutId="emoc-cloud"
+        className="emoc-quick-modal"
+        style={{ borderRadius: 24 }}
+        transition={spring}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* El contenido aparece con delay para no verse raro durante el morph */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, delay: prefersReducedMotion ? 0 : 0.15 }}
+        >
+          <button className="emoc-quick-close" onClick={onClose} aria-label="Cerrar">✕</button>
+          <EmotionForm onSaved={onClose} prefill={null} />
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -356,8 +302,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
   const [showEmocModal, setShowEmocModal] = useState(false);
-  const [emocOrigin,    setEmocOrigin]    = useState(null);
-  const openEmoc  = useCallback((x, y) => { setEmocOrigin({ x, y }); setShowEmocModal(true); }, []);
+  const openEmoc  = useCallback(() => setShowEmocModal(true), []);
   const closeEmoc = useCallback(() => setShowEmocModal(false), []);
 
   const load = async () => {
@@ -506,9 +451,16 @@ export default function Home() {
         />
       )}
 
-      {/* Botón flotante emocionario */}
-      <FloatingEmocButton onOpen={openEmoc} isOpen={showEmocModal} />
-      {showEmocModal && <EmocQuickModal onClose={closeEmoc} origin={emocOrigin} />}
+      {/* Nube flotante — AnimatePresence la desmonta cuando abre el modal,
+          permitiendo que Framer Motion capture su posición para el morph */}
+      <AnimatePresence>
+        {!showEmocModal && <FloatingEmocButton key="emoc-btn" onOpen={openEmoc} />}
+      </AnimatePresence>
+
+      {/* Modal — comparte layoutId con la nube, Framer Motion morfea entre ambos */}
+      <AnimatePresence>
+        {showEmocModal && <EmocQuickModal key="emoc-modal" onClose={closeEmoc} />}
+      </AnimatePresence>
     </div>
   );
 }
