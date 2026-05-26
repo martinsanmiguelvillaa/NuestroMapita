@@ -504,27 +504,23 @@
   }
 }
 
-/* Drop zone de descarte — franja sobre la navbar, solo en mobile durante drag */
+/* Drop zone de descarte — franja sobre la navbar, aparece al arrastrar */
 .emoc-fab__dropzone {
   position: fixed;
   bottom: var(--mobile-nav-height);
   left: 0;
   right: 0;
-  height: 56px;
-  border-top: 2px dashed rgba(74, 55, 40, 0.22);
-  background: rgba(74, 55, 40, 0.04);
+  height: 60px;
+  border-top: 2px dashed rgba(74, 55, 40, 0.25);
+  background: rgba(74, 55, 40, 0.05);
   z-index: calc(var(--z-overlay) - 1);
   pointer-events: none;
   transition: background 0.12s, border-color 0.12s;
 }
 
-@media (hover: hover) {
-  .emoc-fab__dropzone { display: none; }
-}
-
 .emoc-fab__dropzone--over {
-  background: rgba(180, 50, 50, 0.10);
-  border-color: rgba(180, 50, 50, 0.45);
+  background: rgba(180, 50, 50, 0.12);
+  border-color: rgba(180, 50, 50, 0.50);
   border-style: solid;
 }
 

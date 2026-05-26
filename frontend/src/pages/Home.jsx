@@ -275,7 +275,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
 
       {/* Drop zone para mobile: aparece al arrastrar, soltar aquí descarta la nube */}
       <AnimatePresence>
-        {dragging && (
+        {dragging && window.innerWidth <= 768 && (
           <motion.div
             ref={dropZoneRef}
             className={`emoc-fab__dropzone${overDrop ? ' emoc-fab__dropzone--over' : ''}`}
