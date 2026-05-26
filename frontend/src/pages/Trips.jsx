@@ -358,7 +358,7 @@ export default function Trips() {
   };
 
   return (
-    <div className="wishlist-bg">
+    <div className="wishlist-bg trips-bg">
     <div className="container">
       <div className="section-header">
         <h1 className="section-header__title">Viajecitos</h1>

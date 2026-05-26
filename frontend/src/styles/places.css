@@ -66,6 +66,10 @@
   z-index: 1;
 }
 
+.trips-bg::before {
+  background-image: var(--bg-trips);
+}
+
 /* --- Cabecera de sección --- */
 .section-header {
   display: flex;
