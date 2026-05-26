@@ -504,6 +504,13 @@
   }
 }
 
+/* En touch: ocultar completamente */
+@media (hover: none) {
+  .emoc-fab__dismiss {
+    display: none;
+  }
+}
+
 /* Drop zone de descarte — franja sobre la navbar, aparece al arrastrar */
 .emoc-fab__dropzone {
   position: fixed;
