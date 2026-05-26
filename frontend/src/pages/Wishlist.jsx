@@ -201,16 +201,19 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     active: false,
   });
   const scrollRaf = useRef(null);
+  const scrollDir = useRef(0);
 
   const stopAutoScroll = () => {
     if (scrollRaf.current) {
       cancelAnimationFrame(scrollRaf.current);
       scrollRaf.current = null;
     }
+    scrollDir.current = 0;
   };
 
   const startAutoScroll = (dir, speed) => {
     stopAutoScroll();
+    scrollDir.current = dir;
     const step = () => {
       document.documentElement.scrollTop += dir * speed;
       scrollRaf.current = requestAnimationFrame(step);
@@ -249,11 +252,11 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const ZONE = 100;
 
     if (y < ZONE) {
-      if (!scrollRaf.current) startAutoScroll(-1, Math.round(8 + ((ZONE - y) / ZONE) * 16));
+      if (scrollDir.current !== -1) startAutoScroll(-1, Math.round(8 + ((ZONE - y) / ZONE) * 16));
     } else if (y > vh - ZONE) {
-      if (!scrollRaf.current) startAutoScroll(1, Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16));
+      if (scrollDir.current !== 1) startAutoScroll(1, Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16));
     } else {
-      stopAutoScroll();
+      if (scrollDir.current !== 0) stopAutoScroll();
     }
 
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
