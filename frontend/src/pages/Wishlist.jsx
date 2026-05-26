@@ -209,10 +209,10 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     }
   };
 
-  const startAutoScroll = (dir) => {
+  const startAutoScroll = (dir, speed) => {
     stopAutoScroll();
     const step = () => {
-      window.scrollBy(0, dir * 6);
+      document.documentElement.scrollTop += dir * speed;
       scrollRaf.current = requestAnimationFrame(step);
     };
     scrollRaf.current = requestAnimationFrame(step);
@@ -246,12 +246,14 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const touch = e.touches[0];
     const y = touch.clientY;
     const vh = window.innerHeight;
-    const ZONE = 80;
+    const ZONE = 100;
 
     if (y < ZONE) {
-      startAutoScroll(-1);
+      const speed = Math.round(8 + ((ZONE - y) / ZONE) * 16);
+      startAutoScroll(-1, speed);
     } else if (y > vh - ZONE) {
-      startAutoScroll(1);
+      const speed = Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16);
+      startAutoScroll(1, speed);
     } else {
       stopAutoScroll();
     }
