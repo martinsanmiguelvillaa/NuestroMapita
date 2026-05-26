@@ -75,9 +75,7 @@ function EmotionForm({ onSaved, prefill }) {
         setEmotionKey('');
         setNote('');
       }
-      // Despachar el entry completo para actualización optimista
-      window.dispatchEvent(new CustomEvent('emotional-entry-saved', { detail: { entry: savedEntry } }));
-      onSaved();
+      onSaved(savedEntry);
     } catch {
       toast('No se pudo guardar. Intentá de nuevo.', 'error');
     } finally {
@@ -391,35 +389,6 @@ export default function Emocionario() {
     fetchEntries(calYear, calMonth);
   }, [calYear, calMonth, fetchEntries]);
 
-  // Actualización optimista al guardar: toma el entry devuelto por la API
-  // y lo inserta/reemplaza en el estado local sin un nuevo fetch.
-  useEffect(() => {
-    const handler = (e) => {
-      const { entry } = e.detail;
-      const [y, m] = entry.date.split('-').map(Number);
-      const targetYear = y;
-      const targetMonth = m - 1;
-      const { year: curYear, month: curMonth } = calRef.current;
-
-      if (targetYear === curYear && targetMonth === curMonth) {
-        // Mismo mes visible: actualización instantánea en memoria
-        setEntries((prev) => {
-          const sinDuplicado = prev.filter(
-            (en) => !(en.user_key === entry.user_key && en.date === entry.date)
-          );
-          return [...sinDuplicado, entry];
-        });
-      } else {
-        // Mes distinto: navegar y dejar que el useEffect haga el fetch
-        setCalYear(targetYear);
-        setCalMonth(targetMonth);
-      }
-    };
-
-    window.addEventListener('emotional-entry-saved', handler);
-    return () => window.removeEventListener('emotional-entry-saved', handler);
-  }, []); // sin deps: usa calRef para leer el mes actual sin stale closure
-
   const handlePrevMonth = () => {
     if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11); }
     else setCalMonth((m) => m - 1);
@@ -452,7 +421,24 @@ export default function Emocionario() {
         <EmotionForm
           key={editPrefill ? `edit-${editPrefill.entry.id}` : 'new'}
           prefill={editPrefill}
-          onSaved={() => setEditPrefill(null)}
+          onSaved={(savedEntry) => {
+            setEditPrefill(null);
+            const [y, m] = savedEntry.date.split('-').map(Number);
+            const targetYear = y;
+            const targetMonth = m - 1;
+            const { year: curYear, month: curMonth } = calRef.current;
+            if (targetYear === curYear && targetMonth === curMonth) {
+              // Actualización optimista: insertar/reemplazar en el estado local
+              setEntries((prev) => [
+                ...prev.filter((en) => !(en.user_key === savedEntry.user_key && en.date === savedEntry.date)),
+                savedEntry,
+              ]);
+            } else {
+              // Mes distinto: navegar (el useEffect hace el fetch)
+              setCalYear(targetYear);
+              setCalMonth(targetMonth);
+            }
+          }}
         />
 
         <section className="emoc-section">
