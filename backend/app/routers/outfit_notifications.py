@@ -9,6 +9,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.outfit_notification import OutfitNotificationSubscription
 from app.services.outfit_notification_scheduler import send_now
+from app.config import settings
 from app.schemas.outfit_notification import (
     OutfitNotificationSubscribeRequest,
     OutfitNotificationSettingsRequest,
@@ -117,6 +118,11 @@ def test_push(
     _: bool = Depends(get_current_user),
 ):
     """Envía una notificación de prueba inmediatamente. No modifica last_sent_at."""
+    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
+        raise HTTPException(
+            status_code=503,
+            detail="VAPID no configurado. Agregá VAPID_PRIVATE_KEY y VAPID_CLAIMS_EMAIL en las variables de entorno del backend y reconstruí el contenedor.",
+        )
     result = send_now(user_key, device_id, db)
     if not result["ok"]:
         raise HTTPException(status_code=400, detail=result["error"])
