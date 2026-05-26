@@ -53,8 +53,7 @@ function EmotionForm({ onSaved, prefill }) {
   const [saving, setSaving]         = useState(false);
   const isEditing = !!prefill;
 
-  // Ref: siempre apunta al onSaved más reciente para evitar closures obsoletos
-  // en el handler async.
+  // Ref para que el handler async siempre use el onSaved más reciente del padre
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
 
@@ -63,17 +62,16 @@ function EmotionForm({ onSaved, prefill }) {
     if (!emotionKey) return;
     setSaving(true);
     try {
-      const savedEntry = await upsertEmotionalEntry({
-        user_key:     userKey,
+      await upsertEmotionalEntry({
+        user_key:    userKey,
         date,
-        emotion_key:  emotionKey,
-        intensity:    Math.round(intensity),
-        note:         note || null,
+        emotion_key: emotionKey,
+        intensity:   Math.round(intensity),
+        note:        note || null,
       });
       toast(isEditing ? 'Emoción actualizada' : 'Emoción guardada', 'success');
       if (!isEditing) { setEmotionKey(''); setNote(''); }
-      // Llamar via ref garantiza que sea el onSaved del último render de Emocionario
-      onSavedRef.current(savedEntry);
+      await onSavedRef.current();
     } catch {
       toast('No se pudo guardar. Intentá de nuevo.', 'error');
     } finally {
@@ -240,12 +238,15 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
     if (!byDate[e.date]) byDate[e.date] = [];
     byDate[e.date].push(e);
   }
-  const today      = todayISO();
-  const startDow   = (new Date(year, month, 1).getDay() + 6) % 7;
+  const today       = todayISO();
+  const startDow    = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells = [];
   for (let i = 0; i < startDow; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const nowDate   = new Date();
+  const maxMonth  = monthKey(nowDate.getFullYear(), nowDate.getMonth());
 
   return (
     <div className="emoc-calendar">
@@ -253,7 +254,7 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
         <button className="emoc-calendar__nav-btn" onClick={onPrev}>‹</button>
         <span className="emoc-calendar__title">{MONTH_NAMES[month]} {year}</span>
         <button className="emoc-calendar__nav-btn" onClick={onNext}
-          disabled={monthKey(year, month) >= monthKey(...todayYearMonth())}>›</button>
+          disabled={monthKey(year, month) >= maxMonth}>›</button>
       </div>
       <div className="emoc-calendar__grid">
         {DAY_NAMES.map((d) => <div key={d} className="emoc-calendar__dow">{d}</div>)}
@@ -266,8 +267,8 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
           return (
             <button key={iso}
               className={['emoc-calendar__cell',
-                isToday  ? 'emoc-calendar__cell--today'     : '',
-                isFuture ? 'emoc-calendar__cell--future'    : '',
+                isToday   ? 'emoc-calendar__cell--today'     : '',
+                isFuture  ? 'emoc-calendar__cell--future'    : '',
                 dayEntries.length ? 'emoc-calendar__cell--has-entry' : '',
               ].filter(Boolean).join(' ')}
               onClick={() => !isFuture && onDayClick(iso)}
@@ -292,100 +293,73 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
   );
 }
 
-function todayYearMonth() {
-  const d = new Date();
-  return [d.getFullYear(), d.getMonth()];
-}
-
 // ─────────────────────────────────────────────
 // Página principal — fuente de verdad única
 // ─────────────────────────────────────────────
 export default function Emocionario() {
   const now = new Date();
-  const [calYear,    setCalYear]    = useState(now.getFullYear());
-  const [calMonth,   setCalMonth]   = useState(now.getMonth());
-  const [entries,    setEntries]    = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [selectedDay, setSelectedDay] = useState(null); // string ISO | null
-  const [editPrefill, setEditPrefill] = useState(null);
 
-  // Refs para lectura sin stale closure desde callbacks async
-  const calYearRef    = useRef(calYear);
-  const calMonthRef   = useRef(calMonth);
-  calYearRef.current  = calYear;
-  calMonthRef.current = calMonth;
+  // selectedMonth es UN único objeto — cualquier cambio lo reemplaza entero.
+  // Esto elimina el problema de stale closure: handleEntrySaved siempre depende
+  // de [selectedMonth] y React le da la referencia actual.
+  const [selectedMonth, setSelectedMonth] = useState({ year: now.getFullYear(), month: now.getMonth() });
+  const [entries,        setEntries]       = useState([]);
+  const [loadingEntries, setLoadingEntries] = useState(true);
+  const [selectedDay,    setSelectedDay]   = useState(null);
+  const [editPrefill,    setEditPrefill]   = useState(null);
 
-  // fetchEntries: silent=true → no muestra "Cargando", calendario permanece visible
-  const fetchEntries = useCallback(async (year, month, silent = false) => {
-    if (!silent) setLoading(true);
+  // fetchEntriesForMonth: sin dependencias de estado — recibe el mes como argumento.
+  // Es estable para siempre gracias a useCallback([]).
+  const fetchEntriesForMonth = useCallback(async (m) => {
+    setLoadingEntries(true);
     try {
-      const data = await getEmotionalEntries(monthKey(year, month));
+      const data = await getEmotionalEntries(monthKey(m.year, m.month));
       setEntries(data);
     } catch {
-      // silencioso — no romper UI ante error de red puntual
+      // no romper UI ante error puntual de red
     } finally {
-      if (!silent) setLoading(false);
+      setLoadingEntries(false);
     }
   }, []);
 
-  // Carga inicial y al navegar de mes
+  // Cada vez que selectedMonth cambia (navegación de mes o primer render),
+  // se recarga automáticamente.
   useEffect(() => {
-    fetchEntries(calYear, calMonth);
-  }, [calYear, calMonth, fetchEntries]);
+    fetchEntriesForMonth(selectedMonth);
+  }, [selectedMonth, fetchEntriesForMonth]);
 
-  // ── handleEntrySaved: llamado por EmotionForm con el entry devuelto por la API ──
-  // Estrategia: upsert local INMEDIATO (sin esperar red) + refetch silencioso para consistencia.
-  // Los refs garantizan que siempre leemos el año/mes visible actual, aunque
-  // este callback haya sido capturado en un closure anterior.
-  const handleEntrySaved = useCallback((savedEntry) => {
+  // handleEntrySaved: llamado por EmotionForm después de guardar con éxito.
+  // Depende de [selectedMonth] → React garantiza que usa el mes visible actual.
+  // No recibe argumentos ni hace updates optimistas: solo refetch completo.
+  const handleEntrySaved = useCallback(async () => {
     setEditPrefill(null);
-
-    const [y, m] = savedEntry.date.split('-').map(Number);
-    const targetYear  = y;
-    const targetMonth = m - 1;
-    const curYear  = calYearRef.current;
-    const curMonth = calMonthRef.current;
-
-    if (targetYear === curYear && targetMonth === curMonth) {
-      // Mismo mes visible → upsert local instantáneo
-      setEntries((prev) => [
-        ...prev.filter((en) => !(en.user_key === savedEntry.user_key && en.date === savedEntry.date)),
-        savedEntry,
-      ]);
-      // Refetch silencioso en background para consistencia (sin loading)
-      fetchEntries(targetYear, targetMonth, true);
-    } else {
-      // Mes distinto → navegar; el useEffect hace el fetch con loading
-      setCalYear(targetYear);
-      setCalMonth(targetMonth);
-    }
-  }, [fetchEntries]); // fetchEntries es estable (useCallback con [])
+    await fetchEntriesForMonth(selectedMonth);
+  }, [selectedMonth, fetchEntriesForMonth]);
 
   const handlePrevMonth = () => {
-    if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11); }
-    else setCalMonth((m) => m - 1);
+    setSelectedMonth(({ year, month }) => {
+      if (month === 0) return { year: year - 1, month: 11 };
+      return { year, month: month - 1 };
+    });
   };
 
   const handleNextMonth = () => {
-    const [ty, tm] = todayYearMonth();
-    if (calYear === ty && calMonth === tm) return;
-    if (calMonth === 11) { setCalYear((y) => y + 1); setCalMonth(0); }
-    else setCalMonth((m) => m + 1);
+    const maxYear  = now.getFullYear();
+    const maxMonth = now.getMonth();
+    setSelectedMonth(({ year, month }) => {
+      if (year === maxYear && month === maxMonth) return { year, month };
+      if (month === 11) return { year: year + 1, month: 0 };
+      return { year, month: month + 1 };
+    });
   };
 
-  // Entries del día seleccionado, derivados del estado principal (siempre actualizados)
+  // Entries del día seleccionado, siempre derivados del estado actual.
   const selectedDayEntries = selectedDay
     ? entries.filter((e) => e.date === selectedDay)
     : [];
 
   const handleDelete = useCallback((deletedId) => {
     setEntries((prev) => prev.filter((e) => e.id !== deletedId));
-    // Limpiar selectedDay si quedó sin entries y ninguno de los dos usuarios tiene registro
-    setSelectedDay((day) => {
-      if (!day) return null;
-      // mantener modal abierto aunque queden 0 entries (usuario puede ver "Sin registro")
-      return day;
-    });
   }, []);
 
   const handleEdit = (userKey, entry) => {
@@ -409,13 +383,13 @@ export default function Emocionario() {
 
         <section className="emoc-section">
           <h2 className="emoc-section__title">Calendario emocional</h2>
-          {loading ? (
+          {loadingEntries ? (
             <div className="emoc-loading">Cargando…</div>
           ) : (
             <EmotionCalendar
               entries={entries}
-              year={calYear}
-              month={calMonth}
+              year={selectedMonth.year}
+              month={selectedMonth.month}
               onPrev={handlePrevMonth}
               onNext={handleNextMonth}
               onDayClick={setSelectedDay}
@@ -426,7 +400,7 @@ export default function Emocionario() {
         {selectedDay && (
           <DayModal
             day={selectedDay}
-            entries={selectedDayEntries}   {/* siempre derivado del estado actual */}
+            entries={selectedDayEntries}
             onClose={() => setSelectedDay(null)}
             onDelete={handleDelete}
             onEdit={handleEdit}
