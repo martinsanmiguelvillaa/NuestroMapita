@@ -194,6 +194,23 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
   const touchState = useRef({
     id: null, startY: 0, timer: null, active: false,
   });
+  const scrollRaf = useRef(null);
+
+  const stopAutoScroll = () => {
+    if (scrollRaf.current) {
+      cancelAnimationFrame(scrollRaf.current);
+      scrollRaf.current = null;
+    }
+  };
+
+  const startAutoScroll = (dir) => {
+    stopAutoScroll();
+    const step = () => {
+      window.scrollBy(0, dir * 6);
+      scrollRaf.current = requestAnimationFrame(step);
+    };
+    scrollRaf.current = requestAnimationFrame(step);
+  };
 
   const onTouchStart = (id) => (e) => {
     touchState.current.id = id;
@@ -214,6 +231,18 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     }
     e.preventDefault();
     const touch = e.touches[0];
+    const y = touch.clientY;
+    const vh = window.innerHeight;
+    const ZONE = 80;
+
+    if (y < ZONE) {
+      startAutoScroll(-1);
+    } else if (y > vh - ZONE) {
+      startAutoScroll(1);
+    } else {
+      stopAutoScroll();
+    }
+
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     const card = el?.closest('[data-drag-id]');
     if (card) {
@@ -224,6 +253,7 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
 
   const onTouchEnd = () => {
     clearTimeout(touchState.current.timer);
+    stopAutoScroll();
     if (touchState.current.active && touchState.current.id != null && overId != null) {
       const newOrder = reinsert(order, touchState.current.id, overId);
       setOrder(newOrder);
