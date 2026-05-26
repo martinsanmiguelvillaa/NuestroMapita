@@ -504,37 +504,28 @@
   }
 }
 
-/* Drop zone de descarte — aparece al arrastrar en mobile */
+/* Drop zone de descarte — franja sobre la navbar, solo en mobile durante drag */
 .emoc-fab__dropzone {
   position: fixed;
-  bottom: calc(var(--mobile-nav-height) + 14px);
-  left: 50%;
-  translate: -50% 0;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 2px dashed rgba(74, 55, 40, 0.35);
-  background: rgba(74, 55, 40, 0.06);
-  color: rgba(74, 55, 40, 0.45);
-  font-size: 1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  bottom: var(--mobile-nav-height);
+  left: 0;
+  right: 0;
+  height: 56px;
+  border-top: 2px dashed rgba(74, 55, 40, 0.22);
+  background: rgba(74, 55, 40, 0.04);
   z-index: calc(var(--z-overlay) - 1);
-  pointer-events: none; /* el pointer capture está en el botón, no aquí */
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  pointer-events: none;
+  transition: background 0.12s, border-color 0.12s;
 }
 
-/* En desktop se oculta (el X de hover ya lo cubre) */
 @media (hover: hover) {
   .emoc-fab__dropzone { display: none; }
 }
 
 .emoc-fab__dropzone--over {
-  background: rgba(180, 50, 50, 0.14);
-  border-color: rgba(180, 50, 50, 0.55);
+  background: rgba(180, 50, 50, 0.10);
+  border-color: rgba(180, 50, 50, 0.45);
   border-style: solid;
-  color: rgba(180, 50, 50, 0.75);
 }
 
 /* Flotado suave — solo en el inner, no en el botón raíz */
