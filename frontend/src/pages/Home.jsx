@@ -403,8 +403,23 @@ export default function Home() {
     { to: '/cine',        icon: '🎬', name: 'Cine',        desc: 'Películas y series' },
     { to: '/viajecitos',  icon: '✈️', name: 'Viajecitos',  desc: 'Nuestros próximos viajes' },
     { to: '/outfits',     icon: '👗', name: 'Outfits',     desc: 'Qué ponerse hoy' },
-    { to: '/nombres',     icon: '👶', name: 'Nombres',     desc: 'Ranking de nombres' },
   ];
+
+  const moreLinks = [
+    { to: '/cartitas',    icon: '💌', name: 'Cartitas' },
+    { to: '/nombres',     icon: '👶', name: 'Nombres' },
+    { to: '/emocionario', icon: '💭', name: 'Emocionario' },
+  ];
+
+  const [showMore, setShowMore] = useState(false);
+  const moreRef = useRef(null);
+
+  useEffect(() => {
+    if (!showMore) return;
+    const handler = (e) => { if (moreRef.current && !moreRef.current.contains(e.target)) setShowMore(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showMore]);
 
   return (
     <div className="home fade-in">
@@ -444,6 +459,29 @@ export default function Home() {
               <span className="home__nav-card-desc">{desc}</span>
             </Link>
           ))}
+
+          {/* Botón + con panel de más secciones */}
+          <div className="home__nav-card-more" ref={moreRef}>
+            <button
+              className={`home__nav-card home__nav-card--more-btn${showMore ? ' home__nav-card--more-btn--open' : ''}`}
+              onClick={() => setShowMore((v) => !v)}
+            >
+              <span className="home__nav-card-icon">{showMore ? '✕' : '+'}</span>
+              <span className="home__nav-card-name">Más</span>
+              <span className="home__nav-card-desc">Otras secciones</span>
+            </button>
+
+            {showMore && (
+              <div className="home__more-panel">
+                {moreLinks.map(({ to, icon, name }) => (
+                  <Link key={to} to={to} className="home__more-panel-item" onClick={() => setShowMore(false)}>
+                    <span className="home__more-panel-icon">{icon}</span>
+                    <span className="home__more-panel-name">{name}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
