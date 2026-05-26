@@ -236,11 +236,9 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const ZONE = 100;
 
     if (y < ZONE) {
-      const speed = Math.round(8 + ((ZONE - y) / ZONE) * 16);
-      startAutoScroll(-1, speed);
+      if (!scrollRaf.current) startAutoScroll(-1, Math.round(8 + ((ZONE - y) / ZONE) * 16));
     } else if (y > vh - ZONE) {
-      const speed = Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16);
-      startAutoScroll(1, speed);
+      if (!scrollRaf.current) startAutoScroll(1, Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16));
     } else {
       stopAutoScroll();
     }
