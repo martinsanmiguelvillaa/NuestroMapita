@@ -188,7 +188,6 @@
   background: transparent;
   color: inherit;
   transition: var(--transition);
-  -webkit-tap-highlight-color: transparent;
 }
 
 .home__nav-card--more-btn--open {
@@ -543,7 +542,6 @@
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* El float vive en el elemento interno para no interferir con el layoutId de Framer Motion */

@@ -38,6 +38,11 @@ button, input, textarea, select, a {
   touch-action: manipulation;
 }
 
+/* iOS/Android: elimina el overlay azul al tocar elementos interactivos */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Espacio para la navbar en desktop */
 #root {
   padding-top: var(--navbar-height);
