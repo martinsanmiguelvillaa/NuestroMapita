@@ -6,7 +6,7 @@
  * - Lanza un Error con el mensaje del backend si la respuesta no es exitosa.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
 const TOKEN_KEY = 'mapita_token';
 
 export function saveToken(token) {
