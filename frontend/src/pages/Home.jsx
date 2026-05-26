@@ -259,14 +259,16 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         onPointerCancel={onPointerUp}
         aria-label="Registrar emoción"
       >
-        {/* X de descarte — visible al hacer hover en desktop (CSS media query) */}
-        <span
-          className="emoc-fab__dismiss"
-          role="button"
-          aria-label="Ocultar atajo"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-        >×</span>
+        {/* X de descarte — solo en desktop (JS detecta touch por ancho) */}
+        {window.innerWidth > 768 && (
+          <span
+            className="emoc-fab__dismiss"
+            role="button"
+            aria-label="Ocultar atajo"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+          >×</span>
+        )}
         <span className="emoc-fab__inner">
           <span className="emoc-fab__cloud">☁️</span>
           <span className="emoc-fab__face">💭</span>
