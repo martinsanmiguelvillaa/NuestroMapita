@@ -200,79 +200,89 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     timer: null,
     active: false,
   });
-  const scrollDir = useRef(0);
+  const scrollRaf  = useRef(null);
+  const overIdRef  = useRef(null);   // copia ref de overId para usar en closures
 
-  const stopAutoScroll = () => { scrollDir.current = 0; };
+  const stopAutoScroll = () => {
+    if (scrollRaf.current) { cancelAnimationFrame(scrollRaf.current); scrollRaf.current = null; }
+  };
 
   const startAutoScroll = (dir, speed) => {
-    if (scrollDir.current === dir) return;
-    scrollDir.current = dir;
+    stopAutoScroll();
     const step = () => {
-      if (scrollDir.current !== dir) return;
       window.scrollBy(0, dir * speed);
-      requestAnimationFrame(step);
+      scrollRaf.current = requestAnimationFrame(step);
     };
-    requestAnimationFrame(step);
+    scrollRaf.current = requestAnimationFrame(step);
   };
 
-  const onTouchStart = (id) => (e) => {
-    touchState.current.id = id;
-    touchState.current.startY = e.touches[0].clientY;
-    touchState.current.active = false;
-
-    touchState.current.timer = setTimeout(() => {
-      touchState.current.active = true;
-      setDraggingId(id);
-      // Vibración haptica si disponible
-      if (navigator.vibrate) navigator.vibrate(40);
-    }, 300);
-  };
-
-  const onTouchMove = (e) => {
+  // handlers directos al document con passive:false → e.preventDefault() garantizado
+  const handleTouchMove = useCallback((e) => {
     if (!touchState.current.active) {
-      // Cancelar long press si se mueve antes de los 300ms
       const delta = Math.abs(e.touches[0].clientY - touchState.current.startY);
-      if (delta > 8) {
-        clearTimeout(touchState.current.timer);
-      }
+      if (delta > 8) clearTimeout(touchState.current.timer);
       return;
     }
 
-    e.preventDefault(); // Bloquear scroll mientras arrastra
+    e.preventDefault();
 
     const touch = e.touches[0];
-    const y = touch.clientY;
-    const vh = window.innerHeight;
-    const ZONE = 100;
+    const y     = touch.clientY;
+    const vh    = window.innerHeight;
+    const ZONE  = 110;
 
     if (y < ZONE) {
-      startAutoScroll(-1, Math.round(8 + ((ZONE - y) / ZONE) * 16));
+      startAutoScroll(-1, Math.round(6 + ((ZONE - y) / ZONE) * 14));
     } else if (y > vh - ZONE) {
-      startAutoScroll(1, Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16));
+      startAutoScroll(1, Math.round(6 + ((y - (vh - ZONE)) / ZONE) * 14));
     } else {
       stopAutoScroll();
     }
 
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const el   = document.elementFromPoint(touch.clientX, touch.clientY);
     const card = el?.closest('[data-drag-id]');
     if (card) {
       const targetId = parseInt(card.dataset.dragId, 10);
-      if (targetId !== touchState.current.id) setOverId(targetId);
+      if (targetId !== touchState.current.id) {
+        overIdRef.current = targetId;
+        setOverId(targetId);
+      }
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     clearTimeout(touchState.current.timer);
     stopAutoScroll();
-    if (touchState.current.active && touchState.current.id != null && overId != null) {
-      const newOrder = reinsert(order, touchState.current.id, overId);
-      setOrder(newOrder);
-      onOrderChange(newOrder);
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend',  handleTouchEnd);
+
+    if (touchState.current.active && touchState.current.id != null && overIdRef.current != null) {
+      setOrder((prev) => {
+        const newOrder = reinsert(prev, touchState.current.id, overIdRef.current);
+        onOrderChange(newOrder);
+        return newOrder;
+      });
     }
     touchState.current.active = false;
-    touchState.current.id = null;
+    touchState.current.id     = null;
+    overIdRef.current          = null;
     setDraggingId(null);
     setOverId(null);
+  }, [handleTouchMove, onOrderChange]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onTouchStart = (id) => (e) => {
+    touchState.current.id     = id;
+    touchState.current.startY = e.touches[0].clientY;
+    touchState.current.active = false;
+
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend',  handleTouchEnd,  { passive: false });
+
+    touchState.current.timer = setTimeout(() => {
+      touchState.current.active = true;
+      setDraggingId(id);
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, 300);
   };
 
   // Reordena el array moviendo `fromId` a la posición de `toId`
@@ -298,8 +308,6 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     onDrop: disabled ? undefined : onDrop(id),
     onDragEnd: disabled ? undefined : onDragEnd,
     onTouchStart: disabled ? undefined : onTouchStart(id),
-    onTouchMove: disabled ? undefined : onTouchMove,
-    onTouchEnd: disabled ? undefined : onTouchEnd,
     style: {
       opacity: draggingId === id ? 0.4 : 1,
       outline: overId === id && overId !== draggingId ? '2px dashed var(--color-brown)' : 'none',
