@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { upsertEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -62,10 +62,21 @@ function EmotionForm({ onSaved, prefill }) {
     if (!emotionKey) return;
     setSaving(true);
     try {
-      await upsertEmotionalEntry({ user_key: userKey, date, emotion_key: emotionKey, intensity: Math.round(intensity), note: note || null });
+      // La API devuelve el entry guardado (con id)
+      const savedEntry = await upsertEmotionalEntry({
+        user_key: userKey,
+        date,
+        emotion_key: emotionKey,
+        intensity: Math.round(intensity),
+        note: note || null,
+      });
       toast(isEditing ? 'Emoción actualizada' : 'Emoción guardada', 'success');
-      if (!isEditing) setNote('');
-      window.dispatchEvent(new CustomEvent('emotional-entry-saved', { detail: { date } }));
+      if (!isEditing) {
+        setEmotionKey('');
+        setNote('');
+      }
+      // Despachar el entry completo para actualización optimista
+      window.dispatchEvent(new CustomEvent('emotional-entry-saved', { detail: { entry: savedEntry } }));
       onSaved();
     } catch {
       toast('No se pudo guardar. Intentá de nuevo.', 'error');
@@ -275,7 +286,6 @@ const MONTH_NAMES = [
 const DAY_NAMES = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
 
 function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
-  // Construir mapa date → [entries]
   const byDate = {};
   for (const e of entries) {
     if (!byDate[e.date]) byDate[e.date] = [];
@@ -283,9 +293,7 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
   }
 
   const today = todayISO();
-  const firstDay = new Date(year, month, 1);
-  // JS: 0=Dom, convertir a Lu=0
-  const startDow = (firstDay.getDay() + 6) % 7;
+  const startDow = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const cells = [];
@@ -362,7 +370,11 @@ export default function Emocionario() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [editPrefill, setEditPrefill] = useState(null);
 
-  // Función estable: recibe año/mes como parámetros para evitar cierres obsoletos
+  // Ref para que el event listener siempre vea el mes mostrado actual
+  const calRef = useRef({ year: calYear, month: calMonth });
+  calRef.current = { year: calYear, month: calMonth };
+
+  // Carga del mes actual o al navegar
   const fetchEntries = useCallback(async (year, month) => {
     setLoading(true);
     try {
@@ -373,24 +385,40 @@ export default function Emocionario() {
     } finally {
       setLoading(false);
     }
-  }, []); // sin deps: los parámetros se pasan explícitamente
+  }, []);
 
-  // Recarga al cambiar mes
   useEffect(() => {
     fetchEntries(calYear, calMonth);
   }, [calYear, calMonth, fetchEntries]);
 
-  // Recarga cuando se guarda una entrada (via CustomEvent para evitar closures obsoletos)
+  // Actualización optimista al guardar: toma el entry devuelto por la API
+  // y lo inserta/reemplaza en el estado local sin un nuevo fetch.
   useEffect(() => {
     const handler = (e) => {
-      const [y, m] = e.detail.date.split('-').map(Number);
-      setCalYear(y);
-      setCalMonth(m - 1);
-      fetchEntries(y, m - 1);
+      const { entry } = e.detail;
+      const [y, m] = entry.date.split('-').map(Number);
+      const targetYear = y;
+      const targetMonth = m - 1;
+      const { year: curYear, month: curMonth } = calRef.current;
+
+      if (targetYear === curYear && targetMonth === curMonth) {
+        // Mismo mes visible: actualización instantánea en memoria
+        setEntries((prev) => {
+          const sinDuplicado = prev.filter(
+            (en) => !(en.user_key === entry.user_key && en.date === entry.date)
+          );
+          return [...sinDuplicado, entry];
+        });
+      } else {
+        // Mes distinto: navegar y dejar que el useEffect haga el fetch
+        setCalYear(targetYear);
+        setCalMonth(targetMonth);
+      }
     };
+
     window.addEventListener('emotional-entry-saved', handler);
     return () => window.removeEventListener('emotional-entry-saved', handler);
-  }, [fetchEntries]);
+  }, []); // sin deps: usa calRef para leer el mes actual sin stale closure
 
   const handlePrevMonth = () => {
     if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11); }
@@ -448,7 +476,10 @@ export default function Emocionario() {
             day={selectedDay.iso}
             entries={selectedDay.entries}
             onClose={() => setSelectedDay(null)}
-            onDeleted={() => { setSelectedDay(null); fetchEntries(calYear, calMonth); }}
+            onDeleted={() => {
+              setSelectedDay(null);
+              fetchEntries(calYear, calMonth);
+            }}
             onEdit={handleEdit}
           />
         )}
