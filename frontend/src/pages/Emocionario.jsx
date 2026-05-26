@@ -44,7 +44,7 @@ function monthKey(year, month) {
 // Formulario rápido
 // ─────────────────────────────────────────────
 export function EmotionForm({ onSaved, prefill }) {
-  const { toast } = useToast();
+  const toast = useToast();
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
   const [emotionKeys, setEmotionKeys] = useState(() =>
@@ -83,7 +83,7 @@ export function EmotionForm({ onSaved, prefill }) {
           intensity:   Math.round(intensity),
           note:        note || null,
         });
-        toast('Emoción actualizada', 'success');
+        toast.success('Emoción actualizada');
       } else {
         for (const key of emotionKeys) {
           await upsertEmotionalEntry({
@@ -95,13 +95,13 @@ export function EmotionForm({ onSaved, prefill }) {
           });
         }
         const count = emotionKeys.size;
-        toast(count === 1 ? 'Emoción guardada' : `${count} emociones guardadas`, 'success');
+        toast.success(count === 1 ? 'Emoción guardada' : `${count} emociones guardadas`);
         setEmotionKeys(new Set());
         setNote('');
       }
       await onSavedRef.current();
     } catch {
-      toast('No se pudo guardar. Intentá de nuevo.', 'error');
+      toast.error('No se pudo guardar. Intentá de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -188,8 +188,8 @@ export function EmotionForm({ onSaved, prefill }) {
 // Modal de día
 // ─────────────────────────────────────────────
 function DayModal({ day, entries, onClose, onDelete, onEdit }) {
-  const { confirm } = useConfirm();
-  const { toast }   = useToast();
+  const confirm = useConfirm();
+  const toast   = useToast();
 
   const handleDelete = async (entry) => {
     const ok = await confirm({
@@ -201,10 +201,10 @@ function DayModal({ day, entries, onClose, onDelete, onEdit }) {
     if (!ok) return;
     try {
       await deleteEmotionalEntry(entry.id);
-      toast('Emoción eliminada', 'success');
+      toast.success('Emoción eliminada');
       onDelete(entry.id);
     } catch {
-      toast('No se pudo eliminar', 'error');
+      toast.error('No se pudo eliminar');
     }
   };
 
