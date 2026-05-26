@@ -184,6 +184,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const dropZoneRef = useRef(null);
   const [pos, setPos]         = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [justDragged, setJustDragged] = useState(false);
   const [overDrop, setOverDrop] = useState(false);
   const s      = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 });
   const posRef = useRef({ x: 0, y: 0 });
@@ -242,6 +243,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         }
       }
       // posición no persiste entre recargas
+      setJustDragged(true);
     }
   }, [onOpen, onDismiss]);
 
@@ -252,13 +254,14 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
       <motion.button
         ref={btnRef}
         layoutId="emoc-cloud"
-        className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}`}
+        className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}${justDragged ? ' emoc-fab--just-dragged' : ''}`}
         style={{ left: pos.x, top: pos.y }}
         transition={dragging ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        onPointerLeave={() => setJustDragged(false)}
         aria-label="Registrar emoción"
       >
         {/* X de descarte — solo en desktop (JS detecta touch por ancho) */}
