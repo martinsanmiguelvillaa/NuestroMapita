@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
+import { getOutfitNotificationStatus, updateOutfitNotificationSettings } from '../../api/outfitNotifications';
+import { getOrCreateDeviceId } from '../../utils/deviceId';
 import '../../styles/navbar.css';
 
 const links = [
@@ -25,6 +27,71 @@ export default function Navbar() {
   const [fadeRight, setFadeRight] = useState(false);
   const linksRef = useRef(null);
   const { supported, permission, subscribed, subscribe, unsubscribe } = usePushNotifications();
+
+  // Estado de notificaciones de outfits por usuario en este dispositivo
+  // null = cargando, { exists, enabled } = cargado
+  const [outfitNotif, setOutfitNotif] = useState({ van: null, martin: null });
+  const [togglingOutfit, setTogglingOutfit] = useState({ van: false, martin: false });
+
+  useEffect(() => {
+    if (!configOpen) return;
+    const deviceId = getOrCreateDeviceId();
+    Promise.all([
+      getOutfitNotificationStatus('van', deviceId).catch(() => null),
+      getOutfitNotificationStatus('martin', deviceId).catch(() => null),
+    ]).then(([van, martin]) => setOutfitNotif({ van, martin }));
+  }, [configOpen]);
+
+  const toggleOutfit = async (userKey) => {
+    const current = outfitNotif[userKey];
+    if (!current?.exists) return;
+    setTogglingOutfit(prev => ({ ...prev, [userKey]: true }));
+    const newEnabled = !current.enabled;
+    try {
+      await updateOutfitNotificationSettings({
+        user_key: userKey,
+        device_id: getOrCreateDeviceId(),
+        enabled: newEnabled,
+      });
+      setOutfitNotif(prev => ({ ...prev, [userKey]: { ...prev[userKey], enabled: newEnabled } }));
+    } finally {
+      setTogglingOutfit(prev => ({ ...prev, [userKey]: false }));
+    }
+  };
+
+  const toggleAll = async () => {
+    const anyActive = subscribed || outfitNotif.van?.enabled || outfitNotif.martin?.enabled;
+    if (anyActive) {
+      // Desactivar todo
+      if (subscribed) await unsubscribe();
+      for (const userKey of ['van', 'martin']) {
+        if (outfitNotif[userKey]?.exists && outfitNotif[userKey]?.enabled) {
+          await updateOutfitNotificationSettings({
+            user_key: userKey,
+            device_id: getOrCreateDeviceId(),
+            enabled: false,
+          });
+          setOutfitNotif(prev => ({ ...prev, [userKey]: { ...prev[userKey], enabled: false } }));
+        }
+      }
+    } else {
+      // Activar todo lo que tiene suscripción
+      if (!subscribed && supported && permission !== 'denied') await subscribe();
+      for (const userKey of ['van', 'martin']) {
+        if (outfitNotif[userKey]?.exists && !outfitNotif[userKey]?.enabled) {
+          await updateOutfitNotificationSettings({
+            user_key: userKey,
+            device_id: getOrCreateDeviceId(),
+            enabled: true,
+          });
+          setOutfitNotif(prev => ({ ...prev, [userKey]: { ...prev[userKey], enabled: true } }));
+        }
+      }
+    }
+  };
+
+  const anyNotifActive = subscribed || outfitNotif.van?.enabled || outfitNotif.martin?.enabled;
+  const hasOutfitSubs = outfitNotif.van?.exists || outfitNotif.martin?.exists;
 
   useEffect(() => {
     if (!configOpen) return;
@@ -96,15 +163,48 @@ export default function Navbar() {
             <>
               <div className="navbar__config-backdrop" onClick={() => setConfigOpen(false)} />
               <div className="navbar__config-menu">
+
+                {/* Todas las notificaciones — solo si hay alguna configurada */}
+                {(supported && permission !== 'denied' && (subscribed || hasOutfitSubs)) && (
+                  <button className="navbar__config-item" onClick={toggleAll}>
+                    <span>{anyNotifActive ? '🔔' : '🔕'}</span>
+                    <span>{anyNotifActive ? 'Silenciar todas las notificaciones' : 'Activar todas las notificaciones'}</span>
+                  </button>
+                )}
+
+                {/* Notificaciones de cartitas */}
                 {supported && permission !== 'denied' && (
                   <button
                     className="navbar__config-item"
                     onClick={subscribed ? unsubscribe : subscribe}
                   >
-                    <span>{subscribed ? '🔔' : '🔕'}</span>
-                    <span>{subscribed ? 'Desactivar notificaciones' : 'Activar notificaciones'}</span>
+                    <span>{subscribed ? '💌' : '💌'}</span>
+                    <span>{subscribed ? 'Desactivar notificaciones de cartitas' : 'Activar notificaciones de cartitas'}</span>
                   </button>
                 )}
+
+                {/* Notificaciones de outfits por usuario */}
+                {outfitNotif.van?.exists && (
+                  <button
+                    className="navbar__config-item"
+                    onClick={() => toggleOutfit('van')}
+                    disabled={togglingOutfit.van}
+                  >
+                    <span>👗</span>
+                    <span>{outfitNotif.van.enabled ? 'Desactivar outfit de Van' : 'Activar outfit de Van'}</span>
+                  </button>
+                )}
+                {outfitNotif.martin?.exists && (
+                  <button
+                    className="navbar__config-item"
+                    onClick={() => toggleOutfit('martin')}
+                    disabled={togglingOutfit.martin}
+                  >
+                    <span>👔</span>
+                    <span>{outfitNotif.martin.enabled ? 'Desactivar outfit de Martín' : 'Activar outfit de Martín'}</span>
+                  </button>
+                )}
+
                 <button
                   className="navbar__config-item navbar__config-item--danger"
                   onClick={() => setConfirming(true)}

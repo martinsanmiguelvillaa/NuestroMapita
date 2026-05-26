@@ -7,23 +7,13 @@ import {
   unsubscribeOutfitNotification,
   testPushNotification,
 } from '../api/outfitNotifications';
-
-const DEVICE_ID_KEY = 'outfit_notification_device_id';
+import { getOrCreateDeviceId } from '../utils/deviceId';
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(base64);
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
-}
-
-function getOrCreateDeviceId() {
-  let id = localStorage.getItem(DEVICE_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(DEVICE_ID_KEY, id);
-  }
-  return id;
 }
 
 function detectDeviceLabel() {
