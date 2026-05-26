@@ -511,24 +511,29 @@
   }
 }
 
-/* Drop zone de descarte — franja sobre la navbar, aparece al arrastrar */
+/* Drop zone de descarte — semicírculo degradé centrado sobre la navbar */
 .emoc-fab__dropzone {
   position: fixed;
   bottom: var(--mobile-nav-height);
-  left: 0;
-  right: 0;
-  height: 60px;
-  border-top: 2px dashed rgba(74, 55, 40, 0.25);
-  background: rgba(74, 55, 40, 0.05);
+  left: 50%;
+  translate: -50% 0;
+  width: 200px;
+  height: 80px;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: radial-gradient(ellipse at bottom center,
+    rgba(74, 55, 40, 0.22) 0%,
+    rgba(74, 55, 40, 0.08) 55%,
+    transparent 100%);
   z-index: calc(var(--z-overlay) - 1);
   pointer-events: none;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.15s;
 }
 
 .emoc-fab__dropzone--over {
-  background: rgba(180, 50, 50, 0.12);
-  border-color: rgba(180, 50, 50, 0.50);
-  border-style: solid;
+  background: radial-gradient(ellipse at bottom center,
+    rgba(180, 50, 50, 0.35) 0%,
+    rgba(180, 50, 50, 0.12) 55%,
+    transparent 100%);
 }
 
 /* Flotado suave — solo en el inner, no en el botón raíz */
