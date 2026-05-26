@@ -358,23 +358,26 @@ export default function Emocionario() {
   const [calMonth, setCalMonth] = useState(now.getMonth());
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState(null);   // { iso, entries }
-  const [editPrefill, setEditPrefill] = useState(null);   // para editar desde modal
-  const [refreshKey, setRefreshKey] = useState(0);        // fuerza reload del calendario
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [editPrefill, setEditPrefill] = useState(null);
 
-  const loadEntries = useCallback(async () => {
+  // Función estable: recibe año/mes como parámetros para evitar cierres obsoletos
+  const fetchEntries = useCallback(async (year, month) => {
     setLoading(true);
     try {
-      const data = await getEmotionalEntries(monthKey(calYear, calMonth));
+      const data = await getEmotionalEntries(monthKey(year, month));
       setEntries(data);
     } catch {
       // silencioso
     } finally {
       setLoading(false);
     }
-  }, [calYear, calMonth, refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // sin deps: los parámetros se pasan explícitamente
 
-  useEffect(() => { loadEntries(); }, [loadEntries]);
+  // Recarga al cambiar mes
+  useEffect(() => {
+    fetchEntries(calYear, calMonth);
+  }, [calYear, calMonth, fetchEntries]);
 
   const handlePrevMonth = () => {
     if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11); }
@@ -411,10 +414,13 @@ export default function Emocionario() {
           onSaved={(savedDate) => {
             setEditPrefill(null);
             const [y, m] = savedDate.split('-').map(Number);
-            // Navegar al mes guardado y siempre forzar reload vía refreshKey
-            setCalYear(y);
-            setCalMonth(m - 1);
-            setRefreshKey((k) => k + 1);
+            const targetYear = y;
+            const targetMonth = m - 1;
+            // Navegar al mes y recargar. Si el mes no cambia, el useEffect
+            // no se dispara, entonces llamamos fetchEntries directamente.
+            setCalYear(targetYear);
+            setCalMonth(targetMonth);
+            fetchEntries(targetYear, targetMonth);
           }}
         />
 
@@ -439,7 +445,7 @@ export default function Emocionario() {
             day={selectedDay.iso}
             entries={selectedDay.entries}
             onClose={() => setSelectedDay(null)}
-            onDeleted={() => { setSelectedDay(null); loadEntries(); }}
+            onDeleted={() => { setSelectedDay(null); fetchEntries(calYear, calMonth); }}
             onEdit={handleEdit}
           />
         )}
