@@ -65,7 +65,7 @@ function EmotionForm({ onSaved, prefill }) {
       await upsertEmotionalEntry({ user_key: userKey, date, emotion_key: emotionKey, intensity, note: note || null });
       toast(isEditing ? 'Emoción actualizada' : 'Emoción guardada', 'success');
       if (!isEditing) setNote('');
-      onSaved();
+      onSaved(date);
     } catch {
       toast('No se pudo guardar. Intentá de nuevo.', 'error');
     } finally {
@@ -141,11 +141,9 @@ function EmotionForm({ onSaved, prefill }) {
         </div>
         <div className="emoc-form__intensity-dots">
           {[1, 2, 3, 4, 5].map((n) => (
-            <button
+            <span
               key={n}
-              type="button"
               className={`emoc-intensity-dot${intensity >= n ? ' emoc-intensity-dot--filled' : ''}`}
-              onClick={() => setIntensity(n)}
             />
           ))}
         </div>
@@ -408,7 +406,19 @@ export default function Emocionario() {
         <EmotionForm
           key={editPrefill ? `edit-${editPrefill.entry.id}` : 'new'}
           prefill={editPrefill}
-          onSaved={() => { setEditPrefill(null); loadEntries(); }}
+          onSaved={(savedDate) => {
+            setEditPrefill(null);
+            const [y, m] = savedDate.split('-').map(Number);
+            const newMonth = m - 1;
+            if (y === calYear && newMonth === calMonth) {
+              // Mismo mes: recargar directamente
+              loadEntries();
+            } else {
+              // Cambio de mes: el useEffect se encarga al detectar el cambio
+              setCalYear(y);
+              setCalMonth(newMonth);
+            }
+          }}
         />
 
         <section className="emoc-section">

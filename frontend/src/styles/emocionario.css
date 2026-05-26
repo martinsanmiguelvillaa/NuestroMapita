@@ -209,18 +209,13 @@
   border-radius: 50%;
   border: 2px solid var(--color-beige-dark);
   background: transparent;
-  cursor: pointer;
   transition: var(--transition-fast);
-  padding: 0;
   flex-shrink: 0;
+  display: inline-block;
 }
 
 .emoc-intensity-dot--filled {
   background: var(--color-brown);
-  border-color: var(--color-brown);
-}
-
-button.emoc-intensity-dot:hover {
   border-color: var(--color-brown);
 }
 
