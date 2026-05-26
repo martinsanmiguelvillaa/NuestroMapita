@@ -172,10 +172,11 @@ function HomeLightbox({ photo, onClose }) {
 }
 
 // ── Botón flotante nube ────────────────────────────────────────────
-function FloatingEmocButton({ onOpen }) {
+function FloatingEmocButton({ onOpen, isOpen }) {
   const btnRef   = useRef(null);
   const [pos, setPos]       = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [tapped, setTapped] = useState(false);
   // toda la lógica de drag en un ref para evitar stale closures
   const s = useRef({ active: false, moved: false, originX: 0, originY: 0, startX: 0, startY: 0 });
   const posRef = useRef({ x: 0, y: 0 });
@@ -222,6 +223,9 @@ function FloatingEmocButton({ onOpen }) {
     setDragging(false);
     if (!s.current.moved) {
       const rect = btnRef.current.getBoundingClientRect();
+      // burst animation, luego abre el modal
+      setTapped(true);
+      setTimeout(() => setTapped(false), 320);
       onOpen(rect.left + rect.width / 2, rect.top + rect.height / 2);
     } else {
       try { localStorage.setItem('emoc-fab-pos', JSON.stringify(posRef.current)); } catch {}
@@ -230,10 +234,17 @@ function FloatingEmocButton({ onOpen }) {
 
   if (!pos) return null;
 
+  const fabClass = [
+    'emoc-fab',
+    dragging  ? 'emoc-fab--dragging' : '',
+    tapped    ? 'emoc-fab--tapped'   : '',
+    isOpen && !tapped ? 'emoc-fab--open' : '',
+  ].filter(Boolean).join(' ');
+
   return (
     <button
       ref={btnRef}
-      className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}`}
+      className={fabClass}
       style={{ left: pos.x, top: pos.y }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -438,7 +449,7 @@ export default function Home() {
       )}
 
       {/* Botón flotante emocionario */}
-      <FloatingEmocButton onOpen={openEmoc} />
+      <FloatingEmocButton onOpen={openEmoc} isOpen={showEmocModal} />
       {showEmocModal && <EmocQuickModal onClose={closeEmoc} origin={emocOrigin} />}
     </div>
   );
