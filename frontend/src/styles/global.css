@@ -8,6 +8,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -38,10 +39,6 @@ button, input, textarea, select, a {
   touch-action: manipulation;
 }
 
-/* iOS/Android: elimina el overlay azul al tocar elementos interactivos */
-button, a, [role="button"] {
-  -webkit-tap-highlight-color: transparent;
-}
 
 /* Espacio para la navbar en desktop */
 #root {
