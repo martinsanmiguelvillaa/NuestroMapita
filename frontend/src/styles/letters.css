@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--color-cream-overlay);
+  background: var(--color-cream-overlay-strong);
   pointer-events: none;
   z-index: -1;
 }
