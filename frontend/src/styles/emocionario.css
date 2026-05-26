@@ -600,6 +600,18 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 768px) {
+  /* En mobile la navbar está abajo: sin padding-top extra, padding-bottom para la bottom nav */
+  .emoc-modal-backdrop {
+    padding-top: var(--space-4);
+    padding-bottom: calc(var(--mobile-nav-height) + var(--space-4) + env(safe-area-inset-bottom));
+  }
+
+  .emoc-modal {
+    max-height: calc(100vh - var(--mobile-nav-height) - var(--space-8) - env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 480px) {
   .emoc-page {
     padding: var(--space-3) var(--space-2) var(--space-16);
