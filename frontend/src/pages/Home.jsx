@@ -17,6 +17,11 @@ import { polaroidUrl, fullUrl } from '../utils/cloudinary';
 import { useToast } from '../context/ToastContext';
 import { EmotionForm } from './Emocionario';
 import '../styles/home.css';
+
+// Variable de módulo: vive mientras el módulo JS esté cargado.
+// Persiste al cambiar de pestaña y volver (mismo módulo), pero se
+// resetea en cada recarga de página (el módulo se re-ejecuta desde cero).
+let fabDismissedSession = false;
 import '../styles/photos.css';
 
 // ── Polaroid de video con autoplay por visibilidad ─────────────────
@@ -353,10 +358,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
   const [showEmocModal, setShowEmocModal] = useState(false);
-  const [fabDismissed, setFabDismissed]   = useState(false);
+  const [fabDismissed, setFabDismissed]   = useState(fabDismissedSession);
   const openEmoc   = useCallback(() => setShowEmocModal(true), []);
   const closeEmoc  = useCallback(() => setShowEmocModal(false), []);
-  const dismissFab = useCallback(() => setFabDismissed(true), []);
+  const dismissFab = useCallback(() => { fabDismissedSession = true; setFabDismissed(true); }, []);
 
   const load = async () => {
     try {
