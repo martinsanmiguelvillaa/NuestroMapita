@@ -232,8 +232,8 @@ function FloatingEmocButton({ onOpen }) {
       ref={btnRef}
       layoutId="emoc-cloud"
       className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}`}
-      style={{ left: pos.x, top: pos.y, borderRadius: 28 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
+      style={{ left: pos.x, top: pos.y }}
+      transition={dragging ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

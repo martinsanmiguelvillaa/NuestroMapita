@@ -436,22 +436,13 @@
 .emoc-fab {
   position: fixed;
   border: none;
-  /* Fondo glassmorphism que morfea visualmente hacia el modal */
-  background: rgba(255, 255, 255, 0.88);
-  border-radius: 28px;
-  padding: 6px 10px;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
   z-index: var(--z-overlay);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  overflow: hidden;
-  box-shadow:
-    0 2px 8px rgba(74, 55, 40, 0.08),
-    0 6px 20px rgba(74, 55, 40, 0.12);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  /* will-change lo agrega Framer Motion automáticamente para layoutId */
 }
 
 /* El float vive en el elemento interno para no interferir con el layoutId de Framer Motion */
