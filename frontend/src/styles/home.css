@@ -538,6 +538,12 @@
   animation: none;
 }
 
+.emoc-fab--dragging .emoc-fab__dismiss {
+  opacity: 0 !important;
+  transform: scale(0.6) !important;
+  pointer-events: none;
+}
+
 /* X de descarte — solo en desktop al hacer hover */
 .emoc-fab__dismiss {
   position: absolute;
