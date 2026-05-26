@@ -390,13 +390,13 @@ video::-webkit-media-controls-start-playback-button {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 56px 0 8px; /* top: espacio para close/counter; bottom: mínimo */
+  padding: 80px 0 8px; /* top: espacio para navbar + close/counter; bottom: mínimo */
   animation: modalFadeIn 0.2s ease;
 }
 
 .lightbox__img {
   max-width: 92vw;
-  max-height: calc(100vh - 170px); /* 56px top + 114px bottom (acciones + miniaturas) */
+  max-height: calc(100vh - 200px); /* 80px top + 120px bottom (acciones + miniaturas) */
   object-fit: contain;
   border-radius: var(--radius-md);
   user-select: none;
