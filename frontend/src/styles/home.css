@@ -216,17 +216,18 @@
   position: absolute;
   bottom: calc(100% + 10px);
   left: 50%;
-  transform: translateX(-50%);
+  /* Framer Motion maneja el translateX(-50%) vía x: "-50%" — no poner transform aquí */
   background: var(--color-white);
   border: 1.5px solid var(--color-rose);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  padding: var(--space-2);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  min-width: 180px;
+  gap: var(--space-2);
+  min-width: 210px;
   z-index: var(--z-raised);
+  transform-origin: center bottom;
 }
 
 /* Pequeño triángulo que conecta el panel con la tarjeta */
@@ -240,33 +241,36 @@
   height: 7px;
   background: var(--color-white);
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  border-bottom: none;
 }
 
 .home__more-panel-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   text-decoration: none;
   color: var(--color-text);
   transition: var(--transition-fast);
+  border: 1px solid transparent;
 }
 
 .home__more-panel-item:hover {
   background: var(--color-rose-light);
   color: var(--color-brown-dark);
+  border-color: var(--color-rose);
 }
 
 .home__more-panel-icon {
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .home__more-panel-name {
   font-family: var(--font-heading);
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
+  color: var(--color-text);
 }
 
 /* --- Álbum de recuerdos reciente --- */

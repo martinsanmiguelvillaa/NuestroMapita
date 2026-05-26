@@ -476,10 +476,11 @@ export default function Home() {
               {showMore && (
                 <motion.div
                   className="home__more-panel"
-                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ x: '-50%' }}
+                  initial={{ opacity: 0, y: 8, scale: 0.92, transformOrigin: 'center bottom' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, transformOrigin: 'center bottom' }}
+                  exit={{ opacity: 0, y: 6, scale: 0.94, transformOrigin: 'center bottom' }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 >
                   {moreLinks.map(({ to, icon, name }) => (
                     <Link key={to} to={to} className="home__more-panel-item" onClick={() => setShowMore(false)}>
