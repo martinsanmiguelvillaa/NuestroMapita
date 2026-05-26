@@ -15,7 +15,7 @@
   inset: 0;
   background-image: var(--bg-letters);
   background-size: cover;
-  background-position: center;
+  background-position: center 65%;
   pointer-events: none;
   z-index: -2;
 }
