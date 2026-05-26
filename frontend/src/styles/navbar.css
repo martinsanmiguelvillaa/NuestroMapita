@@ -67,12 +67,6 @@
   transition: var(--transition-fast);
 }
 
-/* Ocultar íconos en desktop — el texto ya identifica cada sección */
-@media (min-width: 769px) {
-  .navbar__link-icon {
-    display: none;
-  }
-}
 .navbar__link:hover {
   background-color: var(--color-beige);
   color: var(--color-text);
