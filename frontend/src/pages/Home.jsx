@@ -190,7 +190,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const posRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const initial = { x: window.innerWidth - 84, y: Math.round(window.innerHeight * 0.55) };
+    const initial = { x: Math.round(window.innerWidth * 0.72), y: Math.round(window.innerHeight * 0.36) };
     posRef.current = initial;
     setPos(initial);
   }, []);
@@ -465,22 +465,31 @@ export default function Home() {
             <button
               className={`home__nav-card home__nav-card--more-btn${showMore ? ' home__nav-card--more-btn--open' : ''}`}
               onClick={() => setShowMore((v) => !v)}
+              aria-expanded={showMore}
             >
-              <span className="home__nav-card-icon">{showMore ? '✕' : '+'}</span>
+              <span className={`home__nav-card-icon home__more-icon${showMore ? ' home__more-icon--open' : ''}`}>+</span>
               <span className="home__nav-card-name">Más</span>
               <span className="home__nav-card-desc">Otras secciones</span>
             </button>
 
-            {showMore && (
-              <div className="home__more-panel">
-                {moreLinks.map(({ to, icon, name }) => (
-                  <Link key={to} to={to} className="home__more-panel-item" onClick={() => setShowMore(false)}>
-                    <span className="home__more-panel-icon">{icon}</span>
-                    <span className="home__more-panel-name">{name}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <AnimatePresence>
+              {showMore && (
+                <motion.div
+                  className="home__more-panel"
+                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 4, scale: 0.97 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {moreLinks.map(({ to, icon, name }) => (
+                    <Link key={to} to={to} className="home__more-panel-item" onClick={() => setShowMore(false)}>
+                      <span className="home__more-panel-icon">{icon}</span>
+                      <span className="home__more-panel-name">{name}</span>
+                    </Link>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </section>
