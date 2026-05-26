@@ -539,7 +539,7 @@ video::-webkit-media-controls-start-playback-button {
 
   .lightbox__actions {
     position: fixed;
-    bottom: calc(var(--mobile-nav-height) + 64px + 8px);
+    bottom: calc(var(--mobile-nav-height) + 64px + 18px);
     left: 50%;
     transform: translateX(-50%);
     margin-top: 0;
