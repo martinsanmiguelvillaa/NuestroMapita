@@ -187,11 +187,29 @@
   border: 1.5px dashed var(--color-beige-dark);
   background: transparent;
   color: inherit;
+  transition: var(--transition);
 }
 
 .home__nav-card--more-btn--open {
+  border-style: solid;
   border-color: var(--color-rose);
   background: var(--color-rose-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.home__more-icon {
+  display: inline-block;
+  transition: transform 220ms ease-out;
+  line-height: 1;
+}
+
+.home__more-icon--open {
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__more-icon { transition: none; }
 }
 
 .home__more-panel {
@@ -200,7 +218,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: var(--color-white);
-  border: 1.5px solid var(--color-beige-mid);
+  border: 1.5px solid var(--color-rose);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
   padding: var(--space-2);
@@ -209,6 +227,20 @@
   gap: var(--space-1);
   min-width: 180px;
   z-index: var(--z-raised);
+}
+
+/* Pequeño triángulo que conecta el panel con la tarjeta */
+.home__more-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  translate: -50% 0;
+  width: 12px;
+  height: 7px;
+  background: var(--color-white);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-bottom: none;
 }
 
 .home__more-panel-item {
