@@ -529,9 +529,9 @@
   pointer-events: none;
   transition: background 0.15s;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding-bottom: 6px;
+  padding-bottom: 10px;
 }
 
 .emoc-fab__dropzone--over {
@@ -547,7 +547,7 @@
   height: 22px;
   color: rgba(74, 55, 40, 0.55);
   transition: color 0.15s, transform 0.15s;
-  margin-top: 10px;
+  margin-top: 0;
 }
 
 .emoc-fab__dropzone--over .emoc-fab__dropzone-icon {
