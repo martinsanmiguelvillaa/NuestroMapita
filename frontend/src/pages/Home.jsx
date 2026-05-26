@@ -272,12 +272,19 @@ function EmocQuickModal({ onClose, origin }) {
     if (closingRef.current) return;
     closingRef.current = true;
     if (prefersReducedMotion) { onClose(); return; }
+
+    // Salida coordinada: modal viaja de vuelta a la nube, backdrop se disipa
+    const { x, y } = deltaRef.current;
     await Promise.all([
-      motionAnimate(backdropRef.current, { opacity: 0 }, { duration: 0.18, ease: 'easeIn' }),
+      motionAnimate(
+        backdropRef.current,
+        { opacity: 0 },
+        { duration: 0.22, ease: [0.4, 0, 1, 1] }   // ease-in
+      ),
       motionAnimate(
         modalRef.current,
-        { x: deltaRef.current.x, y: deltaRef.current.y, scale: 0, opacity: 0 },
-        { type: 'spring', stiffness: 420, damping: 36 }
+        { x, y, scale: 0.55, opacity: 0 },
+        { type: 'spring', stiffness: 340, damping: 30, mass: 0.9 }
       ),
     ]);
     onClose();
@@ -290,26 +297,36 @@ function EmocQuickModal({ onClose, origin }) {
     if (!modal || !backdrop) return;
 
     if (prefersReducedMotion) {
-      motionAnimate(backdrop, { opacity: [0, 1] }, { duration: 0.2 });
-      motionAnimate(modal,    { opacity: [0, 1], scale: [0.95, 1] }, { duration: 0.2 });
+      motionAnimate(backdrop, { opacity: [0, 1] }, { duration: 0.25, ease: 'easeOut' });
+      motionAnimate(modal, { opacity: [0, 1], scale: [0.96, 1] }, { duration: 0.25, ease: 'easeOut' });
       return;
     }
 
-    // Calcula el delta: posición de la nube relativa al centro del modal
+    // Calcula delta: posición de la nube relativa al centro del modal
     const rect = modal.getBoundingClientRect();
     const dx = origin ? origin.x - (rect.left + rect.width  / 2) : 0;
     const dy = origin ? origin.y - (rect.top  + rect.height / 2) : 0;
     deltaRef.current = { x: dx, y: dy };
 
-    // Salta instantáneamente a la posición de la nube
+    // Posición inicial instantánea en la nube
     motionAnimate(backdrop, { opacity: 0 }, { duration: 0 });
-    motionAnimate(modal, { x: dx, y: dy, scale: 0, opacity: 0 }, { duration: 0 });
+    motionAnimate(modal, { x: dx, y: dy, scale: 0.55, opacity: 0 }, { duration: 0 });
 
-    // Un frame después, inicia el spring hacia el centro
+    // Backdrop: expo ease-out suave
+    motionAnimate(
+      backdrop,
+      { opacity: 1 },
+      { duration: 0.32, ease: [0.16, 1, 0.3, 1] }
+    );
+
+    // Modal: spring controlado sin rebote exagerado, parte un frame después del backdrop
     requestAnimationFrame(() => {
-      motionAnimate(backdrop, { opacity: 1 }, { duration: 0.22, ease: 'easeOut' });
       motionAnimate(modal, { x: 0, y: 0, scale: 1, opacity: 1 }, {
-        type: 'spring', stiffness: 380, damping: 30, mass: 0.8,
+        type: 'spring',
+        stiffness: 300,
+        damping: 28,
+        mass: 1,
+        opacity: { duration: 0.18, ease: 'easeOut' }, // opacidad más rápida que el movimiento
       });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
