@@ -377,10 +377,6 @@ export default function Outfits() {
           </div>
         )}
 
-        {selectedUser && (
-          <OutfitNotificationCard key={selectedUser} userKey={selectedUser} />
-        )}
-
         {outfit && weather && !busy && (
           <>
             {/* Ocasión + actualizar */}
@@ -502,6 +498,8 @@ export default function Outfits() {
               )}
             </section>
 
+            {/* Notificaciones */}
+            <OutfitNotificationCard key={selectedUser} userKey={selectedUser} />
           </>
         )}
       </div>
