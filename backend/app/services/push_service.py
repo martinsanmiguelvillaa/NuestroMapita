@@ -42,9 +42,14 @@ def send_push_to_endpoint(
         return True
     except WebPushException as e:
         status = e.response.status_code if e.response is not None else None
+        resp_text = e.response.text if e.response is not None else "(sin respuesta)"
         if status in (404, 410):
             return False  # Suscripción expirada
-        logger.warning("Push error (endpoint=%s): %s", endpoint[:40], e)
+        # 401/403 = VAPID key mismatch — la suscripción fue creada con otra clave pública
+        logger.error(
+            "Push error status=%s endpoint=%s respuesta=%s",
+            status, endpoint[:40], resp_text[:200],
+        )
         return True  # Error transitorio — no deshabilitar
 
 
