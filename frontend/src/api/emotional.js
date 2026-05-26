@@ -13,5 +13,11 @@ export const getEmotionalEntries = (month) => {
   return apiFetch(`${BASE}/${qs}`);
 };
 
+export const updateEmotionalEntry = (id, data) =>
+  apiFetch(`${BASE}/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+
 export const deleteEmotionalEntry = (id) =>
   apiFetch(`${BASE}/${id}`, { method: 'DELETE' });

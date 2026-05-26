@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { upsertEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
+import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import '../styles/emocionario.css';
@@ -45,32 +45,60 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 function EmotionForm({ onSaved, prefill }) {
   const { toast } = useToast();
-  const [userKey, setUserKey]       = useState(prefill?.userKey ?? 'van');
-  const [date, setDate]             = useState(prefill?.entry?.date ?? todayISO());
-  const [emotionKey, setEmotionKey] = useState(prefill?.entry?.emotion_key ?? '');
-  const [intensity, setIntensity]   = useState(prefill?.entry?.intensity ?? 3);
-  const [note, setNote]             = useState(prefill?.entry?.note ?? '');
-  const [saving, setSaving]         = useState(false);
+  const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
+  const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
+  const [emotionKeys, setEmotionKeys] = useState(() =>
+    prefill?.entry?.emotion_key ? new Set([prefill.entry.emotion_key]) : new Set()
+  );
+  const [intensity, setIntensity]     = useState(prefill?.entry?.intensity ?? 3);
+  const [note, setNote]               = useState(prefill?.entry?.note ?? '');
+  const [saving, setSaving]           = useState(false);
   const isEditing = !!prefill;
 
-  // Ref para que el handler async siempre use el onSaved más reciente del padre
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
 
+  const toggleEmotion = (key) => {
+    if (isEditing) {
+      setEmotionKeys(new Set([key]));
+    } else {
+      setEmotionKeys((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key);
+        else next.add(key);
+        return next;
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!emotionKey) return;
+    if (emotionKeys.size === 0) return;
     setSaving(true);
     try {
-      await upsertEmotionalEntry({
-        user_key:    userKey,
-        date,
-        emotion_key: emotionKey,
-        intensity:   Math.round(intensity),
-        note:        note || null,
-      });
-      toast(isEditing ? 'Emoción actualizada' : 'Emoción guardada', 'success');
-      if (!isEditing) { setEmotionKey(''); setNote(''); }
+      if (isEditing) {
+        const [emotionKey] = emotionKeys;
+        await updateEmotionalEntry(prefill.entry.id, {
+          emotion_key: emotionKey,
+          intensity:   Math.round(intensity),
+          note:        note || null,
+        });
+        toast('Emoción actualizada', 'success');
+      } else {
+        for (const key of emotionKeys) {
+          await upsertEmotionalEntry({
+            user_key:    userKey,
+            date,
+            emotion_key: key,
+            intensity:   Math.round(intensity),
+            note:        note || null,
+          });
+        }
+        const count = emotionKeys.size;
+        toast(count === 1 ? 'Emoción guardada' : `${count} emociones guardadas`, 'success');
+        setEmotionKeys(new Set());
+        setNote('');
+      }
       await onSavedRef.current();
     } catch {
       toast('No se pudo guardar. Intentá de nuevo.', 'error');
@@ -81,32 +109,45 @@ function EmotionForm({ onSaved, prefill }) {
 
   const today = todayISO();
 
+  const submitLabel = saving
+    ? 'Guardando…'
+    : isEditing
+    ? 'Actualizar emoción'
+    : emotionKeys.size > 1
+    ? `Guardar ${emotionKeys.size} emociones`
+    : 'Guardar emoción';
+
   return (
     <form className="emoc-form" onSubmit={handleSubmit}>
-      <h2 className="emoc-form__title">{isEditing ? 'Editar emoción' : '¿Cómo te sentís hoy?'}</h2>
+      <h2 className="emoc-form__title">{isEditing ? 'Editar emoción' : '¿Qué sentiste?'}</h2>
 
-      <div className="emoc-form__users">
-        {USERS.map((u) => (
-          <button key={u.key} type="button"
-            className={`emoc-form__user-btn${userKey === u.key ? ' emoc-form__user-btn--active' : ''}`}
-            onClick={() => setUserKey(u.key)}>
-            <span>{u.avatar}</span><span>{u.label}</span>
-          </button>
-        ))}
-      </div>
+      {!isEditing && (
+        <div className="emoc-form__users">
+          {USERS.map((u) => (
+            <button key={u.key} type="button"
+              className={`emoc-form__user-btn${userKey === u.key ? ' emoc-form__user-btn--active' : ''}`}
+              onClick={() => setUserKey(u.key)}>
+              <span>{u.avatar}</span><span>{u.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="emoc-form__date-row">
         <label className="emoc-form__label">Fecha</label>
         <input type="date" className="emoc-form__date" value={date} max={today}
+          disabled={isEditing}
           onChange={(e) => setDate(e.target.value)} />
       </div>
 
-      <div className="emoc-form__label">¿Qué sentiste?</div>
+      <div className="emoc-form__label">
+        {isEditing ? '¿Qué sentiste?' : 'Podés elegir más de una'}
+      </div>
       <div className="emoc-form__chips">
         {EMOTIONS.map((em) => (
           <button key={em.key} type="button"
-            className={`emoc-chip${emotionKey === em.key ? ' emoc-chip--active' : ''}`}
-            onClick={() => setEmotionKey(em.key)}>
+            className={`emoc-chip${emotionKeys.has(em.key) ? ' emoc-chip--active' : ''}`}
+            onClick={() => toggleEmotion(em.key)}>
             <span className="emoc-chip__emoji">{em.emoji}</span>
             <span className="emoc-chip__label">{em.label}</span>
           </button>
@@ -136,8 +177,8 @@ function EmotionForm({ onSaved, prefill }) {
         value={note} maxLength={500} rows={3}
         onChange={(e) => setNote(e.target.value)} />
 
-      <button type="submit" className="emoc-form__submit" disabled={!emotionKey || saving}>
-        {saving ? 'Guardando…' : isEditing ? 'Actualizar emoción' : 'Guardar emoción'}
+      <button type="submit" className="emoc-form__submit" disabled={emotionKeys.size === 0 || saving}>
+        {submitLabel}
       </button>
     </form>
   );
@@ -149,9 +190,6 @@ function EmotionForm({ onSaved, prefill }) {
 function DayModal({ day, entries, onClose, onDelete, onEdit }) {
   const { confirm } = useConfirm();
   const { toast }   = useToast();
-
-  const vanEntry    = entries.find((e) => e.user_key === 'van');
-  const martinEntry = entries.find((e) => e.user_key === 'martin');
 
   const handleDelete = (entry) => {
     confirm(
@@ -178,34 +216,40 @@ function DayModal({ day, entries, onClose, onDelete, onEdit }) {
         </div>
         <div className="emoc-modal__users">
           {USERS.map((u) => {
-            const entry = u.key === 'van' ? vanEntry : martinEntry;
-            const em    = entry ? EMOTION_MAP[entry.emotion_key] : null;
+            const userEntries = entries.filter((e) => e.user_key === u.key);
             return (
               <div key={u.key} className="emoc-modal__user-card">
                 <div className="emoc-modal__user-header">
                   <span className="emoc-modal__user-avatar">{u.avatar}</span>
                   <span className="emoc-modal__user-name">{u.label}</span>
                 </div>
-                {em ? (
-                  <>
-                    <div className="emoc-modal__emotion">
-                      <span className="emoc-modal__emoji">{em.emoji}</span>
-                      <span className="emoc-modal__emotion-label">{em.label}</span>
-                    </div>
-                    <div className="emoc-modal__intensity-dots">
-                      {[1,2,3,4,5].map((n) => (
-                        <span key={n}
-                          className={`emoc-intensity-dot${entry.intensity >= n ? ' emoc-intensity-dot--filled' : ''}`} />
-                      ))}
-                    </div>
-                    {entry.note && <p className="emoc-modal__note">{entry.note}</p>}
-                    <div className="emoc-modal__actions">
-                      <button className="emoc-modal__edit-btn"
-                        onClick={() => { onEdit(u.key, entry); onClose(); }}>Editar</button>
-                      <button className="emoc-modal__delete-btn"
-                        onClick={() => handleDelete(entry)}>Eliminar</button>
-                    </div>
-                  </>
+                {userEntries.length > 0 ? (
+                  <div className="emoc-modal__emotion-list">
+                    {userEntries.map((entry) => {
+                      const em = EMOTION_MAP[entry.emotion_key];
+                      return (
+                        <div key={entry.id} className="emoc-modal__emotion-entry">
+                          <div className="emoc-modal__emotion">
+                            <span className="emoc-modal__emoji">{em?.emoji}</span>
+                            <span className="emoc-modal__emotion-label">{em?.label}</span>
+                          </div>
+                          <div className="emoc-modal__intensity-dots">
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <span key={n}
+                                className={`emoc-intensity-dot${entry.intensity >= n ? ' emoc-intensity-dot--filled' : ''}`} />
+                            ))}
+                          </div>
+                          {entry.note && <p className="emoc-modal__note">{entry.note}</p>}
+                          <div className="emoc-modal__actions">
+                            <button className="emoc-modal__edit-btn"
+                              onClick={() => { onEdit(u.key, entry); onClose(); }}>Editar</button>
+                            <button className="emoc-modal__delete-btn"
+                              onClick={() => handleDelete(entry)}>Eliminar</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <div className="emoc-modal__empty">Sin registro</div>
                 )}
@@ -278,7 +322,7 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
                 {dayEntries.map((e) => {
                   const em = EMOTION_MAP[e.emotion_key];
                   return em ? (
-                    <span key={e.user_key} className="emoc-calendar__emoji"
+                    <span key={e.id} className="emoc-calendar__emoji"
                       title={`${e.user_key === 'van' ? 'Van' : 'Martín'}: ${em.label}`}>
                       {em.emoji}
                     </span>
@@ -299,17 +343,12 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
 export default function Emocionario() {
   const now = new Date();
 
-  // selectedMonth es UN único objeto — cualquier cambio lo reemplaza entero.
-  // Esto elimina el problema de stale closure: handleEntrySaved siempre depende
-  // de [selectedMonth] y React le da la referencia actual.
   const [selectedMonth, setSelectedMonth] = useState({ year: now.getFullYear(), month: now.getMonth() });
   const [entries,        setEntries]       = useState([]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
   const [editPrefill,    setEditPrefill]   = useState(null);
 
-  // fetchEntriesForMonth: sin dependencias de estado — recibe el mes como argumento.
-  // Es estable para siempre gracias a useCallback([]).
   const fetchEntriesForMonth = useCallback(async (m) => {
     setLoadingEntries(true);
     try {
@@ -322,15 +361,10 @@ export default function Emocionario() {
     }
   }, []);
 
-  // Cada vez que selectedMonth cambia (navegación de mes o primer render),
-  // se recarga automáticamente.
   useEffect(() => {
     fetchEntriesForMonth(selectedMonth);
   }, [selectedMonth, fetchEntriesForMonth]);
 
-  // handleEntrySaved: llamado por EmotionForm después de guardar con éxito.
-  // Depende de [selectedMonth] → React garantiza que usa el mes visible actual.
-  // No recibe argumentos ni hace updates optimistas: solo refetch completo.
   const handleEntrySaved = useCallback(async () => {
     setEditPrefill(null);
     await fetchEntriesForMonth(selectedMonth);
@@ -353,7 +387,6 @@ export default function Emocionario() {
     });
   };
 
-  // Entries del día seleccionado, siempre derivados del estado actual.
   const selectedDayEntries = selectedDay
     ? entries.filter((e) => e.date === selectedDay)
     : [];

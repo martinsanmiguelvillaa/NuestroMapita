@@ -48,6 +48,26 @@ class EmotionalEntryUpsertRequest(BaseModel):
         return v
 
 
+class EmotionalEntryUpdateRequest(BaseModel):
+    emotion_key: str
+    intensity: int
+    note: Optional[str] = None
+
+    @field_validator("emotion_key")
+    @classmethod
+    def validate_emotion(cls, v: str) -> str:
+        if v not in VALID_EMOTIONS:
+            raise ValueError(f"emotion_key inválido: {v}")
+        return v
+
+    @field_validator("intensity")
+    @classmethod
+    def validate_intensity(cls, v: int) -> int:
+        if not (1 <= v <= 5):
+            raise ValueError("intensity debe estar entre 1 y 5")
+        return v
+
+
 class EmotionalEntryResponse(BaseModel):
     id: int
     user_key: str

@@ -16,5 +16,5 @@ class EmotionalEntry(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
-        UniqueConstraint("user_key", "date", name="uq_emotional_user_date"),
+        UniqueConstraint("user_key", "date", "emotion_key", name="uq_emotional_user_date_emotion"),
     )

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.emotional_entry import EmotionalEntry
-from app.schemas.emotional_entry import EmotionalEntryUpsertRequest, EmotionalEntryResponse
+from app.schemas.emotional_entry import EmotionalEntryUpsertRequest, EmotionalEntryUpdateRequest, EmotionalEntryResponse
 
 router = APIRouter(prefix="/emocionario", tags=["Emocionario"])
 
@@ -28,7 +28,7 @@ def upsert_entry(
 
     entry = (
         db.query(EmotionalEntry)
-        .filter_by(user_key=body.user_key, date=body.date)
+        .filter_by(user_key=body.user_key, date=body.date, emotion_key=body.emotion_key)
         .first()
     )
     if entry:
@@ -61,6 +61,33 @@ def list_entries(
     if month:
         q = q.filter(EmotionalEntry.date.like(f"{month}-%"))
     return q.order_by(EmotionalEntry.date.desc()).all()
+
+
+@router.patch("/{entry_id}", response_model=EmotionalEntryResponse)
+def update_entry(
+    entry_id: int,
+    body: EmotionalEntryUpdateRequest,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Actualiza emoción, intensidad y nota de una entrada existente."""
+    entry = db.query(EmotionalEntry).filter_by(id=entry_id).first()
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entrada no encontrada")
+    if body.emotion_key != entry.emotion_key:
+        conflict = (
+            db.query(EmotionalEntry)
+            .filter_by(user_key=entry.user_key, date=entry.date, emotion_key=body.emotion_key)
+            .first()
+        )
+        if conflict:
+            raise HTTPException(status_code=400, detail="Ya registraste esa emoción para ese día")
+    entry.emotion_key = body.emotion_key
+    entry.intensity = body.intensity
+    entry.note = body.note
+    db.commit()
+    db.refresh(entry)
+    return entry
 
 
 @router.delete("/{entry_id}", status_code=200)
