@@ -475,6 +475,68 @@
   animation: none;
 }
 
+/* X de descarte — solo en desktop al hacer hover */
+.emoc-fab__dismiss {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--color-brown);
+  color: #fff;
+  font-size: 13px;
+  line-height: 19px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 1;
+  user-select: none;
+}
+
+/* Solo aparece en dispositivos con mouse/hover real */
+@media (hover: hover) {
+  .emoc-fab:hover .emoc-fab__dismiss {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Drop zone de descarte — aparece al arrastrar en mobile */
+.emoc-fab__dropzone {
+  position: fixed;
+  bottom: calc(var(--mobile-nav-height) + 14px);
+  left: 50%;
+  translate: -50% 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px dashed rgba(74, 55, 40, 0.35);
+  background: rgba(74, 55, 40, 0.06);
+  color: rgba(74, 55, 40, 0.45);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: calc(var(--z-overlay) - 1);
+  pointer-events: none; /* el pointer capture está en el botón, no aquí */
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+/* En desktop se oculta (el X de hover ya lo cubre) */
+@media (hover: hover) {
+  .emoc-fab__dropzone { display: none; }
+}
+
+.emoc-fab__dropzone--over {
+  background: rgba(180, 50, 50, 0.14);
+  border-color: rgba(180, 50, 50, 0.55);
+  border-style: solid;
+  color: rgba(180, 50, 50, 0.75);
+}
+
 /* Flotado suave — solo en el inner, no en el botón raíz */
 @keyframes emoc-fab-float {
   0%   { transform: translateY(0px)  rotate(-0.5deg) scale(1);    }

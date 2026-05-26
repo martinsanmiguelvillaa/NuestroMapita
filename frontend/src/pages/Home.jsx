@@ -174,10 +174,12 @@ function HomeLightbox({ photo, onClose }) {
 
 // ── Botón flotante nube ────────────────────────────────────────────
 // layoutId="emoc-cloud" → Framer Motion morfea este botón en el modal al abrirse
-function FloatingEmocButton({ onOpen }) {
-  const btnRef = useRef(null);
-  const [pos, setPos]     = useState(null);
+function FloatingEmocButton({ onOpen, onDismiss }) {
+  const btnRef     = useRef(null);
+  const dropZoneRef = useRef(null);
+  const [pos, setPos]         = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [overDrop, setOverDrop] = useState(false);
   const s      = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 });
   const posRef = useRef({ x: 0, y: 0 });
 
@@ -212,39 +214,81 @@ function FloatingEmocButton({ onOpen }) {
     const next = clamp(s.current.originX + dx, s.current.originY + dy);
     posRef.current = next;
     setPos(next);
+    // Detectar si está sobre la drop zone (mobile)
+    const dz = dropZoneRef.current;
+    if (dz) {
+      const r = dz.getBoundingClientRect();
+      setOverDrop(e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = useCallback((e) => {
     if (!s.current.active) return;
     s.current.active = false;
     setDragging(false);
+    setOverDrop(false);
     if (!s.current.moved) {
       onOpen();
     } else {
+      // Si se soltó sobre la drop zone → descartar
+      const dz = dropZoneRef.current;
+      if (dz) {
+        const r = dz.getBoundingClientRect();
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+          onDismiss();
+          return;
+        }
+      }
       try { localStorage.setItem('emoc-fab-pos', JSON.stringify(posRef.current)); } catch {}
     }
-  }, [onOpen]);
+  }, [onOpen, onDismiss]);
 
   if (!pos) return null;
 
   return (
-    <motion.button
-      ref={btnRef}
-      layoutId="emoc-cloud"
-      className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}`}
-      style={{ left: pos.x, top: pos.y }}
-      transition={dragging ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      aria-label="Registrar emoción"
-    >
-      <span className="emoc-fab__inner">
-        <span className="emoc-fab__cloud">☁️</span>
-        <span className="emoc-fab__face">💭</span>
-      </span>
-    </motion.button>
+    <>
+      <motion.button
+        ref={btnRef}
+        layoutId="emoc-cloud"
+        className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}`}
+        style={{ left: pos.x, top: pos.y }}
+        transition={dragging ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        aria-label="Registrar emoción"
+      >
+        {/* X de descarte — visible al hacer hover en desktop (CSS media query) */}
+        <span
+          className="emoc-fab__dismiss"
+          role="button"
+          aria-label="Ocultar atajo"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+        >×</span>
+        <span className="emoc-fab__inner">
+          <span className="emoc-fab__cloud">☁️</span>
+          <span className="emoc-fab__face">💭</span>
+        </span>
+      </motion.button>
+
+      {/* Drop zone para mobile: aparece al arrastrar, soltar aquí descarta la nube */}
+      <AnimatePresence>
+        {dragging && (
+          <motion.div
+            ref={dropZoneRef}
+            className={`emoc-fab__dropzone${overDrop ? ' emoc-fab__dropzone--over' : ''}`}
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.7 }}
+            transition={{ duration: 0.18 }}
+          >
+            ×
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -302,8 +346,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
   const [showEmocModal, setShowEmocModal] = useState(false);
-  const openEmoc  = useCallback(() => setShowEmocModal(true), []);
-  const closeEmoc = useCallback(() => setShowEmocModal(false), []);
+  const [fabDismissed, setFabDismissed]   = useState(false);
+  const openEmoc   = useCallback(() => setShowEmocModal(true), []);
+  const closeEmoc  = useCallback(() => setShowEmocModal(false), []);
+  const dismissFab = useCallback(() => setFabDismissed(true), []);
 
   const load = async () => {
     try {
@@ -454,7 +500,9 @@ export default function Home() {
       {/* Nube flotante — AnimatePresence la desmonta cuando abre el modal,
           permitiendo que Framer Motion capture su posición para el morph */}
       <AnimatePresence>
-        {!showEmocModal && <FloatingEmocButton key="emoc-btn" onOpen={openEmoc} />}
+        {!showEmocModal && !fabDismissed && (
+          <FloatingEmocButton key="emoc-btn" onOpen={openEmoc} onDismiss={dismissFab} />
+        )}
       </AnimatePresence>
 
       {/* Modal — comparte layoutId con la nube, Framer Motion morfea entre ambos */}
