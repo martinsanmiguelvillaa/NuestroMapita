@@ -201,10 +201,13 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
     setPos(initial);
   }, []);
 
-  const clamp = (x, y) => ({
-    x: Math.max(8, Math.min(window.innerWidth  - 68, x)),
-    y: Math.max(72, Math.min(window.innerHeight - 72, y)),
-  });
+  const clamp = (x, y) => {
+    const homeH = btnRef.current?.closest('.home')?.offsetHeight ?? window.innerHeight;
+    return {
+      x: Math.max(8, Math.min(window.innerWidth - 68, x)),
+      y: Math.max(8, Math.min(homeH - 68, y)),
+    };
+  };
 
   const onPointerDown = useCallback((e) => {
     e.preventDefault();
