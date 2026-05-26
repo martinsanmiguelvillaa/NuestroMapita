@@ -533,7 +533,7 @@
 
 /* ── Botón flotante nube ── */
 .emoc-fab {
-  position: fixed;
+  position: absolute;
   border: none;
   background: transparent;
   padding: 0;

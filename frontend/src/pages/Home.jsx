@@ -190,7 +190,13 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const posRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const initial = { x: Math.round(window.innerWidth * 0.72), y: Math.round(window.innerHeight * 0.36) };
+    // position:absolute dentro de .home — restamos el top de .home (= altura del navbar)
+    // para que la posición visual quede en el 36% del viewport.
+    const homeTop = btnRef.current?.closest('.home')?.getBoundingClientRect().top ?? 0;
+    const initial = {
+      x: Math.round(window.innerWidth * 0.72),
+      y: Math.round(window.innerHeight * 0.36 - homeTop),
+    };
     posRef.current = initial;
     setPos(initial);
   }, []);
