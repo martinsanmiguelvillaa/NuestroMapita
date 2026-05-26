@@ -9,6 +9,7 @@
  * - Acceso destacado a cartitas
  */
 import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { animate as motionAnimate, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
@@ -260,30 +261,70 @@ function FloatingEmocButton({ onOpen, isOpen }) {
 
 // ── Modal rápido del emocionario ───────────────────────────────────
 function EmocQuickModal({ onClose, origin }) {
-  const modalRef = useRef(null);
+  const prefersReducedMotion = useReducedMotion();
+  const modalRef    = useRef(null);
+  const backdropRef = useRef(null);
+  const deltaRef    = useRef({ x: 0, y: 0 });
+  const closingRef  = useRef(false);
 
-  // Calcula el origen de la animación (posición de la nube) relativo al modal
-  // y lo setea como custom properties antes del primer paint
+  // Cierra con animación de salida (regresa a la nube) y luego desmonta
+  const doClose = useCallback(async () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    if (prefersReducedMotion) { onClose(); return; }
+    await Promise.all([
+      motionAnimate(backdropRef.current, { opacity: 0 }, { duration: 0.18, ease: 'easeIn' }),
+      motionAnimate(
+        modalRef.current,
+        { x: deltaRef.current.x, y: deltaRef.current.y, scale: 0, opacity: 0 },
+        { type: 'spring', stiffness: 420, damping: 36 }
+      ),
+    ]);
+    onClose();
+  }, [onClose, prefersReducedMotion]);
+
+  // Animación de entrada: mide el modal, salta a la nube, spring al centro
   useLayoutEffect(() => {
-    if (!modalRef.current || !origin) return;
-    const rect = modalRef.current.getBoundingClientRect();
-    const ox = ((origin.x - rect.left) / rect.width  * 100).toFixed(1) + '%';
-    const oy = ((origin.y - rect.top)  / rect.height * 100).toFixed(1) + '%';
-    modalRef.current.style.setProperty('--ox', ox);
-    modalRef.current.style.setProperty('--oy', oy);
+    const modal    = modalRef.current;
+    const backdrop = backdropRef.current;
+    if (!modal || !backdrop) return;
+
+    if (prefersReducedMotion) {
+      motionAnimate(backdrop, { opacity: [0, 1] }, { duration: 0.2 });
+      motionAnimate(modal,    { opacity: [0, 1], scale: [0.95, 1] }, { duration: 0.2 });
+      return;
+    }
+
+    // Calcula el delta: posición de la nube relativa al centro del modal
+    const rect = modal.getBoundingClientRect();
+    const dx = origin ? origin.x - (rect.left + rect.width  / 2) : 0;
+    const dy = origin ? origin.y - (rect.top  + rect.height / 2) : 0;
+    deltaRef.current = { x: dx, y: dy };
+
+    // Salta instantáneamente a la posición de la nube
+    motionAnimate(backdrop, { opacity: 0 }, { duration: 0 });
+    motionAnimate(modal, { x: dx, y: dy, scale: 0, opacity: 0 }, { duration: 0 });
+
+    // Un frame después, inicia el spring hacia el centro
+    requestAnimationFrame(() => {
+      motionAnimate(backdrop, { opacity: 1 }, { duration: 0.22, ease: 'easeOut' });
+      motionAnimate(modal, { x: 0, y: 0, scale: 1, opacity: 1 }, {
+        type: 'spring', stiffness: 380, damping: 30, mass: 0.8,
+      });
+    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e) => { if (e.key === 'Escape') doClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [doClose]);
 
   return (
-    <div className="emoc-quick-backdrop" onClick={onClose}>
-      <div ref={modalRef} className="emoc-quick-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="emoc-quick-close" onClick={onClose} aria-label="Cerrar">✕</button>
-        <EmotionForm onSaved={onClose} prefill={null} />
+    <div ref={backdropRef} className="emoc-quick-backdrop" style={{ opacity: 0 }} onClick={doClose}>
+      <div ref={modalRef} className="emoc-quick-modal" style={{ opacity: 0 }} onClick={(e) => e.stopPropagation()}>
+        <button className="emoc-quick-close" onClick={doClose} aria-label="Cerrar">✕</button>
+        <EmotionForm onSaved={doClose} prefill={null} />
       </div>
     </div>
   );
