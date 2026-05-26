@@ -188,6 +188,7 @@
   background: transparent;
   color: inherit;
   transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .home__nav-card--more-btn--open {
