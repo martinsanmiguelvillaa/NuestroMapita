@@ -68,7 +68,6 @@
 
 .trips-bg::before {
   background-image: var(--bg-trips);
-  background-position: 65% center;
 }
 
 /* --- Cabecera de sección --- */
