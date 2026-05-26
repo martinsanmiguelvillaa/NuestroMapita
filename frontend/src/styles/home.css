@@ -509,6 +509,21 @@
   max-height: calc(100vh - var(--navbar-height) - var(--space-8));
   overflow-y: auto;
   position: relative;
+  /* animación: se expande desde la posición de la nube */
+  --ox: 50%;
+  --oy: 120%;
+  animation: emoc-modal-reveal 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes emoc-modal-reveal {
+  from {
+    clip-path: circle(0% at var(--ox) var(--oy));
+    opacity: 0.5;
+  }
+  to {
+    clip-path: circle(200% at var(--ox) var(--oy));
+    opacity: 1;
+  }
 }
 
 .emoc-quick-close {

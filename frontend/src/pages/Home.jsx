@@ -8,7 +8,7 @@
  * - Álbum de fotos recientes (polaroids)
  * - Acceso destacado a cartitas
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
@@ -221,7 +221,8 @@ function FloatingEmocButton({ onOpen }) {
     s.current.active = false;
     setDragging(false);
     if (!s.current.moved) {
-      onOpen();
+      const rect = btnRef.current.getBoundingClientRect();
+      onOpen(rect.left + rect.width / 2, rect.top + rect.height / 2);
     } else {
       try { localStorage.setItem('emoc-fab-pos', JSON.stringify(posRef.current)); } catch {}
     }
@@ -247,7 +248,20 @@ function FloatingEmocButton({ onOpen }) {
 }
 
 // ── Modal rápido del emocionario ───────────────────────────────────
-function EmocQuickModal({ onClose }) {
+function EmocQuickModal({ onClose, origin }) {
+  const modalRef = useRef(null);
+
+  // Calcula el origen de la animación (posición de la nube) relativo al modal
+  // y lo setea como custom properties antes del primer paint
+  useLayoutEffect(() => {
+    if (!modalRef.current || !origin) return;
+    const rect = modalRef.current.getBoundingClientRect();
+    const ox = ((origin.x - rect.left) / rect.width  * 100).toFixed(1) + '%';
+    const oy = ((origin.y - rect.top)  / rect.height * 100).toFixed(1) + '%';
+    modalRef.current.style.setProperty('--ox', ox);
+    modalRef.current.style.setProperty('--oy', oy);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -256,7 +270,7 @@ function EmocQuickModal({ onClose }) {
 
   return (
     <div className="emoc-quick-backdrop" onClick={onClose}>
-      <div className="emoc-quick-modal" onClick={(e) => e.stopPropagation()}>
+      <div ref={modalRef} className="emoc-quick-modal" onClick={(e) => e.stopPropagation()}>
         <button className="emoc-quick-close" onClick={onClose} aria-label="Cerrar">✕</button>
         <EmotionForm onSaved={onClose} prefill={null} />
       </div>
@@ -273,7 +287,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [lightboxPhoto, setLightboxPhoto] = useState(null);
   const [showEmocModal, setShowEmocModal] = useState(false);
-  const openEmoc  = useCallback(() => setShowEmocModal(true),  []);
+  const [emocOrigin,    setEmocOrigin]    = useState(null);
+  const openEmoc  = useCallback((x, y) => { setEmocOrigin({ x, y }); setShowEmocModal(true); }, []);
   const closeEmoc = useCallback(() => setShowEmocModal(false), []);
 
   const load = async () => {
@@ -424,7 +439,7 @@ export default function Home() {
 
       {/* Botón flotante emocionario */}
       <FloatingEmocButton onOpen={openEmoc} />
-      {showEmocModal && <EmocQuickModal onClose={closeEmoc} />}
+      {showEmocModal && <EmocQuickModal onClose={closeEmoc} origin={emocOrigin} />}
     </div>
   );
 }
