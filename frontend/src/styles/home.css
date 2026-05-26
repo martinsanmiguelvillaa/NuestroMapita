@@ -538,7 +538,7 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-  z-index: var(--z-overlay);
+  z-index: calc(var(--z-modal) - 1); /* debajo de modales (200) */
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -631,7 +631,7 @@
     rgba(74, 55, 40, 0.25) 35%,
     rgba(74, 55, 40, 0.08) 65%,
     transparent 100%);
-  z-index: calc(var(--z-overlay) - 1);
+  z-index: calc(var(--z-modal) - 2);
   pointer-events: none;
   transition: background 0.15s;
   display: flex;
