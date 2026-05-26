@@ -191,20 +191,21 @@ function DayModal({ day, entries, onClose, onDelete, onEdit }) {
   const { confirm } = useConfirm();
   const { toast }   = useToast();
 
-  const handleDelete = (entry) => {
-    confirm(
-      'Eliminar emoción',
-      `¿Eliminar la emoción de ${entry.user_key === 'van' ? 'Van' : 'Martín'} del ${formatDay(day)}?`,
-      async () => {
-        try {
-          await deleteEmotionalEntry(entry.id);
-          toast('Emoción eliminada', 'success');
-          onDelete(entry.id);
-        } catch {
-          toast('No se pudo eliminar', 'error');
-        }
-      }
-    );
+  const handleDelete = async (entry) => {
+    const ok = await confirm({
+      title: 'Eliminar emoción',
+      message: `¿Eliminar la emoción de ${entry.user_key === 'van' ? 'Van' : 'Martín'} del ${formatDay(day)}?`,
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteEmotionalEntry(entry.id);
+      toast('Emoción eliminada', 'success');
+      onDelete(entry.id);
+    } catch {
+      toast('No se pudo eliminar', 'error');
+    }
   };
 
   return (
