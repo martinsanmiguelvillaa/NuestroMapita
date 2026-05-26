@@ -87,6 +87,14 @@ export function useOutfitNotifications(userKey) {
     loadStatus();
   }, [loadStatus]);
 
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.userKey === userKey) loadStatus();
+    };
+    window.addEventListener('outfit-notif-changed', handler);
+    return () => window.removeEventListener('outfit-notif-changed', handler);
+  }, [userKey, loadStatus]);
+
   const activate = async (time = '09:00') => {
     setSaving(true);
     setError(null);

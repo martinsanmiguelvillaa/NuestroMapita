@@ -54,6 +54,7 @@ export default function Navbar() {
         enabled: newEnabled,
       });
       setOutfitNotif(prev => ({ ...prev, [userKey]: { ...prev[userKey], enabled: newEnabled } }));
+      window.dispatchEvent(new CustomEvent('outfit-notif-changed', { detail: { userKey } }));
     } finally {
       setTogglingOutfit(prev => ({ ...prev, [userKey]: false }));
     }
@@ -72,6 +73,7 @@ export default function Navbar() {
             enabled: false,
           });
           setOutfitNotif(prev => ({ ...prev, [userKey]: { ...prev[userKey], enabled: false } }));
+          window.dispatchEvent(new CustomEvent('outfit-notif-changed', { detail: { userKey } }));
         }
       }
     } else {
@@ -85,6 +87,7 @@ export default function Navbar() {
             enabled: true,
           });
           setOutfitNotif(prev => ({ ...prev, [userKey]: { ...prev[userKey], enabled: true } }));
+          window.dispatchEvent(new CustomEvent('outfit-notif-changed', { detail: { userKey } }));
         }
       }
     }
