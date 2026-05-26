@@ -85,7 +85,7 @@ function formatDate(isoString) {
 
 // ── Card de notificaciones ─────────────────────────────────────────
 function OutfitNotificationCard({ userKey }) {
-  const { status, notifTime, deviceLabel, saving, error, activate, updateTime, deactivate } =
+  const { status, notifTime, deviceLabel, saving, testing, error, testResult, activate, updateTime, deactivate, testPush } =
     useOutfitNotifications(userKey);
 
   const [editingTime, setEditingTime] = useState(false);
@@ -169,13 +169,25 @@ function OutfitNotificationCard({ userKey }) {
           </div>
         )}
 
-        <button
-          className="btn btn-ghost btn-sm outfit-notif-card__deactivate"
-          disabled={saving}
-          onClick={deactivate}
-        >
-          Desactivar en este dispositivo
-        </button>
+        <div className="outfit-notif-card__actions-row">
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={saving || testing}
+            onClick={testPush}
+          >
+            {testing ? 'Enviando...' : 'Probar ahora'}
+          </button>
+          <button
+            className="btn btn-ghost btn-sm outfit-notif-card__deactivate"
+            disabled={saving || testing}
+            onClick={deactivate}
+          >
+            Desactivar en este dispositivo
+          </button>
+        </div>
+        {testResult === 'ok' && (
+          <p className="outfit-notif-card__test-ok">✓ Notificación enviada — fijate en las notificaciones del sistema</p>
+        )}
         {error && <p className="outfit-notif-card__error">{error}</p>}
       </div>
     );

@@ -5,6 +5,7 @@ import {
   getOutfitNotificationStatus,
   updateOutfitNotificationSettings,
   unsubscribeOutfitNotification,
+  testPushNotification,
 } from '../api/outfitNotifications';
 
 const DEVICE_ID_KEY = 'outfit_notification_device_id';
@@ -58,7 +59,9 @@ export function useOutfitNotifications(userKey) {
   const [notifTime, setNotifTime] = useState('09:00');
   const [deviceLabel, setDeviceLabel] = useState('');
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [error, setError] = useState(null);
+  const [testResult, setTestResult] = useState(null); // 'ok' | 'error'
 
   const supported = 'serviceWorker' in navigator && 'PushManager' in window;
 
@@ -195,14 +198,34 @@ export function useOutfitNotifications(userKey) {
     }
   };
 
+  const testPush = async () => {
+    setTesting(true);
+    setTestResult(null);
+    setError(null);
+    try {
+      const deviceId = getOrCreateDeviceId();
+      await testPushNotification(userKey, deviceId);
+      setTestResult('ok');
+    } catch (err) {
+      console.error('Error en test push:', err);
+      setTestResult('error');
+      setError('El test falló. Revisá que las claves VAPID estén configuradas en el backend.');
+    } finally {
+      setTesting(false);
+    }
+  };
+
   return {
     status,       // 'loading' | 'unsupported' | 'denied' | 'inactive' | 'active'
     notifTime,
     deviceLabel,
     saving,
+    testing,
     error,
+    testResult,
     activate,
     updateTime,
     deactivate,
+    testPush,
   };
 }
