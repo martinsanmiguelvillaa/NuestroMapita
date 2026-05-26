@@ -62,7 +62,7 @@ function EmotionForm({ onSaved, prefill }) {
     if (!emotionKey) return;
     setSaving(true);
     try {
-      await upsertEmotionalEntry({ user_key: userKey, date, emotion_key: emotionKey, intensity, note: note || null });
+      await upsertEmotionalEntry({ user_key: userKey, date, emotion_key: emotionKey, intensity: Math.round(intensity), note: note || null });
       toast(isEditing ? 'Emoción actualizada' : 'Emoción guardada', 'success');
       if (!isEditing) setNote('');
       onSaved(date);
@@ -125,7 +125,7 @@ function EmotionForm({ onSaved, prefill }) {
       {/* Intensidad */}
       <div className="emoc-form__intensity">
         <label className="emoc-form__label">
-          Intensidad — <span className="emoc-form__intensity-val">{INTENSITY_LABELS[intensity]}</span>
+          Intensidad — <span className="emoc-form__intensity-val">{INTENSITY_LABELS[Math.round(intensity)]}</span>
         </label>
         <div className="emoc-form__slider-row">
           <span className="emoc-form__slider-min">1</span>
@@ -133,6 +133,7 @@ function EmotionForm({ onSaved, prefill }) {
             type="range"
             min={1}
             max={5}
+            step={0.01}
             value={intensity}
             className="emoc-form__slider"
             onChange={(e) => setIntensity(Number(e.target.value))}
@@ -143,7 +144,7 @@ function EmotionForm({ onSaved, prefill }) {
           {[1, 2, 3, 4, 5].map((n) => (
             <span
               key={n}
-              className={`emoc-intensity-dot${intensity >= n ? ' emoc-intensity-dot--filled' : ''}`}
+              className={`emoc-intensity-dot${Math.round(intensity) >= n ? ' emoc-intensity-dot--filled' : ''}`}
             />
           ))}
         </div>
@@ -359,6 +360,7 @@ export default function Emocionario() {
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState(null);   // { iso, entries }
   const [editPrefill, setEditPrefill] = useState(null);   // para editar desde modal
+  const [refreshKey, setRefreshKey] = useState(0);        // fuerza reload del calendario
 
   const loadEntries = useCallback(async () => {
     setLoading(true);
@@ -370,7 +372,7 @@ export default function Emocionario() {
     } finally {
       setLoading(false);
     }
-  }, [calYear, calMonth]);
+  }, [calYear, calMonth, refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { loadEntries(); }, [loadEntries]);
 
@@ -409,15 +411,10 @@ export default function Emocionario() {
           onSaved={(savedDate) => {
             setEditPrefill(null);
             const [y, m] = savedDate.split('-').map(Number);
-            const newMonth = m - 1;
-            if (y === calYear && newMonth === calMonth) {
-              // Mismo mes: recargar directamente
-              loadEntries();
-            } else {
-              // Cambio de mes: el useEffect se encarga al detectar el cambio
-              setCalYear(y);
-              setCalMonth(newMonth);
-            }
+            // Navegar al mes guardado y siempre forzar reload vía refreshKey
+            setCalYear(y);
+            setCalMonth(m - 1);
+            setRefreshKey((k) => k + 1);
           }}
         />
 
