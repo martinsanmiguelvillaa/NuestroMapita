@@ -267,15 +267,9 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                         <div key={entry.id} className="emoc-modal__emotion-entry">
                           {isEditing ? (
                             <div className="emoc-modal__inline-edit">
-                              <div className="emoc-form__chips">
-                                {EMOTIONS.map((e) => (
-                                  <button key={e.key} type="button"
-                                    className={`emoc-chip${editEmoKey === e.key ? ' emoc-chip--active' : ''}`}
-                                    onClick={() => setEditEmoKey(e.key)}>
-                                    <span className="emoc-chip__emoji">{e.emoji}</span>
-                                    <span className="emoc-chip__label">{e.label}</span>
-                                  </button>
-                                ))}
+                              <div className="emoc-modal__emotion">
+                                <span className="emoc-modal__emoji">{EMOTION_MAP[editEmoKey]?.emoji}</span>
+                                <span className="emoc-modal__emotion-label">{EMOTION_MAP[editEmoKey]?.label}</span>
                               </div>
                               <div className="emoc-form__intensity">
                                 <label className="emoc-form__label">
