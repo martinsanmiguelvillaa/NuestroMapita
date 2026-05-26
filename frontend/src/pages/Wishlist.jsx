@@ -200,25 +200,19 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     timer: null,
     active: false,
   });
-  const scrollRaf = useRef(null);
   const scrollDir = useRef(0);
 
-  const stopAutoScroll = () => {
-    if (scrollRaf.current) {
-      cancelAnimationFrame(scrollRaf.current);
-      scrollRaf.current = null;
-    }
-    scrollDir.current = 0;
-  };
+  const stopAutoScroll = () => { scrollDir.current = 0; };
 
   const startAutoScroll = (dir, speed) => {
-    stopAutoScroll();
+    if (scrollDir.current === dir) return;
     scrollDir.current = dir;
     const step = () => {
-      document.documentElement.scrollTop += dir * speed;
-      scrollRaf.current = requestAnimationFrame(step);
+      if (scrollDir.current !== dir) return;
+      window.scrollBy(0, dir * speed);
+      requestAnimationFrame(step);
     };
-    scrollRaf.current = requestAnimationFrame(step);
+    requestAnimationFrame(step);
   };
 
   const onTouchStart = (id) => (e) => {
@@ -252,11 +246,11 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const ZONE = 100;
 
     if (y < ZONE) {
-      if (scrollDir.current !== -1) startAutoScroll(-1, Math.round(8 + ((ZONE - y) / ZONE) * 16));
+      startAutoScroll(-1, Math.round(8 + ((ZONE - y) / ZONE) * 16));
     } else if (y > vh - ZONE) {
-      if (scrollDir.current !== 1) startAutoScroll(1, Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16));
+      startAutoScroll(1, Math.round(8 + ((y - (vh - ZONE)) / ZONE) * 16));
     } else {
-      if (scrollDir.current !== 0) stopAutoScroll();
+      stopAutoScroll();
     }
 
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
