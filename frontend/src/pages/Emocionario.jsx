@@ -5,22 +5,26 @@ import { useConfirm } from '../context/ConfirmContext';
 import '../styles/emocionario.css';
 
 export const EMOTIONS = [
-  { key: 'feliz',       label: 'Feliz',        emoji: '😊' },
-  { key: 'enamorado',   label: 'Enamorado/a',  emoji: '🥰' },
-  { key: 'tranquilo',   label: 'Tranquilo/a',  emoji: '😌' },
-  { key: 'emocionado',  label: 'Emocionado/a', emoji: '🤩' },
-  { key: 'agradecido',  label: 'Agradecido/a', emoji: '🙏' },
-  { key: 'nostalgico',  label: 'Nostálgico/a', emoji: '🥺' },
-  { key: 'ansioso',     label: 'Ansioso/a',    emoji: '😰' },
-  { key: 'triste',      label: 'Triste',       emoji: '😢' },
-  { key: 'cansado',     label: 'Cansado/a',    emoji: '😴' },
-  { key: 'estresado',   label: 'Estresado/a',  emoji: '😤' },
-  { key: 'irritado',    label: 'Irritado/a',   emoji: '😠' },
-  { key: 'solo',        label: 'Solo/a',       emoji: '😔' },
-  { key: 'confundido',  label: 'Confundido/a', emoji: '😕' },
-  { key: 'asustado',    label: 'Asustado/a',   emoji: '😨' },
-  { key: 'orgulloso',   label: 'Orgulloso/a',  emoji: '🥹' },
+  { key: 'feliz',       labelM: 'Feliz',        labelF: 'Feliz',        emoji: '😊' },
+  { key: 'enamorado',   labelM: 'Enamorado',    labelF: 'Enamorada',    emoji: '🥰' },
+  { key: 'tranquilo',   labelM: 'Tranquilo',    labelF: 'Tranquila',    emoji: '😌' },
+  { key: 'emocionado',  labelM: 'Emocionado',   labelF: 'Emocionada',   emoji: '🤩' },
+  { key: 'agradecido',  labelM: 'Agradecido',   labelF: 'Agradecida',   emoji: '🙏' },
+  { key: 'nostalgico',  labelM: 'Nostálgico',   labelF: 'Nostálgica',   emoji: '🥺' },
+  { key: 'ansioso',     labelM: 'Ansioso',      labelF: 'Ansiosa',      emoji: '😰' },
+  { key: 'triste',      labelM: 'Triste',       labelF: 'Triste',       emoji: '😢' },
+  { key: 'cansado',     labelM: 'Cansado',      labelF: 'Cansada',      emoji: '😴' },
+  { key: 'estresado',   labelM: 'Estresado',    labelF: 'Estresada',    emoji: '😤' },
+  { key: 'irritado',    labelM: 'Irritado',     labelF: 'Irritada',     emoji: '😠' },
+  { key: 'solo',        labelM: 'Solo',         labelF: 'Sola',         emoji: '😔' },
+  { key: 'confundido',  labelM: 'Confundido',   labelF: 'Confundida',   emoji: '😕' },
+  { key: 'asustado',    labelM: 'Asustado',     labelF: 'Asustada',     emoji: '😨' },
+  { key: 'orgulloso',   labelM: 'Orgulloso',    labelF: 'Orgullosa',    emoji: '🥹' },
 ];
+
+function emotionLabel(em, userKey) {
+  return userKey === 'van' ? em.labelF : em.labelM;
+}
 
 const EMOTION_MAP = Object.fromEntries(EMOTIONS.map((e) => [e.key, e]));
 
@@ -149,7 +153,7 @@ export function EmotionForm({ onSaved, prefill }) {
             className={`emoc-chip${emotionKeys.has(em.key) ? ' emoc-chip--active' : ''}`}
             onClick={() => toggleEmotion(em.key)}>
             <span className="emoc-chip__emoji">{em.emoji}</span>
-            <span className="emoc-chip__label">{em.label}</span>
+            <span className="emoc-chip__label">{emotionLabel(em, userKey)}</span>
           </button>
         ))}
       </div>
@@ -263,7 +267,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                             <div className="emoc-modal__inline-edit">
                               <div className="emoc-modal__emotion">
                                 <span className="emoc-modal__emoji">{EMOTION_MAP[editEmoKey]?.emoji}</span>
-                                <span className="emoc-modal__emotion-label">{EMOTION_MAP[editEmoKey]?.label}</span>
+                                <span className="emoc-modal__emotion-label">{EMOTION_MAP[editEmoKey] ? emotionLabel(EMOTION_MAP[editEmoKey], entry.user_key) : ''}</span>
                               </div>
                               <div className="emoc-form__intensity">
                                 <label className="emoc-form__label">
@@ -295,7 +299,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                             <>
                               <div className="emoc-modal__emotion">
                                 <span className="emoc-modal__emoji">{em?.emoji}</span>
-                                <span className="emoc-modal__emotion-label">{em?.label}</span>
+                                <span className="emoc-modal__emotion-label">{em ? emotionLabel(em, entry.user_key) : ''}</span>
                               </div>
                               <div className="emoc-modal__intensity-dots">
                                 {[1,2,3,4,5].map((n) => (
@@ -387,7 +391,7 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
                   const em = EMOTION_MAP[e.emotion_key];
                   return em ? (
                     <span key={e.id} className="emoc-calendar__emoji"
-                      title={`${e.user_key === 'van' ? 'Van' : 'Martín'}: ${em.label}`}>
+                      title={`${e.user_key === 'van' ? 'Van' : 'Martín'}: ${emotionLabel(em, e.user_key)}`}>
                       {em.emoji}
                     </span>
                   ) : null;
