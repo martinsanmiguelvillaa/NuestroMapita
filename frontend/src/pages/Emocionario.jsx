@@ -282,12 +282,6 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                                     onChange={(e) => setEditInt(Number(e.target.value))} />
                                   <span className="emoc-form__slider-max">5</span>
                                 </div>
-                                <div className="emoc-form__intensity-dots">
-                                  {[1,2,3,4,5].map((n) => (
-                                    <span key={n}
-                                      className={`emoc-intensity-dot${Math.round(editInt) >= n ? ' emoc-intensity-dot--filled' : ''}`} />
-                                  ))}
-                                </div>
                               </div>
                               <textarea className="emoc-form__note" rows={2} maxLength={500}
                                 placeholder="Nota opcional…"
