@@ -65,7 +65,8 @@ function EmotionForm({ onSaved, prefill }) {
       await upsertEmotionalEntry({ user_key: userKey, date, emotion_key: emotionKey, intensity: Math.round(intensity), note: note || null });
       toast(isEditing ? 'Emoción actualizada' : 'Emoción guardada', 'success');
       if (!isEditing) setNote('');
-      onSaved(date);
+      window.dispatchEvent(new CustomEvent('emotional-entry-saved', { detail: { date } }));
+      onSaved();
     } catch {
       toast('No se pudo guardar. Intentá de nuevo.', 'error');
     } finally {
@@ -379,6 +380,18 @@ export default function Emocionario() {
     fetchEntries(calYear, calMonth);
   }, [calYear, calMonth, fetchEntries]);
 
+  // Recarga cuando se guarda una entrada (via CustomEvent para evitar closures obsoletos)
+  useEffect(() => {
+    const handler = (e) => {
+      const [y, m] = e.detail.date.split('-').map(Number);
+      setCalYear(y);
+      setCalMonth(m - 1);
+      fetchEntries(y, m - 1);
+    };
+    window.addEventListener('emotional-entry-saved', handler);
+    return () => window.removeEventListener('emotional-entry-saved', handler);
+  }, [fetchEntries]);
+
   const handlePrevMonth = () => {
     if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11); }
     else setCalMonth((m) => m - 1);
@@ -411,17 +424,7 @@ export default function Emocionario() {
         <EmotionForm
           key={editPrefill ? `edit-${editPrefill.entry.id}` : 'new'}
           prefill={editPrefill}
-          onSaved={(savedDate) => {
-            setEditPrefill(null);
-            const [y, m] = savedDate.split('-').map(Number);
-            const targetYear = y;
-            const targetMonth = m - 1;
-            // Navegar al mes y recargar. Si el mes no cambia, el useEffect
-            // no se dispara, entonces llamamos fetchEntries directamente.
-            setCalYear(targetYear);
-            setCalMonth(targetMonth);
-            fetchEntries(targetYear, targetMonth);
-          }}
+          onSaved={() => setEditPrefill(null)}
         />
 
         <section className="emoc-section">
