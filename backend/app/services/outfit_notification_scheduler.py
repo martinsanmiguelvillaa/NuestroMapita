@@ -132,15 +132,6 @@ def _check_and_send() -> None:
                 if current_hhmm != sub.notification_time:
                     continue
 
-                # Evitar duplicados: si ya se envió hoy en la timezone del dispositivo, saltar
-                if sub.last_sent_at is not None:
-                    last_sent_local = sub.last_sent_at.replace(tzinfo=dt_timezone.utc).astimezone(tz)
-                    if last_sent_local.date() == now_local.date():
-                        print(
-                            f"[outfit-notif] ya enviado hoy user={sub.user_key} device={sub.device_id[:8]} — skip"
-                        )
-                        continue
-
                 # Pre-generar y cachear el outfit antes de notificar
                 _fetch_and_cache_outfit(sub.user_key, db)
 
