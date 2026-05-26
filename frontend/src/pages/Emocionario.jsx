@@ -43,7 +43,7 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 // Formulario rápido
 // ─────────────────────────────────────────────
-function EmotionForm({ onSaved, prefill }) {
+export function EmotionForm({ onSaved, prefill }) {
   const { toast } = useToast();
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
