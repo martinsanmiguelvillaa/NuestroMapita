@@ -189,10 +189,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const posRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const saved = (() => {
-      try { return JSON.parse(localStorage.getItem('emoc-fab-pos')); } catch { return null; }
-    })();
-    const initial = saved ?? { x: window.innerWidth - 84, y: Math.round(window.innerHeight * 0.55) };
+    const initial = { x: window.innerWidth - 84, y: Math.round(window.innerHeight * 0.55) };
     posRef.current = initial;
     setPos(initial);
   }, []);
@@ -244,7 +241,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
           return;
         }
       }
-      try { localStorage.setItem('emoc-fab-pos', JSON.stringify(posRef.current)); } catch {}
+      // posición no persiste entre recargas
     }
   }, [onOpen, onDismiss]);
 
