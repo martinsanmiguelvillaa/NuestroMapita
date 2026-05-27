@@ -432,15 +432,15 @@ export default function Emocionario() {
     return () => clearTimeout(t);
   }, []);
 
-  const fetchEntriesForMonth = useCallback(async (m) => {
-    setLoadingEntries(true);
+  const fetchEntriesForMonth = useCallback(async (m, { silent = false } = {}) => {
+    if (!silent) setLoadingEntries(true);
     try {
       const data = await getEmotionalEntries(monthKey(m.year, m.month));
       setEntries(data);
     } catch {
       // no romper UI ante error puntual de red
     } finally {
-      setLoadingEntries(false);
+      if (!silent) setLoadingEntries(false);
     }
   }, []);
 
@@ -448,8 +448,9 @@ export default function Emocionario() {
     fetchEntriesForMonth(selectedMonth);
   }, [selectedMonth, fetchEntriesForMonth]);
 
+  // Al guardar/editar: refresh silencioso para no desmontar el calendario
   const handleEntrySaved = useCallback(async () => {
-    await fetchEntriesForMonth(selectedMonth);
+    await fetchEntriesForMonth(selectedMonth, { silent: true });
   }, [selectedMonth, fetchEntriesForMonth]);
 
   const handlePrevMonth = () => {
