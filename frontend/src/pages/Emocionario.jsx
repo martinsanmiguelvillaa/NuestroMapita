@@ -426,7 +426,7 @@ export default function Emocionario() {
   const [ready, setReady] = useState(() => window.innerWidth > 768);
   useEffect(() => {
     if (window.innerWidth > 768) return;
-    const t = setTimeout(() => setReady(true), 500);
+    const t = setTimeout(() => setReady(true), 1000);
     return () => clearTimeout(t);
   }, []);
 
