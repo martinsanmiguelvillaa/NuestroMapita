@@ -16,6 +16,12 @@ html {
   scroll-behavior: smooth;
   /* Evita que iOS redimensione la fuente en landscape */
   -webkit-text-size-adjust: 100%;
+  /* Ocultar scrollbar en todos los navegadores */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
