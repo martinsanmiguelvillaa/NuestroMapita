@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { getOutfitNotificationStatus, updateOutfitNotificationSettings } from '../../api/outfitNotifications';
@@ -22,6 +22,7 @@ const links = [
 
 export default function Navbar() {
   const { logout } = useAuth();
+  const location = useLocation();
   const [confirming, setConfirming] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const [fadeLeft, setFadeLeft] = useState(false);
@@ -119,6 +120,19 @@ export default function Navbar() {
       window.removeEventListener('resize', update);
     };
   }, []);
+
+  // Auto-scroll al item activo cuando cambia la ruta (ej: swipe)
+  useEffect(() => {
+    const el = linksRef.current;
+    if (!el) return;
+    const activeLi = el.querySelector('a.active')?.closest('li');
+    if (!activeLi) return;
+    const liLeft   = activeLi.offsetLeft;
+    const liWidth  = activeLi.offsetWidth;
+    const elWidth  = el.clientWidth;
+    const target   = liLeft - (elWidth - liWidth) / 2;
+    el.scrollTo({ left: target, behavior: 'smooth' });
+  }, [location.pathname]);
 
   const navClass = [
     'navbar',
