@@ -96,9 +96,9 @@
   --color-beige-light: #FEFBF3;
 
   /* Overlays de marca */
-  --color-cream-overlay: rgba(253, 246, 236, 0.82);
-  --color-cream-overlay-light: rgba(253, 246, 236, 0.75);
-  --color-cream-overlay-strong: rgba(253, 246, 236, 0.85);
+  --color-cream-overlay: rgba(253, 246, 236, 0.70);
+  --color-cream-overlay-light: rgba(253, 246, 236, 0.62);
+  --color-cream-overlay-strong: rgba(253, 246, 236, 0.75);
   --color-brown-overlay: rgba(74, 55, 40, 0.35);
   --color-brown-overlay-mid: rgba(74, 55, 40, 0.45);
   --color-brown-overlay-strong: rgba(74, 55, 40, 0.5);

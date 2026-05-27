@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.88);
+  background: rgba(253, 246, 236, 0.75);
   pointer-events: none;
   z-index: -1;
 }
