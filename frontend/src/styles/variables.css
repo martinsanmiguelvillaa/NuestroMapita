@@ -89,6 +89,8 @@
   --bg-cine: url('/backgrounds/fondo-cine.png');
   --bg-outfits: url('/backgrounds/fondo-outfits.png');
   --bg-trips: url('/backgrounds/fondo-viajecitos.png');
+  --bg-emocionario: url('/backgrounds/fondo-emocionario.png');
+  --bg-nombres: url('/backgrounds/fondo-nombres.png');
 
   /* Paleta faltante */
   --color-beige-light: #FEFBF3;
@@ -182,5 +184,7 @@
     --bg-outfits: url('/backgrounds/fondo-outfits-celu.png');
     --bg-recipes: url('/backgrounds/fondo-recetas-celu.png');
     --bg-trips: url('/backgrounds/fondo-viajecitos-celu.png');
+    --bg-nombres: url('/backgrounds/fondo-nombres-celu.png');
+    --bg-emocionario: url('/backgrounds/fondo-emocionario-celu.png');
   }
 }

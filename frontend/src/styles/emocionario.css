@@ -5,7 +5,28 @@
 .emoc-page {
   min-height: 100vh;
   padding: var(--space-4) var(--space-3) var(--space-16);
-  background-color: var(--color-cream);
+  position: relative;
+  isolation: isolate;
+}
+
+.emoc-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: var(--bg-emocionario);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  z-index: var(--z-below);
+}
+
+.emoc-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--color-cream-overlay);
+  pointer-events: none;
+  z-index: calc(var(--z-below) + 1);
 }
 
 .emoc-page__inner {
@@ -14,6 +35,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Header ── */
