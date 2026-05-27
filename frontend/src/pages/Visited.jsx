@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getVisited, createVisited, updateVisited, deleteVisited, convertBackToWishlist, convertBackToTrip } from '../api/placesVisited';
 import { useConfirm } from '../context/ConfirmContext';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
@@ -22,7 +22,6 @@ function formatDate(dateStr) {
 
 function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   const confirm = useConfirm();
-  const toast = useToast();
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -187,7 +186,6 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
 }
 
 export default function Visited() {
-  const toast = useToast();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -227,10 +225,10 @@ export default function Visited() {
     try {
       const newPlace = await createVisited(data);
       if (files?.length) await uploadPhotos(newPlace.id, files);
-      toast.resolve(tid, 'Lugar agregado a Ya hicimos');
+      toast.success('Lugar agregado a Ya hicimos', { id: tid });
       load();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
     }
   };
 
@@ -242,10 +240,10 @@ export default function Visited() {
     try {
       await updateVisited(id, data);
       if (files?.length) await uploadPhotos(id, files);
-      toast.resolve(tid, 'Lugar actualizado');
+      toast.success('Lugar actualizado', { id: tid });
       load();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
       load();
     }
   };

@@ -9,7 +9,7 @@ import {
 import { createCineItem } from '../../api/cine';
 import RecommendationCard from './RecommendationCard';
 import Modal from '../ui/Modal';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 
 const MOODS = [
   'Romántica ♥',
@@ -24,7 +24,6 @@ const MOODS = [
 ];
 
 export default function CineRecommendationPanel({ onItemAdded }) {
-  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [reqType, setReqType] = useState('');
   const [moods, setMoods] = useState(new Set());

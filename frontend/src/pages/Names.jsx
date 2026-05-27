@@ -9,7 +9,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getNames, createName, updateName, deleteName, rateName } from '../api/names';
 import { useConfirm } from '../context/ConfirmContext';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import '../styles/names.css';
 
 // ─── Constantes ──────────────────────────────────────────────────────
@@ -108,7 +108,6 @@ function RatingInput({ value, onChange, saving }) {
 // ─── Tab: Cargar ─────────────────────────────────────────────────────
 function CargarTab({ names, onCreated, onUpdated, onDeleted }) {
   const confirm = useConfirm();
-  const toast   = useToast();
 
   const [form, setForm]         = useState({ text: '', gender: 'female', note: '' });
   const [editingId, setEditingId] = useState(null);
@@ -373,7 +372,6 @@ function CargarTab({ names, onCreated, onUpdated, onDeleted }) {
 
 // ─── Tab: Puntuar ─────────────────────────────────────────────────────
 function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
-  const toast               = useToast();
   const [savingId, setSavingId] = useState(null);
   const [savedId, setSavedId]   = useState(null);
   const [filter, setFilter]     = useState('all');
@@ -704,7 +702,6 @@ const TABS = [
 ];
 
 export default function NamesPage() {
-  const toast                           = useToast();
   const [tab, setTab]                   = useState('cargar');
   const [names, setNames]               = useState([]);
   const [loading, setLoading]           = useState(true);

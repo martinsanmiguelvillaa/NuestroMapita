@@ -3,7 +3,7 @@ import Modal from '../ui/Modal';
 import StarRating from '../places/StarRating';
 import { getRecipe, addComment, deleteComment } from '../../api/recipes';
 import { useConfirm } from '../../context/ConfirmContext';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 import '../../styles/recipes.css';
 
 /**
@@ -11,7 +11,6 @@ import '../../styles/recipes.css';
  */
 export default function RecipeDetail({ recipeId, onClose, onEdit }) {
   const confirm = useConfirm();
-  const toast = useToast();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,7 +117,6 @@ function RecipeDetailContent({ recipe, onEdit, onCommentChanged }) {
 
 function RecipeComments({ recipe, onUpdated }) {
   const confirm = useConfirm();
-  const toast = useToast();
   const EMPTY = { author: '', text: '', rating: null };
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);

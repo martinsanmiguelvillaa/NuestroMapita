@@ -8,7 +8,7 @@ import {
   addPreference,
   deletePreference,
 } from '../api/outfits';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import { useConfirm } from '../context/ConfirmContext';
 import { useOutfitNotifications } from '../hooks/useOutfitNotifications';
 import '../styles/outfits.css';
@@ -232,7 +232,6 @@ function OutfitNotificationCard({ userKey }) {
 
 // ── Página principal ───────────────────────────────────────────────
 export default function Outfits() {
-  const toast = useToast();
   const confirm = useConfirm();
   const [searchParams] = useSearchParams();
 

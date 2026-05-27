@@ -5,7 +5,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { updatePhotoPosition } from '../../api/photos';
 import { coverUrl } from '../../utils/cloudinary';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 
 function videoThumb(url) {
   return url
@@ -28,7 +28,6 @@ export default function CoverPhoto({
   aspectRatio = '4/3',
   placeholder = '📍',
 }) {
-  const toast = useToast();
   const [adjusting, setAdjusting] = useState(false);
   const [pendingPos, setPendingPos] = useState(null);
   const [saving, setSaving] = useState(false);

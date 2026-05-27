@@ -18,7 +18,7 @@ import PhotoSection from '../components/photos/PhotoSection';
 import CoverPhoto from '../components/photos/CoverPhoto';
 import SearchBar from '../components/ui/SearchBar';
 import { useConfirm } from '../context/ConfirmContext';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import '../styles/places.css';
 import '../styles/photos.css';
 
@@ -26,7 +26,6 @@ import '../styles/photos.css';
 
 function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHandleProps, isDragging }) {
   const confirm = useConfirm();
-  const toast = useToast();
   const [deleting, setDeleting] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -325,7 +324,6 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
 // ─── Página ───────────────────────────────────────────────────────────────────
 
 export default function Wishlist() {
-  const toast = useToast();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -376,10 +374,10 @@ export default function Wishlist() {
     try {
       const newPlace = await createWishlist(data);
       if (files?.length) await uploadWishlistPhotos(newPlace.id, files);
-      toast.resolve(tid, 'Lugar agregado a Por hacer');
+      toast.success('Lugar agregado a Por hacer', { id: tid });
       load();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
     }
   };
 
@@ -391,10 +389,10 @@ export default function Wishlist() {
     try {
       await updateWishlist(id, data);
       if (files?.length) await uploadWishlistPhotos(id, files);
-      toast.resolve(tid, 'Lugar actualizado');
+      toast.success('Lugar actualizado', { id: tid });
       load();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
       load();
     }
   };

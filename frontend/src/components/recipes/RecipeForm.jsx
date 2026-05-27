@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createRecipe, updateRecipe, uploadRecipePhoto, deleteRecipePhoto } from '../../api/recipes';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 
 const EMPTY_FORM = {
   title: '',
@@ -18,7 +18,6 @@ const EMPTY_FORM = {
  */
 export default function RecipeForm({ initialData = null, onSaved, onClose, onCancel, onDirtyChange, submitRef }) {
   const formRef = useRef();
-  const toast = useToast();
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -94,10 +93,10 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
         ? await updateRecipe(initialData.id, payload)
         : await createRecipe(payload);
       if (photoFile) saved = await uploadRecipePhoto(saved.id, photoFile);
-      toast.resolve(tid, initialData?.id ? 'Receta actualizada' : 'Receta guardada');
+      toast.success(initialData?.id ? 'Receta actualizada' : 'Receta guardada', { id: tid });
       onSaved?.(saved);
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
     }
   };
 

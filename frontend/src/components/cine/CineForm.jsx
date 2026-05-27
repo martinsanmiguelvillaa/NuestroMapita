@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import StarRating from '../places/StarRating';
 import { searchTmdb, getTmdbDetail, createCineItem, updateCineItem } from '../../api/cine';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 
 const EMPTY_FORM = {
   title: '',
@@ -40,7 +40,6 @@ function itemToForm(item) {
 export default function CineForm({ initialData, onSaved, onClose, onCancel, onDirtyChange, submitRef }) {
   const isEdit = !!initialData;
   const formRef = useRef();
-  const toast = useToast();
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -141,10 +140,10 @@ export default function CineForm({ initialData, onSaved, onClose, onCancel, onDi
       } else {
         await createCineItem(payload);
       }
-      toast.resolve(tid, isEdit ? 'Guardado' : 'Agregado al cine');
+      toast.success(isEdit ? 'Guardado' : 'Agregado al cine', { id: tid });
       onSaved();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + (err.message || 'Error desconocido'));
+      toast.error('No se pudo guardar: ' + (err.message || 'Error desconocido'), { id: tid });
     }
   };
 

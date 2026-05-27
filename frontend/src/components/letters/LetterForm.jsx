@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { createLetter, updateLetter, uploadLetterPhoto, deleteLetterPhoto } from '../../api/letters';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 
 const EMPTY_FORM = { title: '', body: '', letter_date: '' };
 
 export default function LetterForm({ initialData = null, onSaved, onClose, onCancel, onDirtyChange, submitRef }) {
   const formRef = useRef();
-  const toast = useToast();
 
   useEffect(() => {
     if (submitRef) submitRef.current = () => formRef.current?.requestSubmit();
@@ -59,10 +58,10 @@ export default function LetterForm({ initialData = null, onSaved, onClose, onCan
         ? await updateLetter(initialData.id, payload)
         : await createLetter(payload);
       if (photoFile) await uploadLetterPhoto(saved.id, photoFile);
-      toast.resolve(tid, initialData ? 'Cartita actualizada' : 'Cartita guardada');
+      toast.success(initialData ? 'Cartita actualizada' : 'Cartita guardada', { id: tid });
       onSaved?.();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
     }
   };
 

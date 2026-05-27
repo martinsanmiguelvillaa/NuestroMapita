@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import StarRating from '../places/StarRating';
 import { useConfirm } from '../../context/ConfirmContext';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 import {
   getCineItem,
   updateCineItem,
@@ -15,7 +15,6 @@ const STATUS_LABEL = { to_watch: 'Por ver', watched: 'Ya vimos' };
 
 export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
   const confirm = useConfirm();
-  const toast = useToast();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

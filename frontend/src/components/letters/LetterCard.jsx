@@ -3,7 +3,7 @@ import Modal from '../ui/Modal';
 import LetterForm from './LetterForm';
 import { deleteLetter } from '../../api/letters';
 import { useConfirm } from '../../context/ConfirmContext';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 import { useDirtyForm } from '../../hooks/useDirtyForm';
 import '../../styles/letters.css';
 
@@ -21,7 +21,6 @@ function formatDate(dateStr) {
  */
 export default function LetterCard({ letter, onChanged }) {
   const confirm = useConfirm();
-  const toast = useToast();
   const [open, setOpen] = useState(false);      // Ver completa
   const [editing, setEditing] = useState(false); // Formulario de edición
   const [deleting, setDeleting] = useState(false);

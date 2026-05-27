@@ -14,7 +14,7 @@ import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
 import WishlistForm from '../components/places/WishlistForm';
 import { useDirtyForm } from '../hooks/useDirtyForm.jsx';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import { convertTripToVisited } from '../api/trips';
 import '../styles/map.css';
 
@@ -95,7 +95,6 @@ function MapSearch({ visited, wishlist, trips, onSelect }) {
 }
 
 export default function MapPage() {
-  const toast = useToast();
   const [visited, setVisited] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [trips, setTrips] = useState([]);
@@ -223,10 +222,10 @@ export default function MapPage() {
         await updateTrip(original.id, data);
         if (files?.length) await uploadTripPhotos(original.id, files);
       }
-      toast.resolve(tid, isTrip ? 'Viajecito actualizado' : 'Lugar actualizado');
+      toast.success(isTrip ? 'Viajecito actualizado' : 'Lugar actualizado', { id: tid });
       load();
     } catch (err) {
-      toast.reject(tid, 'No se pudo guardar: ' + err.message);
+      toast.error('No se pudo guardar: ' + err.message, { id: tid });
       load();
     }
   };

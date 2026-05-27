@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { deletePhoto, setCoverPhoto } from '../../api/photos';
 import { thumbUrl, fullUrl } from '../../utils/cloudinary';
 import { useConfirm } from '../../context/ConfirmContext';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'sonner';
 import '../../styles/photos.css';
 
 function videoThumb(url) {
@@ -56,7 +56,6 @@ function GalleryVideo({ src, className, onClick }) {
 
 const PhotoGallery = forwardRef(function PhotoGallery({ photos = [], onDelete, onCoverSet, onPhotoDeleted, canDelete = true }, ref) {
   const confirm = useConfirm();
-  const toast = useToast();
   const [lightboxIndex, setLightboxIndex] = useState(null); // índice abierto o null
   const [localPhotos, setLocalPhotos] = useState(photos);
   const coverChangedRef = useRef(false);

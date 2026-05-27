@@ -4,11 +4,10 @@ import Modal from '../components/ui/Modal';
 import LetterCard from '../components/letters/LetterCard';
 import LetterForm from '../components/letters/LetterForm';
 import { useDirtyForm } from '../hooks/useDirtyForm';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import '../styles/letters.css';
 
 export default function Letters() {
-  const toast = useToast();
   const [letters, setLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

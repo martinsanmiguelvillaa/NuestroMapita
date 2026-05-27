@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRecipes, deleteRecipe } from '../api/recipes';
 import { useConfirm } from '../context/ConfirmContext';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import Modal from '../components/ui/Modal';
 import RecipeCard from '../components/recipes/RecipeCard';
 import RecipeForm from '../components/recipes/RecipeForm';
@@ -23,7 +23,6 @@ const EMPTY_MESSAGES = {
 
 export default function Recipes() {
   const confirm = useConfirm();
-  const toast = useToast();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');

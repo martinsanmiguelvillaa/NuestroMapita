@@ -10,7 +10,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ConfirmProvider } from './context/ConfirmContext';
-import { ToastProvider } from './context/ToastContext';
+import { Toaster } from 'sonner';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -35,7 +35,6 @@ function ProtectedRoute() {
 
 export default function App() {
   return (
-    <ToastProvider>
     <AuthProvider>
       <ConfirmProvider>
       <BrowserRouter>
@@ -68,9 +67,9 @@ export default function App() {
           {/* Cualquier ruta desconocida va al home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Toaster position="bottom-center" richColors closeButton />
       </BrowserRouter>
       </ConfirmProvider>
     </AuthProvider>
-    </ToastProvider>
   );
 }

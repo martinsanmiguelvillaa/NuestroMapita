@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import { useConfirm } from '../context/ConfirmContext';
 import '../styles/emocionario.css';
 
@@ -48,7 +48,6 @@ function monthKey(year, month) {
 // Formulario rápido
 // ─────────────────────────────────────────────
 export function EmotionForm({ onSaved, prefill }) {
-  const toast = useToast();
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
   const [emotionKeys, setEmotionKeys] = useState(() =>
@@ -193,7 +192,6 @@ export function EmotionForm({ onSaved, prefill }) {
 // ─────────────────────────────────────────────
 function DayModal({ day, entries, onClose, onDelete, onSaved }) {
   const confirm = useConfirm();
-  const toast   = useToast();
 
   // Estado de edición inline: id del entry que se está editando
   const [editingId,  setEditingId]  = useState(null);

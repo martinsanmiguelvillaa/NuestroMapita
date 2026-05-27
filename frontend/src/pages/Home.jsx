@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
 import { polaroidUrl, fullUrl } from '../utils/cloudinary';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import { EmotionForm } from './Emocionario';
 import '../styles/home.css';
 
@@ -411,7 +411,6 @@ function EmocQuickModal({ onClose }) {
 
 // ── Página principal ───────────────────────────────────────────────
 export default function Home() {
-  const toast = useToast();
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
   const [previewLetters, setPreviewLetters] = useState([]);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCineItems, deleteCineItem, updateCineItem } from '../api/cine';
 import { useConfirm } from '../context/ConfirmContext';
-import { useToast } from '../context/ToastContext';
+import { toast } from 'sonner';
 import Modal from '../components/ui/Modal';
 import CineCard from '../components/cine/CineCard';
 import CineForm from '../components/cine/CineForm';
@@ -36,7 +36,6 @@ function buildParams(typeFilter, statusFilter, search) {
 
 export default function Cine() {
   const confirm = useConfirm();
-  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('all');

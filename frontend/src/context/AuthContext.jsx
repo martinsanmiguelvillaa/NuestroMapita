@@ -8,12 +8,11 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { checkAuth, logout as logoutApi } from '../api/auth';
 import { saveToken, clearToken } from '../api/client';
-import { useToast } from './ToastContext';
+import { toast } from 'sonner';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const toast = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   // Evita que checkAuth() pise el estado si el usuario ya hizo login explícito
