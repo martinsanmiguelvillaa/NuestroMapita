@@ -11,7 +11,7 @@
  */
 import { useRef, useEffect, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, animate, useReducedMotion } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 import Navbar from './Navbar';
 import ClipboardImportBanner from '../ui/ClipboardImportBanner';
 
@@ -36,8 +36,6 @@ const COMMIT_THRESHOLD = 0.28;
 export default function Layout() {
   const location = useLocation();
   const navigate  = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
-
   // MotionValue: actualiza el transform del DOM sin re-renders
   const x = useMotionValue(0);
   const mainRef = useRef(null);
@@ -78,19 +76,9 @@ export default function Layout() {
       return;
     }
 
-    const W      = window.innerWidth;
-    const exitX  = dir < 0 ? -W : W;
-    const enterX = -exitX;
+    const exitX = dir < 0 ? -window.innerWidth : window.innerWidth;
 
-    if (prefersReducedMotion) {
-      // Sin movimiento: cambio instantáneo
-      x.set(0);
-      navigate(SWIPE_ROUTES[nextIdx]);
-      g.current.animating = false;
-      return;
-    }
-
-    // 1. La sección actual sale con la velocidad del gesto
+    // La sección actual sale con la velocidad del gesto, luego navegación instantánea
     await animate(x, exitX, {
       type:      'spring',
       stiffness: 340,
@@ -98,20 +86,8 @@ export default function Layout() {
       velocity:  x.getVelocity(),
     });
 
-    // 2. Navega y coloca el nuevo contenido fuera de pantalla
     navigate(SWIPE_ROUTES[nextIdx]);
-    x.set(enterX);
-
-    // Esperar un frame para que React monte el nuevo contenido
-    await new Promise((r) => requestAnimationFrame(r));
-
-    // 3. La nueva sección entra suavemente al centro
-    await animate(x, 0, {
-      type:      'spring',
-      stiffness: 320,
-      damping:   30,
-    });
-
+    x.set(0);
     g.current.animating = false;
   }, [x, navigate, snapBack, prefersReducedMotion]);
 
