@@ -146,7 +146,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--overlay-romantic);
+  background: var(--color-cream-overlay);
   pointer-events: none;
   z-index: -1;
 }
