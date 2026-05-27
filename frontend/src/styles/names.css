@@ -5,8 +5,13 @@
 .names-bg {
   min-height: calc(100vh - var(--navbar-height));
   overflow-x: hidden;
+  scrollbar-width: none;
   position: relative;
   isolation: isolate;
+}
+
+.names-bg::-webkit-scrollbar {
+  display: none;
 }
 
 .names-bg::before {
