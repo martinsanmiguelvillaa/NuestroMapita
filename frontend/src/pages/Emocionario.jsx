@@ -422,6 +422,14 @@ export default function Emocionario() {
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
 
+  // En mobile, retrasar el renderizado del contenido 500ms para que se vea el fondo
+  const [ready, setReady] = useState(() => window.innerWidth > 768);
+  useEffect(() => {
+    if (window.innerWidth > 768) return;
+    const t = setTimeout(() => setReady(true), 500);
+    return () => clearTimeout(t);
+  }, []);
+
   const fetchEntriesForMonth = useCallback(async (m) => {
     setLoadingEntries(true);
     try {
@@ -469,7 +477,7 @@ export default function Emocionario() {
 
   return (
     <div className="emoc-page">
-      <div className="emoc-page__inner">
+      {!ready ? null : <div className="emoc-page__inner">
         <header className="emoc-header">
           <h1 className="emoc-header__title">Emocionario</h1>
           <p className="emoc-header__sub">Un diario de cómo se sienten, día a día</p>
@@ -502,7 +510,7 @@ export default function Emocionario() {
             onSaved={handleEntrySaved}
           />
         )}
-      </div>
+      </div>}
     </div>
   );
 }
