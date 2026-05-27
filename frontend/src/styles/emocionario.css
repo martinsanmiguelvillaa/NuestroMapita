@@ -311,6 +311,12 @@
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--shadow-sm);
+  transition: opacity 0.15s ease;
+}
+
+.emoc-calendar--loading {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .emoc-calendar__nav {

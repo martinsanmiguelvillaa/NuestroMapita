@@ -352,7 +352,7 @@ const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DAY_NAMES   = ['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
 
-function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
+function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick, loading }) {
   const byDate = {};
   for (const e of entries) {
     if (!byDate[e.date]) byDate[e.date] = [];
@@ -369,7 +369,7 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick }) {
   const maxMonth  = monthKey(nowDate.getFullYear(), nowDate.getMonth());
 
   return (
-    <div className="emoc-calendar">
+    <div className={`emoc-calendar${loading ? ' emoc-calendar--loading' : ''}`}>
       <div className="emoc-calendar__nav">
         <button className="emoc-calendar__nav-btn" onClick={onPrev}>‹</button>
         <span className="emoc-calendar__title">{MONTH_NAMES[month]} {year}</span>
@@ -490,18 +490,15 @@ export default function Emocionario() {
 
         <section className="emoc-section">
           <h2 className="emoc-section__title">Calendario emocional</h2>
-          {loadingEntries ? (
-            <div className="emoc-loading">Cargando…</div>
-          ) : (
-            <EmotionCalendar
-              entries={entries}
-              year={selectedMonth.year}
-              month={selectedMonth.month}
-              onPrev={handlePrevMonth}
-              onNext={handleNextMonth}
-              onDayClick={setSelectedDay}
-            />
-          )}
+          <EmotionCalendar
+            entries={entries}
+            year={selectedMonth.year}
+            month={selectedMonth.month}
+            onPrev={handlePrevMonth}
+            onNext={handleNextMonth}
+            onDayClick={setSelectedDay}
+            loading={loadingEntries}
+          />
         </section>
 
         {selectedDay && (
