@@ -67,7 +67,11 @@ export default function App() {
           {/* Cualquier ruta desconocida va al home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <Toaster position="bottom-center" richColors closeButton />
+        <Toaster
+          position={window.matchMedia('(max-width: 768px)').matches ? 'top-center' : 'bottom-right'}
+          richColors
+          closeButton
+        />
       </BrowserRouter>
       </ConfirmProvider>
     </AuthProvider>
