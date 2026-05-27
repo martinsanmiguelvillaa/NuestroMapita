@@ -1,64 +1,201 @@
 /**
  * Layout: envuelve todas las páginas protegidas.
- * Renderiza la navbar y el contenido de la página actual (<Outlet>).
  *
- * En mobile, el <main> detecta swipes horizontales para navegar
- * entre secciones. La animación de transición usa framer-motion.
+ * En mobile, detecta arrastre horizontal táctil sobre <main> y mueve
+ * el contenido con el dedo en tiempo real (useMotionValue). Al soltar:
+ *  - Si superó el umbral → completa la salida con la velocidad del gesto
+ *    y desliza la nueva sección desde el lado opuesto.
+ *  - Si no llegó al umbral → rebota de vuelta al centro (spring).
+ *
+ * En desktop: sin animación de gesto, solo cambia el contenido.
  */
-import { useRef } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useRef, useEffect, useCallback } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { motion, useMotionValue, animate, useReducedMotion } from 'framer-motion';
 import Navbar from './Navbar';
 import ClipboardImportBanner from '../ui/ClipboardImportBanner';
-import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
 
-// Variantes de animación según dirección del swipe.
-// swipeDir: -1 = viene de la derecha (swipe izquierda), 1 = viene de la izquierda (swipe derecha)
-// En navegación normal (tap en navbar): sin animación de slide.
-function getVariants(swipeDir) {
-  if (!swipeDir) {
-    // Sin dirección → sin animación (tap en navbar)
-    return {
-      initial:  { opacity: 1 },
-      animate:  { opacity: 1 },
-      exit:     { opacity: 1 },
-    };
-  }
-  return {
-    initial: { x: swipeDir * -30 + '%', opacity: 0 },
-    animate: { x: '0%',                  opacity: 1 },
-    exit:    { x: swipeDir *  30 + '%',  opacity: 0 },
-  };
-}
+// Orden de navegación horizontal (Mapa queda a la izquierda de Inicio)
+const SWIPE_ROUTES = [
+  '/mapa', '/', '/visitados', '/por-visitar', '/viajecitos',
+  '/cartitas', '/recetas', '/cine', '/outfits', '/nombres', '/emocionario',
+];
+
+// Selectores de elementos que manejan su propio gesto táctil
+const BLOCKED = [
+  '.leaflet-container',
+  '.photo-gallery',
+  '.home__polaroids',
+  '.lightbox__thumbs',
+  '.lightbox',
+];
+
+// Fracción del ancho de pantalla para confirmar el swipe
+const COMMIT_THRESHOLD = 0.28;
 
 export default function Layout() {
-  const mainRef = useRef(null);
   const location = useLocation();
+  const navigate  = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
 
-  useSwipeNavigation(mainRef);
+  // MotionValue: actualiza el transform del DOM sin re-renders
+  const x = useMotionValue(0);
+  const mainRef = useRef(null);
 
-  const isMobile   = window.innerWidth <= 768;
-  const swipeDir   = isMobile ? (location.state?.swipeDir ?? 0) : 0;
-  const variants   = getVariants(swipeDir);
+  // Estado del gesto en ref → sin re-renders durante el arrastre
+  const g = useRef({
+    active:    false,  // hay un toque activo
+    locked:    false,  // dirección horizontal confirmada
+    startX:    0,
+    startY:    0,
+    animating: false,  // hay una animación de transición en curso
+  });
+
+  // Siempre disponemos del pathname actual dentro de los listeners
+  const pathnameRef = useRef(location.pathname);
+  useEffect(() => { pathnameRef.current = location.pathname; }, [location.pathname]);
+
+  // ── Rebote al centro ────────────────────────────────────────────
+  const snapBack = useCallback(() => {
+    animate(x, 0, {
+      type:      'spring',
+      stiffness: 500,
+      damping:   42,
+      velocity:  x.getVelocity(),
+    });
+  }, [x]);
+
+  // ── Confirmar swipe: completar salida → navegar → deslizar entrada ─
+  const commitSwipe = useCallback(async (dir) => {
+    g.current.animating = true;
+
+    const idx     = SWIPE_ROUTES.indexOf(pathnameRef.current);
+    const nextIdx = idx + (dir < 0 ? 1 : -1);
+
+    if (idx === -1 || nextIdx < 0 || nextIdx >= SWIPE_ROUTES.length) {
+      g.current.animating = false;
+      snapBack();
+      return;
+    }
+
+    const W      = window.innerWidth;
+    const exitX  = dir < 0 ? -W : W;
+    const enterX = -exitX;
+
+    if (prefersReducedMotion) {
+      // Sin movimiento: cambio instantáneo
+      x.set(0);
+      navigate(SWIPE_ROUTES[nextIdx]);
+      g.current.animating = false;
+      return;
+    }
+
+    // 1. La sección actual sale con la velocidad del gesto
+    await animate(x, exitX, {
+      type:      'spring',
+      stiffness: 340,
+      damping:   34,
+      velocity:  x.getVelocity(),
+    });
+
+    // 2. Navega y coloca el nuevo contenido fuera de pantalla
+    navigate(SWIPE_ROUTES[nextIdx]);
+    x.set(enterX);
+
+    // Esperar un frame para que React monte el nuevo contenido
+    await new Promise((r) => requestAnimationFrame(r));
+
+    // 3. La nueva sección entra suavemente al centro
+    await animate(x, 0, {
+      type:      'spring',
+      stiffness: 320,
+      damping:   30,
+    });
+
+    g.current.animating = false;
+  }, [x, navigate, snapBack, prefersReducedMotion]);
+
+  // ── Listeners táctiles ─────────────────────────────────────────
+  useEffect(() => {
+    if (window.innerWidth > 768) return;
+
+    const el = mainRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e) => {
+      if (g.current.animating) return;
+      if (BLOCKED.some((sel) => e.target.closest(sel))) return;
+
+      g.current.active = true;
+      g.current.locked = false;
+      g.current.startX = e.touches[0].clientX;
+      g.current.startY = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e) => {
+      if (!g.current.active) return;
+
+      const dx  = e.touches[0].clientX - g.current.startX;
+      const dy  = e.touches[0].clientY - g.current.startY;
+      const adx = Math.abs(dx);
+      const ady = Math.abs(dy);
+
+      if (!g.current.locked) {
+        if (adx < 10 && ady < 10) return; // esperar suficiente movimiento
+
+        if (ady >= adx) {
+          // Gesto vertical → cancelar tracking horizontal
+          g.current.active = false;
+          return;
+        }
+
+        g.current.locked = true;
+      }
+
+      const idx    = SWIPE_ROUTES.indexOf(pathnameRef.current);
+      const atEdge = (dx > 0 && idx <= 0) || (dx < 0 && idx >= SWIPE_ROUTES.length - 1);
+
+      // Efecto rubber-band en los extremos
+      x.set(atEdge ? dx * 0.15 : dx);
+    };
+
+    const onTouchEnd = (e) => {
+      if (!g.current.active) return;
+      g.current.active = false;
+      if (!g.current.locked) return;
+
+      const currentX  = x.get();
+      const threshold = window.innerWidth * COMMIT_THRESHOLD;
+
+      if (Math.abs(currentX) >= threshold) {
+        commitSwipe(currentX < 0 ? -1 : 1);
+      } else {
+        snapBack();
+      }
+    };
+
+    el.addEventListener('touchstart',  onTouchStart, { passive: true });
+    el.addEventListener('touchmove',   onTouchMove,  { passive: true });
+    el.addEventListener('touchend',    onTouchEnd,   { passive: true });
+    el.addEventListener('touchcancel', onTouchEnd,   { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart',  onTouchStart);
+      el.removeEventListener('touchmove',   onTouchMove);
+      el.removeEventListener('touchend',    onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [commitSwipe, snapBack, x]);
 
   return (
     <>
       <Navbar />
       <ClipboardImportBanner />
       <main ref={mainRef}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={location.pathname}
-            variants={variants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            style={{ willChange: 'transform, opacity' }}
-          >
-            <Outlet />
-          </motion.div>
-        </AnimatePresence>
+        {/* motion.div sigue el dedo en tiempo real via MotionValue x */}
+        <motion.div style={{ x }}>
+          <Outlet />
+        </motion.div>
       </main>
     </>
   );
