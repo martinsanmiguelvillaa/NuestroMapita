@@ -12,10 +12,13 @@
 .names-bg::before {
   content: '';
   position: fixed;
-  inset: 0;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-image: var(--bg-nombres);
   background-size: cover;
-  background-position: center;
+  background-position: center top;
   pointer-events: none;
   z-index: var(--z-below);
 }
@@ -23,7 +26,10 @@
 .names-bg::after {
   content: '';
   position: fixed;
-  inset: 0;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: var(--color-cream-overlay);
   pointer-events: none;
   z-index: calc(var(--z-below) + 1);
