@@ -128,6 +128,9 @@ export default function Layout() {
         g.current.locked = true;
       }
 
+      // Bloquar scroll vertical mientras se navega horizontalmente
+      e.preventDefault();
+
       const idx    = SWIPE_ROUTES.indexOf(pathnameRef.current);
       const atEdge = (dx > 0 && idx <= 0) || (dx < 0 && idx >= SWIPE_ROUTES.length - 1);
 
@@ -151,7 +154,7 @@ export default function Layout() {
     };
 
     el.addEventListener('touchstart',  onTouchStart, { passive: true });
-    el.addEventListener('touchmove',   onTouchMove,  { passive: true });
+    el.addEventListener('touchmove',   onTouchMove,  { passive: false }); // necesita preventDefault
     el.addEventListener('touchend',    onTouchEnd,   { passive: true });
     el.addEventListener('touchcancel', onTouchEnd,   { passive: true });
 
