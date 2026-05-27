@@ -49,6 +49,11 @@ export function useSwipeNavigation(ref) {
     let tracking = true; // se cancela si el gesto resulta ser vertical
 
     const onTouchStart = (e) => {
+      // Si el touch empieza dentro del mapa de Leaflet, no interferimos
+      if (e.target.closest('.leaflet-container')) {
+        tracking = false;
+        return;
+      }
       startX   = e.touches[0].clientX;
       startY   = e.touches[0].clientY;
       tracking = true;
