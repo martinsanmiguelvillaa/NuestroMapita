@@ -24,6 +24,10 @@ html::-webkit-scrollbar {
   display: none;
 }
 
+body::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--color-cream);
@@ -33,6 +37,8 @@ body {
   -webkit-font-smoothing: antialiased;
   /* Evita scroll horizontal accidental en mobile */
   overflow-x: hidden;
+  /* Ocultar scrollbar */
+  scrollbar-width: none;
 }
 
 /* iOS: evita el zoom automático al enfocar inputs (requiere font-size >= 16px) */
