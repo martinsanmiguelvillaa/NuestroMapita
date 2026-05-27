@@ -49,8 +49,15 @@ export function useSwipeNavigation(ref) {
     let tracking = true; // se cancela si el gesto resulta ser vertical
 
     const onTouchStart = (e) => {
-      // Si el touch empieza dentro del mapa de Leaflet, no interferimos
-      if (e.target.closest('.leaflet-container')) {
+      // Excluir elementos que necesitan su propio manejo táctil horizontal
+      const blocked = [
+        '.leaflet-container',  // mapa interactivo
+        '.photo-gallery',      // grillas de fotos (visitados, recetas, etc.)
+        '.home__polaroids',    // fotos polaroid del inicio
+        '.lightbox__thumbs',   // tira de miniaturas del lightbox
+        '.lightbox',           // lightbox completo
+      ];
+      if (blocked.some((sel) => e.target.closest(sel))) {
         tracking = false;
         return;
       }
