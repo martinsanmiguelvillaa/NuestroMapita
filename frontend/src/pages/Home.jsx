@@ -9,6 +9,7 @@
  * - Acceso destacado a cartitas
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
@@ -607,13 +608,14 @@ export default function Home() {
         </section>
       )}
 
-      {/* Lightbox */}
-      {lightboxIndex !== null && (
+      {/* Lightbox — portal para escapar del stacking context del motion.div de Layout */}
+      {lightboxIndex !== null && createPortal(
         <HomeLightbox
           photos={recentPhotos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
-        />
+        />,
+        document.body
       )}
 
       {/* Nube flotante — AnimatePresence la desmonta cuando abre el modal,
