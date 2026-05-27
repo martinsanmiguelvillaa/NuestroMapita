@@ -89,7 +89,7 @@ export default function Layout() {
     navigate(SWIPE_ROUTES[nextIdx]);
     x.set(0);
     g.current.animating = false;
-  }, [x, navigate, snapBack, prefersReducedMotion]);
+  }, [x, navigate, snapBack]);
 
   // ── Listeners táctiles ─────────────────────────────────────────
   useEffect(() => {
