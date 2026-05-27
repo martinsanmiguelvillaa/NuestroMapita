@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { toast } from 'sonner';
-import { useConfirm } from '../context/ConfirmContext';
+import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/emocionario.css';
 
 export const EMOTIONS = [
@@ -191,7 +191,7 @@ export function EmotionForm({ onSaved, prefill }) {
 // Modal de día
 // ─────────────────────────────────────────────
 function DayModal({ day, entries, onClose, onDelete, onSaved }) {
-  const confirm = useConfirm();
+  const [hiddenIds, setHiddenIds] = useState(new Set());
 
   // Estado de edición inline: id del entry que se está editando
   const [editingId,  setEditingId]  = useState(null);
@@ -227,21 +227,25 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
     }
   };
 
-  const handleDelete = async (entry) => {
-    const ok = await confirm({
-      title: 'Eliminar emoción',
-      message: `¿Eliminar la emoción de ${entry.user_key === 'van' ? 'Van' : 'Martín'} del ${formatDay(day)}?`,
-      confirmLabel: 'Eliminar',
-      danger: true,
-    });
-    if (!ok) return;
-    try {
+  const handleDeleteEntry = (entry) => {
+    setHiddenIds(prev => new Set([...prev, entry.id]));
+    const key = `emoc-${entry.id}`;
+    scheduleDeletion(key, async () => {
       await deleteEmotionalEntry(entry.id);
-      toast.success('Emoción eliminada');
+      setHiddenIds(prev => { const s = new Set(prev); s.delete(entry.id); return s; });
       onDelete(entry.id);
-    } catch {
-      toast.error('No se pudo eliminar');
-    }
+    });
+    toast.success('Emoción eliminada', {
+      duration: 5000,
+      action: {
+        label: 'Deshacer',
+        onClick: () => {
+          if (cancelDeletion(key)) {
+            setHiddenIds(prev => { const s = new Set(prev); s.delete(entry.id); return s; });
+          }
+        },
+      },
+    });
   };
 
   return (
@@ -253,7 +257,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
         </div>
         <div className="emoc-modal__users">
           {USERS.map((u) => {
-            const userEntries = entries.filter((e) => e.user_key === u.key);
+            const userEntries = entries.filter((e) => e.user_key === u.key && !hiddenIds.has(e.id));
             return (
               <div key={u.key} className="emoc-modal__user-card">
                 <div className="emoc-modal__user-header">
@@ -314,7 +318,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                               {entry.note && <p className="emoc-modal__note">{entry.note}</p>}
                               <div className="emoc-modal__actions">
                                 <button className="emoc-modal__edit-btn" onClick={() => startEdit(entry)}>Editar</button>
-                                <button className="emoc-modal__delete-btn" onClick={() => handleDelete(entry)}>Eliminar</button>
+                                <button className="emoc-modal__delete-btn" onClick={() => handleDeleteEntry(entry)}>Eliminar</button>
                               </div>
                             </>
                           )}

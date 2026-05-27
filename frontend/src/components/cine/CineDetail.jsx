@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import StarRating from '../places/StarRating';
-import { useConfirm } from '../../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../../utils/pendingDeletions';
 import {
   getCineItem,
   updateCineItem,
@@ -14,7 +14,6 @@ const TYPE_LABEL = { movie: '🎬 Película', series: '📺 Serie' };
 const STATUS_LABEL = { to_watch: 'Por ver', watched: 'Ya vimos' };
 
 export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
-  const confirm = useConfirm();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,16 +71,16 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
     }
   };
 
-  const handleDelete = async () => {
-    const ok = await confirm({ title: `¿Eliminar "${item.title}"?`, confirmLabel: 'Eliminar', danger: true });
-    if (!ok) return;
-    try {
+  const handleDeleteItem = () => {
+    const key = `cine-${itemId}`;
+    scheduleDeletion(key, async () => {
       await deleteCineItem(itemId);
-      toast.success('Eliminado del cine');
       onDeleted();
-    } catch (err) {
-      toast.error('No se pudo eliminar: ' + err.message);
-    }
+    });
+    toast.success('Eliminado del cine', {
+      duration: 5000,
+      action: { label: 'Deshacer', onClick: () => { cancelDeletion(key); } },
+    });
   };
 
   const handleAddComment = async (e) => {
@@ -282,7 +281,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
         <button className="btn btn-ghost btn-sm" onClick={() => onEdit(item)}>
           Editar
         </button>
-        <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+        <button className="btn btn-danger btn-sm" onClick={handleDeleteItem}>
           Eliminar
         </button>
       </div>

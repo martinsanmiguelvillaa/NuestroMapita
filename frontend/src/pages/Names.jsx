@@ -8,8 +8,8 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getNames, createName, updateName, deleteName, rateName } from '../api/names';
-import { useConfirm } from '../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/names.css';
 
 // ─── Constantes ──────────────────────────────────────────────────────
@@ -107,7 +107,6 @@ function RatingInput({ value, onChange, saving }) {
 
 // ─── Tab: Cargar ─────────────────────────────────────────────────────
 function CargarTab({ names, onCreated, onUpdated, onDeleted }) {
-  const confirm = useConfirm();
 
   const [form, setForm]         = useState({ text: '', gender: 'female', note: '' });
   const [editingId, setEditingId] = useState(null);
@@ -161,21 +160,21 @@ function CargarTab({ names, onCreated, onUpdated, onDeleted }) {
     }
   };
 
-  const handleDelete = async (name) => {
-    const ok = await confirm({
-      title: `¿Eliminar "${name.text}"?`,
-      message: 'Se perderán las puntuaciones asociadas.',
-      confirmLabel: 'Eliminar',
-      danger: true,
+  const handleDelete = (name) => {
+    onDeleted(name.id);
+    const key = `name-${name.id}`;
+    scheduleDeletion(key, () => deleteName(name.id));
+    toast.success(`"${name.text}" eliminado`, {
+      duration: 5000,
+      action: {
+        label: 'Deshacer',
+        onClick: () => {
+          if (cancelDeletion(key)) {
+            onCreated(name);
+          }
+        },
+      },
     });
-    if (!ok) return;
-    try {
-      await deleteName(name.id);
-      onDeleted(name.id);
-      toast.success('Nombre eliminado');
-    } catch (err) {
-      toast.error(err.message);
-    }
   };
 
   const filtered = names.filter((n) => {

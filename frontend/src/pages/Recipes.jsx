@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRecipes, deleteRecipe } from '../api/recipes';
-import { useConfirm } from '../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import Modal from '../components/ui/Modal';
 import RecipeCard from '../components/recipes/RecipeCard';
 import RecipeForm from '../components/recipes/RecipeForm';
@@ -22,17 +22,16 @@ const EMPTY_MESSAGES = {
 };
 
 export default function Recipes() {
-  const confirm = useConfirm();
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
   const [search, setSearch] = useState('');
+  const [hiddenIds, setHiddenIds] = useState(new Set());
 
   // Modales
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);   // recipe obj
   const [detailId, setDetailId] = useState(null); // recipe id
-  const [deleting, setDeleting] = useState(null); // recipe id en proceso
   const addForm = useDirtyForm();
   const editForm = useDirtyForm();
 
@@ -58,19 +57,25 @@ export default function Recipes() {
     return () => controller.abort();
   }, [load]);
 
-  const handleDelete = async (recipe) => {
-    const ok = await confirm({ title: `¿Eliminar "${recipe.title}"?`, confirmLabel: 'Eliminar', danger: true });
-    if (!ok) return;
-    setDeleting(recipe.id);
-    try {
+  const handleDelete = (recipe) => {
+    setHiddenIds(prev => new Set([...prev, recipe.id]));
+    const key = `recipe-${recipe.id}`;
+    scheduleDeletion(key, async () => {
       await deleteRecipe(recipe.id);
-      toast.success('Receta eliminada');
+      setHiddenIds(prev => { const s = new Set(prev); s.delete(recipe.id); return s; });
       load();
-    } catch (err) {
-      toast.error('No se pudo eliminar: ' + err.message);
-    } finally {
-      setDeleting(null);
-    }
+    });
+    toast.success('Receta eliminada', {
+      duration: 5000,
+      action: {
+        label: 'Deshacer',
+        onClick: () => {
+          if (cancelDeletion(key)) {
+            setHiddenIds(prev => { const s = new Set(prev); s.delete(recipe.id); return s; });
+          }
+        },
+      },
+    });
   };
 
   const handleFormSaved = () => {
@@ -136,14 +141,13 @@ export default function Recipes() {
         </div>
       ) : (
         <div className="letters-grid">
-          {recipes.map((recipe) => (
+          {recipes.filter(r => !hiddenIds.has(r.id)).map((recipe) => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
               onView={() => setDetailId(recipe.id)}
               onEdit={() => openEdit(recipe)}
               onDelete={() => handleDelete(recipe)}
-              disabled={deleting === recipe.id}
             />
           ))}
         </div>

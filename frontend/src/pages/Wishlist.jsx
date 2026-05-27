@@ -17,16 +17,15 @@ import ConvertModal from '../components/places/ConvertModal';
 import PhotoSection from '../components/photos/PhotoSection';
 import CoverPhoto from '../components/photos/CoverPhoto';
 import SearchBar from '../components/ui/SearchBar';
-import { useConfirm } from '../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/places.css';
 import '../styles/photos.css';
 
 // ─── Tarjeta individual ──────────────────────────────────────────────────────
 
 function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHandleProps, isDragging }) {
-  const confirm = useConfirm();
-  const [deleting, setDeleting] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [coverIndex, setCoverIndex] = useState(0);
@@ -62,19 +61,20 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
     }
   };
 
-  const handleDelete = async () => {
-    const ok = await confirm({ title: `¿Eliminar "${place.name}"?`, confirmLabel: 'Eliminar', danger: true });
-    if (!ok) return;
-    setDeleting(true);
-    try {
+  const handleDelete = () => {
+    setDeleted(true);
+    const key = `wishlist-${place.id}`;
+    scheduleDeletion(key, async () => {
       await deleteWishlist(place.id);
-      toast.success('Lugar eliminado');
       onDelete?.();
-    } catch (err) {
-      toast.error('Error al eliminar: ' + err.message);
-      setDeleting(false);
-    }
+    });
+    toast.success('Lugar eliminado', {
+      duration: 5000,
+      action: { label: 'Deshacer', onClick: () => { if (cancelDeletion(key)) setDeleted(false); } },
+    });
   };
+
+  if (deleted) return null;
 
   return (
     <div className={`wish-card fade-in${isDragging ? ' wish-card--dragging' : ''}`}>
@@ -142,8 +142,8 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
       <div className="wish-card__footer">
         <div style={{ display: 'flex', gap: '6px' }}>
           <button className="btn btn-ghost btn-sm" onClick={() => onEdit(place)}>Editar</button>
-          <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
-            {deleting ? '...' : 'Eliminar'}
+          <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+            Eliminar
           </button>
           <button className="btn-went" onClick={() => onConvert(place)}>
             Ya fuimos

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCineItems, deleteCineItem, updateCineItem } from '../api/cine';
-import { useConfirm } from '../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import Modal from '../components/ui/Modal';
 import CineCard from '../components/cine/CineCard';
 import CineForm from '../components/cine/CineForm';
@@ -35,7 +35,6 @@ function buildParams(typeFilter, statusFilter, search) {
 }
 
 export default function Cine() {
-  const confirm = useConfirm();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('all');
@@ -44,7 +43,7 @@ export default function Cine() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [detailId, setDetailId] = useState(null);
-  const [deleting, setDeleting] = useState(null);
+  const [hiddenIds, setHiddenIds] = useState(new Set());
   const [randomPick, setRandomPick] = useState(null);
   const [showRandom, setShowRandom] = useState(false);
   const addForm = useDirtyForm();
@@ -69,19 +68,25 @@ export default function Cine() {
     return () => controller.abort();
   }, [load]);
 
-  const handleDelete = async (item) => {
-    const ok = await confirm({ title: `¿Eliminar "${item.title}"?`, confirmLabel: 'Eliminar', danger: true });
-    if (!ok) return;
-    setDeleting(item.id);
-    try {
+  const handleDelete = (item) => {
+    setHiddenIds(prev => new Set([...prev, item.id]));
+    const key = `cine-${item.id}`;
+    scheduleDeletion(key, async () => {
       await deleteCineItem(item.id);
-      toast.success('Eliminado del cine');
+      setHiddenIds(prev => { const s = new Set(prev); s.delete(item.id); return s; });
       load();
-    } catch (err) {
-      toast.error('No se pudo eliminar: ' + err.message);
-    } finally {
-      setDeleting(null);
-    }
+    });
+    toast.success('Eliminado del cine', {
+      duration: 5000,
+      action: {
+        label: 'Deshacer',
+        onClick: () => {
+          if (cancelDeletion(key)) {
+            setHiddenIds(prev => { const s = new Set(prev); s.delete(item.id); return s; });
+          }
+        },
+      },
+    });
   };
 
   const handleToggleFavorite = async (item) => {
@@ -202,7 +207,7 @@ export default function Cine() {
           </div>
         ) : (
           <div className="cine-grid">
-            {items.map((item) => (
+            {items.filter(i => !hiddenIds.has(i.id)).map((item) => (
               <CineCard
                 key={item.id}
                 item={item}
@@ -211,7 +216,6 @@ export default function Cine() {
                 onDelete={() => handleDelete(item)}
                 onToggleFavorite={() => handleToggleFavorite(item)}
                 onToggleStatus={() => handleToggleStatus(item)}
-                disabled={deleting === item.id}
               />
             ))}
           </div>

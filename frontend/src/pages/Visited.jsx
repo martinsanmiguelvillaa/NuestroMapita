@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getVisited, createVisited, updateVisited, deleteVisited, convertBackToWishlist, convertBackToTrip } from '../api/placesVisited';
 import { useConfirm } from '../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import { uploadPhotos } from '../api/photos';
 import Modal from '../components/ui/Modal';
 import PlaceForm from '../components/places/PlaceForm';
@@ -22,9 +23,9 @@ function formatDate(dateStr) {
 
 function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
   const confirm = useConfirm();
+  const [deleted, setDeleted] = useState(false);
   const [showPhotos, setShowPhotos] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [convertingBack, setConvertingBack] = useState(false);
   const [coverIndex, setCoverIndex] = useState(0);
   const galleryRef = useRef(null);
@@ -82,24 +83,20 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
     }
   };
 
-  const handleDelete = async () => {
-    const ok = await confirm({
-      title: `¿Eliminar "${place.name}"?`,
-      message: 'También se borrarán sus fotos.',
-      confirmLabel: 'Eliminar',
-      danger: true,
-    });
-    if (!ok) return;
-    setDeleting(true);
-    try {
+  const handleDelete = () => {
+    setDeleted(true);
+    const key = `visited-${place.id}`;
+    scheduleDeletion(key, async () => {
       await deleteVisited(place.id);
-      toast.success('Lugar eliminado');
       onDelete?.();
-    } catch (err) {
-      toast.error('Error al eliminar: ' + err.message);
-      setDeleting(false);
-    }
+    });
+    toast.success('Lugar eliminado', {
+      duration: 5000,
+      action: { label: 'Deshacer', onClick: () => { if (cancelDeletion(key)) setDeleted(false); } },
+    });
   };
+
+  if (deleted) return null;
 
   return (
     <div className="place-card fade-in">
@@ -170,8 +167,8 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
       <div className="place-card__footer">
         <div className="place-card__actions">
           <button className="btn btn-ghost btn-sm" onClick={() => onEdit(place)}>Editar</button>
-          <button className="btn btn-danger btn-sm" onClick={handleDelete} disabled={deleting}>
-            {deleting ? '...' : 'Eliminar'}
+          <button className="btn btn-danger btn-sm" onClick={handleDelete}>
+            Eliminar
           </button>
         </div>
         <button

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import Modal from '../ui/Modal';
 import LetterForm from './LetterForm';
 import { deleteLetter } from '../../api/letters';
-import { useConfirm } from '../../context/ConfirmContext';
 import { toast } from 'sonner';
+import { scheduleDeletion, cancelDeletion } from '../../utils/pendingDeletions';
 import { useDirtyForm } from '../../hooks/useDirtyForm';
 import '../../styles/letters.css';
 
@@ -20,25 +20,25 @@ function formatDate(dateStr) {
  * Tarjeta de cartita con vista completa, edición y eliminación.
  */
 export default function LetterCard({ letter, onChanged }) {
-  const confirm = useConfirm();
+  const [deleted, setDeleted] = useState(false);
   const [open, setOpen] = useState(false);      // Ver completa
   const [editing, setEditing] = useState(false); // Formulario de edición
-  const [deleting, setDeleting] = useState(false);
   const editForm = useDirtyForm();
 
-  const handleDelete = async () => {
-    const ok = await confirm({ title: '¿Eliminar esta cartita? 💔', confirmLabel: 'Eliminar', danger: true });
-    if (!ok) return;
-    setDeleting(true);
-    try {
+  const handleDelete = () => {
+    setDeleted(true);
+    const key = `letter-${letter.id}`;
+    scheduleDeletion(key, async () => {
       await deleteLetter(letter.id);
-      toast.success('Cartita eliminada');
       onChanged?.();
-    } catch (err) {
-      toast.error('No se pudo eliminar: ' + err.message);
-      setDeleting(false);
-    }
+    });
+    toast.success('Cartita eliminada', {
+      duration: 5000,
+      action: { label: 'Deshacer', onClick: () => { if (cancelDeletion(key)) setDeleted(false); } },
+    });
   };
+
+  if (deleted) return null;
 
   return (
     <>
@@ -61,9 +61,8 @@ export default function LetterCard({ letter, onChanged }) {
           <button
             className="btn btn-danger btn-sm"
             onClick={handleDelete}
-            disabled={deleting}
           >
-            {deleting ? '...' : 'Eliminar'}
+            Eliminar
           </button>
         </div>
       </div>
