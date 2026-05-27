@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--color-cream-overlay);
+  background: var(--overlay-romantic);
   pointer-events: none;
   z-index: -1;
 }
