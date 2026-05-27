@@ -13,7 +13,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: var(--bg-letters);
+  background-image: none;
   background-size: cover;
   background-position: center 65%;
   pointer-events: none;
@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(253, 246, 236, 0.75);
+  background: transparent;
   pointer-events: none;
   z-index: -1;
 }

@@ -1,0 +1,19 @@
+/* =========================================
+   LAYOUT — capas de fondo y overlay
+   Viven fuera del motion.div para no moverse
+   con el gesto de swipe.
+   ========================================= */
+
+.layout__bg,
+.layout__overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -100;
+}
+
+.layout__bg {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}

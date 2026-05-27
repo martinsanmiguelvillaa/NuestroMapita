@@ -12,7 +12,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: var(--bg-home);
+  background-image: none;
   background-size: cover;
   background-position: center;
   pointer-events: none;
@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(40, 28, 15, 0.55);
+  background: transparent;
   pointer-events: none;
   z-index: calc(var(--z-below) + 1);
 }

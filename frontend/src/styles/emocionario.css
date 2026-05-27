@@ -13,7 +13,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: var(--bg-emocionario);
+  background-image: none;
   background-size: cover;
   background-position: center;
   pointer-events: none;
@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--color-cream-overlay);
+  background: transparent;
   pointer-events: none;
   z-index: calc(var(--z-below) + 1);
 }

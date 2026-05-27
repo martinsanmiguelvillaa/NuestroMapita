@@ -13,7 +13,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: var(--bg-visited);
+  background-image: none;
   background-size: cover;
   background-position: center;
   pointer-events: none;
@@ -24,7 +24,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--color-cream-overlay);
+  background: transparent;
   pointer-events: none;
   z-index: -1;
 }
@@ -45,7 +45,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: var(--bg-wishlist);
+  background-image: none;
   background-size: cover;
   background-position: center;
   pointer-events: none;
@@ -56,7 +56,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--color-cream-overlay);
+  background: transparent;
   pointer-events: none;
   z-index: -1;
 }
@@ -67,7 +67,7 @@
 }
 
 .trips-bg::before {
-  background-image: var(--bg-trips);
+  background-image: none;
 }
 
 /* --- Cabecera de sección --- */

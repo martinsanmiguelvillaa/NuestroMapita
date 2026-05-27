@@ -14,6 +14,22 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, animate } from 'framer-motion';
 import Navbar from './Navbar';
 import ClipboardImportBanner from '../ui/ClipboardImportBanner';
+import '../../styles/layout.css';
+
+// Config de fondo + overlay por ruta
+// La imagen usa CSS custom properties (resuelven mobile/desktop automáticamente via variables.css)
+const ROUTE_BG = {
+  '/':            { img: 'var(--bg-home)',       overlay: 'rgba(40, 28, 15, 0.55)',            pos: 'center' },
+  '/visitados':   { img: 'var(--bg-visited)',    overlay: 'var(--color-cream-overlay)',         pos: 'center' },
+  '/por-visitar': { img: 'var(--bg-wishlist)',   overlay: 'var(--color-cream-overlay)',         pos: 'center' },
+  '/viajecitos':  { img: 'var(--bg-trips)',      overlay: 'var(--color-cream-overlay)',         pos: 'center' },
+  '/cartitas':    { img: 'var(--bg-letters)',    overlay: 'rgba(253, 246, 236, 0.75)',          pos: 'center 65%' },
+  '/recetas':     { img: 'var(--bg-recipes)',    overlay: 'var(--color-cream-overlay)',         pos: 'center' },
+  '/cine':        { img: 'var(--bg-cine)',       overlay: 'var(--color-cream-overlay-strong)', pos: 'center' },
+  '/outfits':     { img: 'var(--bg-outfits)',    overlay: 'var(--color-cream-overlay)',         pos: 'center top' },
+  '/nombres':     { img: 'var(--bg-nombres)',    overlay: 'var(--color-cream-overlay)',         pos: 'center top' },
+  '/emocionario': { img: 'var(--bg-emocionario)', overlay: 'var(--color-cream-overlay)',       pos: 'center' },
+};
 
 // Orden de navegación horizontal (Mapa queda a la izquierda de Inicio)
 const SWIPE_ROUTES = [
@@ -36,6 +52,7 @@ const COMMIT_THRESHOLD = 0.28;
 export default function Layout() {
   const location = useLocation();
   const navigate  = useNavigate();
+  const bg = ROUTE_BG[location.pathname];
   // MotionValue: actualiza el transform del DOM sin re-renders
   const x = useMotionValue(0);
   const mainRef = useRef(null);
@@ -168,6 +185,18 @@ export default function Layout() {
 
   return (
     <>
+      {bg && (
+        <>
+          <div
+            className="layout__bg"
+            style={{ backgroundImage: bg.img, backgroundPosition: bg.pos }}
+          />
+          <div
+            className="layout__overlay"
+            style={{ background: bg.overlay }}
+          />
+        </>
+      )}
       <Navbar />
       <ClipboardImportBanner />
       <main ref={mainRef}>

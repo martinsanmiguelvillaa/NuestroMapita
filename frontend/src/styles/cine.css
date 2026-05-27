@@ -12,7 +12,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background-image: var(--bg-cine);
+  background-image: none;
   background-size: cover;
   background-position: center;
   pointer-events: none;
@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: var(--color-cream-overlay-strong);
+  background: transparent;
   pointer-events: none;
   z-index: -1;
 }

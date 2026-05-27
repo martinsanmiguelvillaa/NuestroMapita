@@ -21,7 +21,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: var(--bg-nombres);
+  background-image: none;
   background-size: cover;
   background-position: center top;
   pointer-events: none;
@@ -35,7 +35,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--color-cream-overlay);
+  background: transparent;
   pointer-events: none;
   z-index: calc(var(--z-below) + 1);
 }
