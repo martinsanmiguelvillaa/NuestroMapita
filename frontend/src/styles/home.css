@@ -23,7 +23,7 @@
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(40, 28, 15, 0.55);
   pointer-events: none;
   z-index: calc(var(--z-below) + 1);
 }
