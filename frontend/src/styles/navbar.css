@@ -248,6 +248,10 @@
     padding: 0 var(--space-2);
   }
 
+  /* Mapa aparece antes de Inicio en mobile para coincidir con el swipe */
+  .navbar__links li[data-to="/mapa"]  { order: -1; }
+  .navbar__links li[data-to="/"]      { order:  0; }
+
   .navbar__links::-webkit-scrollbar {
     display: none;
   }

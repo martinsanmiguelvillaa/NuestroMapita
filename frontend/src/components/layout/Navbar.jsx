@@ -139,7 +139,7 @@ export default function Navbar() {
         <div className="navbar__scroll-area">
           <ul className="navbar__links" ref={linksRef}>
             {links.map(({ to, label, icon }) => (
-              <li key={to}>
+              <li key={to} data-to={to}>
                 <NavLink
                   to={to}
                   end={to === '/'}
