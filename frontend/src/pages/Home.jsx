@@ -326,13 +326,12 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
       >
         {/* X de descarte — solo en desktop (JS detecta touch por ancho) */}
         {window.innerWidth > 768 && (
-          <span
+          <button
             className="emoc-fab__dismiss"
-            role="button"
             aria-label="Ocultar atajo"
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); onDismiss(); }}
-          >×</span>
+          >×</button>
         )}
         <span className="emoc-fab__inner">
           <span className="emoc-fab__cloud">☁️</span>

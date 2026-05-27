@@ -589,6 +589,8 @@
   width: 19px;
   height: 19px;
   border-radius: 50%;
+  border: none;
+  padding: 0;
   background: var(--color-brown);
   color: #fff;
   font-size: 13px;
