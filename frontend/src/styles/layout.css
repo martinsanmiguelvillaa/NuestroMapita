@@ -17,3 +17,10 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+
+/* Evita que el motion.div desborde horizontalmente al hacer swipe.
+   Sin esto, cuando x < 0 el contenido sobresale por la derecha,
+   el navegador expande el ancho del scroll y el navbar fixed se desplaza. */
+main {
+  overflow-x: clip;
+}
