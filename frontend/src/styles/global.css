@@ -514,3 +514,31 @@ img {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================================
+   SONNER — UNDO BUTTON TIMER
+   ========================================= */
+
+[data-sonner-toast] [data-action] {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-sonner-toast] [data-action]::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.45;
+  transform-origin: left;
+  animation: undo-timer 5s linear forwards;
+  pointer-events: none;
+}
+
+@keyframes undo-timer {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
