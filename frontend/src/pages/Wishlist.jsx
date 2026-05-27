@@ -68,6 +68,7 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
     setDeleting(true);
     try {
       await deleteWishlist(place.id);
+      toast.success('Lugar eliminado');
       onDelete?.();
     } catch (err) {
       toast.error('Error al eliminar: ' + err.message);

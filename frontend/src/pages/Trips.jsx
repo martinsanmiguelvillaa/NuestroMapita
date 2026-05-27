@@ -70,6 +70,7 @@ function TripCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, isDragg
     setDeleting(true);
     try {
       await deleteTrip(place.id);
+      toast.success('Viajecito eliminado');
       onDelete?.();
     } catch (err) {
       toast.error('Error al eliminar: ' + err.message);

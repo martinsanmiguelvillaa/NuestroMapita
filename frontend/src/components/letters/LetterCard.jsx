@@ -32,6 +32,7 @@ export default function LetterCard({ letter, onChanged }) {
     setDeleting(true);
     try {
       await deleteLetter(letter.id);
+      toast.success('Cartita eliminada');
       onChanged?.();
     } catch (err) {
       toast.error('No se pudo eliminar: ' + err.message);

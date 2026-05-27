@@ -93,6 +93,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
     setDeleting(true);
     try {
       await deleteVisited(place.id);
+      toast.success('Lugar eliminado');
       onDelete?.();
     } catch (err) {
       toast.error('Error al eliminar: ' + err.message);

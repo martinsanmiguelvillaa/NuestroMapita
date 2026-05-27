@@ -64,6 +64,7 @@ export default function Recipes() {
     setDeleting(recipe.id);
     try {
       await deleteRecipe(recipe.id);
+      toast.success('Receta eliminada');
       load();
     } catch (err) {
       toast.error('No se pudo eliminar: ' + err.message);

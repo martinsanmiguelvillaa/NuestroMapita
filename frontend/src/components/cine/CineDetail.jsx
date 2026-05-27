@@ -77,6 +77,7 @@ export default function CineDetail({ itemId, onClose, onEdit, onDeleted }) {
     if (!ok) return;
     try {
       await deleteCineItem(itemId);
+      toast.success('Eliminado del cine');
       onDeleted();
     } catch (err) {
       toast.error('No se pudo eliminar: ' + err.message);
