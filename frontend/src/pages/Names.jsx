@@ -747,24 +747,20 @@ export default function NamesPage() {
 
   return (
     <div className="names-bg">
-      {/* Header */}
-      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-6) var(--space-4) 0' }}>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 'var(--text-3xl)', color: 'var(--color-text)', marginBottom: 'var(--space-1)' }}>
-          Ranking de nombres
-        </h1>
-      </div>
-
-      {/* Tabs */}
-      <div className="names-tabs">
-        {TABS.map(({ id, label }) => (
-          <button
-            key={id}
-            className={`names-tab-btn${tab === id ? ' active' : ''}`}
-            onClick={() => setTab(id)}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Header + Tabs */}
+      <div className="names-top-bar">
+        <h1 className="names-title">Ranking de nombres</h1>
+        <div className="names-tabs">
+          {TABS.map(({ id, label }) => (
+            <button
+              key={id}
+              className={`names-tab-btn${tab === id ? ' active' : ''}`}
+              onClick={() => setTab(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Contenido */}

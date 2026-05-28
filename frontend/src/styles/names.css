@@ -37,21 +37,37 @@
   z-index: calc(var(--z-below) + 1);
 }
 
-/* ─── Tabs ─────────────────────────────── */
-.names-tabs {
+/* ─── Header + Tabs ─────────────────────── */
+.names-top-bar {
   display: flex;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-4) 0;
-  border-bottom: 2px solid var(--color-beige-mid);
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  border-bottom: 1.5px solid var(--color-beige-mid);
   flex-shrink: 0;
 }
 
+.names-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.names-tabs {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--color-beige);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  width: fit-content;
+}
+
 .names-tab-btn {
-  background: none;
+  background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  padding: var(--space-3) var(--space-5);
-  margin-bottom: -2px;
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-5);
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -59,17 +75,17 @@
   cursor: pointer;
   white-space: nowrap;
   transition: var(--transition-fast);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 .names-tab-btn:hover {
-  color: var(--color-brown);
-  background: var(--color-beige);
+  color: var(--color-text);
+  background: var(--color-white);
 }
 
 .names-tab-btn.active {
-  color: var(--color-brown-dark);
-  border-bottom-color: var(--color-brown);
+  background: var(--color-white);
+  color: var(--color-brown);
+  box-shadow: var(--shadow-xs);
 }
 
 /* ─── Contenido de tabs ──────────────────── */
