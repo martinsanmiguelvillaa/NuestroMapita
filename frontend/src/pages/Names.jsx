@@ -193,27 +193,39 @@ function CargarTab({ names, onCreated, onUpdated, onDeleted }) {
       {/* Stats */}
       {total > 0 && (
         <div className="names-stats">
-          <div className="names-stat">
+          <button
+            className={`names-stat names-stat--btn${filter === 'all' ? ' names-stat--active' : ''}`}
+            onClick={() => setFilter('all')}
+          >
             <div className="names-stat__number">{total}</div>
             <div className="names-stat__label">en total</div>
-          </div>
+          </button>
           {byGender.female > 0 && (
-            <div className="names-stat">
+            <button
+              className={`names-stat names-stat--btn${filter === 'female' ? ' names-stat--active' : ''}`}
+              onClick={() => setFilter(filter === 'female' ? 'all' : 'female')}
+            >
               <div className="names-stat__number">{byGender.female}</div>
               <div className="names-stat__label">de mujer</div>
-            </div>
+            </button>
           )}
           {byGender.male > 0 && (
-            <div className="names-stat">
+            <button
+              className={`names-stat names-stat--btn${filter === 'male' ? ' names-stat--active' : ''}`}
+              onClick={() => setFilter(filter === 'male' ? 'all' : 'male')}
+            >
               <div className="names-stat__number">{byGender.male}</div>
               <div className="names-stat__label">de varón</div>
-            </div>
+            </button>
           )}
           {byGender.unisex > 0 && (
-            <div className="names-stat">
+            <button
+              className={`names-stat names-stat--btn${filter === 'unisex' ? ' names-stat--active' : ''}`}
+              onClick={() => setFilter(filter === 'unisex' ? 'all' : 'unisex')}
+            >
               <div className="names-stat__number">{byGender.unisex}</div>
               <div className="names-stat__label">unisex</div>
-            </div>
+            </button>
           )}
         </div>
       )}

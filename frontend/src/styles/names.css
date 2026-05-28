@@ -653,6 +653,26 @@
   min-width: 90px;
 }
 
+.names-stat--btn {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.names-stat--btn:hover {
+  border-color: var(--color-brown-light, #c8956b);
+  box-shadow: var(--shadow-sm);
+}
+
+.names-stat--active {
+  border-color: var(--color-brown);
+  background: var(--color-beige-light, #fdf6ec);
+  box-shadow: var(--shadow-sm);
+}
+
+.names-stat--active .names-stat__number {
+  color: var(--color-brown-dark, #7a4a28);
+}
+
 .names-stat__number {
   font-family: var(--font-heading);
   font-size: var(--text-2xl);
