@@ -19,7 +19,7 @@ import '../../styles/layout.css';
 // Config de fondo + overlay por ruta
 // La imagen usa CSS custom properties (resuelven mobile/desktop automáticamente via variables.css)
 const ROUTE_BG = {
-  '/':            { img: 'var(--bg-home)',       overlay: 'rgba(40, 28, 15, 0.55)',            pos: 'center' },
+  '/':            { img: 'var(--bg-home)',       overlay: 'var(--color-cream-overlay)',         pos: 'center' },
   '/visitados':   { img: 'var(--bg-visited)',    overlay: 'var(--color-cream-overlay)',         pos: 'center' },
   '/por-visitar': { img: 'var(--bg-wishlist)',   overlay: 'var(--color-cream-overlay)',         pos: 'center' },
   '/viajecitos':  { img: 'var(--bg-trips)',      overlay: 'var(--color-cream-overlay)',         pos: 'center' },
