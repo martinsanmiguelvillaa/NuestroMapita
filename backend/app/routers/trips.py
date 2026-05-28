@@ -32,6 +32,12 @@ def reorder_all(
     missing = [pid for pid in data.ordered_ids if pid not in existing_ids]
     if missing:
         raise HTTPException(status_code=422, detail=f"IDs no encontrados: {missing}")
+    total = db.query(func.count(PlaceTrip.id)).scalar()
+    if len(data.ordered_ids) != total:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Se esperaban {total} IDs pero se recibieron {len(data.ordered_ids)}"
+        )
     for index, place_id in enumerate(data.ordered_ids):
         db.query(PlaceTrip).filter(PlaceTrip.id == place_id).update(
             {"order_index": index}
