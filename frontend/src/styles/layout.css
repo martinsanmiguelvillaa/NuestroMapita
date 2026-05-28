@@ -12,6 +12,15 @@
   z-index: -100;
 }
 
+/* Desktop: el fondo arranca donde termina la navbar */
+@media (min-width: 769px) {
+  .layout__bg,
+  .layout__overlay {
+    top: var(--navbar-height);
+  }
+}
+
+/* Mobile: navbar abajo, fondo no tapa la barra inferior */
 @media (max-width: 768px) {
   .layout__bg,
   .layout__overlay {
