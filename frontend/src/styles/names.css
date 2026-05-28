@@ -39,7 +39,6 @@
 
 /* ─── Header + Tabs ─────────────────────── */
 .names-top-bar {
-  border-bottom: 1.5px solid var(--color-beige-mid);
   flex-shrink: 0;
 }
 
@@ -50,6 +49,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-4);
+  border-bottom: 1.5px solid var(--color-beige-mid);
 }
 
 .names-title {
