@@ -182,18 +182,33 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
   }
 
   // ── Auto-scroll compartido desktop + mobile ──
-  const scrollRaf = useRef(null);
+  const scrollRaf       = useRef(null);
+  const autoScrollState = useRef({ dir: 0, speed: 0 });
 
   const stopAutoScroll = useCallback(() => {
+    autoScrollState.current = { dir: 0, speed: 0 };
     if (scrollRaf.current) { cancelAnimationFrame(scrollRaf.current); scrollRaf.current = null; }
   }, []);
 
-  const startAutoScroll = useCallback((dir, speed) => {
-    stopAutoScroll();
+  const ensureScrollLoop = useCallback(() => {
+    if (scrollRaf.current) return;
     const scroller = document.scrollingElement || document.documentElement;
-    const step = () => { scroller.scrollTop += dir * speed; scrollRaf.current = requestAnimationFrame(step); };
+    const step = () => {
+      const { dir, speed } = autoScrollState.current;
+      if (dir !== 0) {
+        scroller.scrollTop += dir * speed;
+        scrollRaf.current = requestAnimationFrame(step);
+      } else {
+        scrollRaf.current = null;
+      }
+    };
     scrollRaf.current = requestAnimationFrame(step);
-  }, [stopAutoScroll]);
+  }, []);
+
+  const setAutoScroll = useCallback((dir, speed) => {
+    autoScrollState.current = { dir, speed };
+    ensureScrollLoop();
+  }, [ensureScrollLoop]);
 
   // ── Desktop (HTML5 drag) ──
   const onDragStart = (id) => (e) => {
@@ -206,8 +221,8 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const y    = e.clientY;
     const vh   = window.innerHeight;
     const ZONE = 100;
-    if (y < ZONE)           startAutoScroll(-1, Math.round(20 + ((ZONE - y)        / ZONE) * 40));
-    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(20 + ((y - (vh - ZONE)) / ZONE) * 40));
+    if (y < ZONE)           setAutoScroll(-1, Math.round(20 + ((ZONE - y)        / ZONE) * 40));
+    else if (y > vh - ZONE) setAutoScroll( 1, Math.round(20 + ((y - (vh - ZONE)) / ZONE) * 40));
     else                    stopAutoScroll();
   };
 
@@ -258,8 +273,8 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const y = touch.clientY;
     const vh = window.innerHeight;
     const ZONE = 110;
-    if (y < ZONE)           startAutoScroll(-1, Math.round(20 + ((ZONE - y)        / ZONE) * 40));
-    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(20 + ((y - (vh - ZONE)) / ZONE) * 40));
+    if (y < ZONE)           setAutoScroll(-1, Math.round(6 + ((ZONE - y)        / ZONE) * 54));
+    else if (y > vh - ZONE) setAutoScroll( 1, Math.round(6 + ((y - (vh - ZONE)) / ZONE) * 54));
     else                    stopAutoScroll();
     const el   = document.elementFromPoint(touch.clientX, touch.clientY);
     const card = el?.closest('[data-drag-id]');
@@ -267,7 +282,7 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
       const targetId = parseInt(card.dataset.dragId, 10);
       if (targetId !== touchState.current.id) { overIdRef.current = targetId; setOverId(targetId); }
     }
-  }, [startAutoScroll, stopAutoScroll]);
+  }, [setAutoScroll, stopAutoScroll]);
 
   const handleTouchEnd = useCallback(() => {
     clearTimeout(touchState.current.timer);
