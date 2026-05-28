@@ -314,9 +314,6 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
   }, [disabled, stopAutoScroll, detachListeners]);
 
   const onTouchStart = (id) => (e) => {
-    // #1 — Evita que el Layout detecte este toque como inicio de swipe horizontal
-    e.stopPropagation();
-
     touchState.current.id     = id;
     touchState.current.startX = e.touches[0].clientX;
     touchState.current.startY = e.touches[0].clientY;
