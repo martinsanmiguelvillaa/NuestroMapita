@@ -702,8 +702,13 @@
   max-width: 520px;
   max-height: calc(100vh - var(--navbar-height) - var(--space-8));
   overflow-y: auto;
+  scrollbar-width: none;
   position: relative;
   /* animación manejada por Framer Motion */
+}
+
+.emoc-quick-modal::-webkit-scrollbar {
+  display: none;
 }
 
 .emoc-quick-close {
