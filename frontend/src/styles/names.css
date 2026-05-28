@@ -49,6 +49,11 @@
   max-width: var(--max-width);
   margin: 0 auto;
   overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.names-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .names-tab-btn {
