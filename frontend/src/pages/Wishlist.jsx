@@ -155,16 +155,41 @@ function WishCard({ place, onEdit, onDelete, onPhotosChanged, onConvert, dragHan
 }
 
 // ─── Hook de drag-and-drop nativo (mouse + touch) ────────────────────────────
+//
+// Fixes aplicados:
+//  #1 — stopPropagation en onTouchStart: evita que el Layout robe el gesto de swipe
+//  #2 — Rollback en error: si el backend falla, el orden local se revierte
+//  #3 — startX tracked: cancela long-press si el dedo se mueve horizontalmente
+//  #4 — Cleanup en desmontaje: listeners del document se remueven siempre
+//  #5 — Cancel drag cuando disabled cambia (ej: búsqueda activada en pleno drag)
 
 function useDragSort({ items, onOrderChange, disabled = false }) {
   const [order, setOrder] = useState(items.map((i) => i.id));
   const [draggingId, setDraggingId] = useState(null);
   const [overId, setOverId] = useState(null);
 
+  // onOrderChange en ref → handlers con useCallback no necesitan recrearse
+  const onOrderChangeRef = useRef(onOrderChange);
+  useEffect(() => { onOrderChangeRef.current = onOrderChange; }, [onOrderChange]);
+
+  // orderRef → handleTouchEnd puede leer el último order sin closures obsoletas
+  const orderRef = useRef(order);
+  useEffect(() => { orderRef.current = order; }, [order]);
+
   // Sincroniza cuando cambia la lista externa (búsqueda, carga)
   useEffect(() => {
     setOrder(items.map((i) => i.id));
   }, [items]);
+
+  function reinsert(ids, fromId, toId) {
+    const arr = [...ids];
+    const fromIdx = arr.indexOf(fromId);
+    const toIdx   = arr.indexOf(toId);
+    if (fromIdx === -1 || toIdx === -1) return ids;
+    arr.splice(fromIdx, 1);
+    arr.splice(toIdx, 0, fromId);
+    return arr;
+  }
 
   // ── Desktop (HTML5 drag) ──
   const onDragStart = (id) => (e) => {
@@ -181,11 +206,12 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
   const onDrop = (id) => (e) => {
     e.preventDefault();
     if (draggingId == null || draggingId === id) return;
+    const previousOrder = [...order];           // snapshot para rollback
     const newOrder = reinsert(order, draggingId, id);
     setOrder(newOrder);
     setDraggingId(null);
     setOverId(null);
-    onOrderChange(newOrder);
+    onOrderChangeRef.current(newOrder, () => setOrder(previousOrder));  // #2
   };
 
   const onDragEnd = () => {
@@ -194,89 +220,113 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
   };
 
   // ── Mobile (touch long-press + drag) ──
-  const touchState = useRef({
-    id: null,
-    startY: 0,
-    timer: null,
-    active: false,
-  });
+  const touchState = useRef({ id: null, startX: 0, startY: 0, timer: null, active: false });
   const scrollRaf  = useRef(null);
-  const overIdRef  = useRef(null);   // copia ref de overId para usar en closures
+  const overIdRef  = useRef(null);
 
-  const stopAutoScroll = () => {
+  // Wrappers estables para poder hacer removeEventListener con la misma referencia
+  const stableMove = useRef(null);
+  const stableEnd  = useRef(null);
+
+  const stopAutoScroll = useCallback(() => {
     if (scrollRaf.current) { cancelAnimationFrame(scrollRaf.current); scrollRaf.current = null; }
-  };
+  }, []);
 
-  const startAutoScroll = (dir, speed) => {
+  const startAutoScroll = useCallback((dir, speed) => {
     stopAutoScroll();
-    const step = () => {
-      window.scrollBy(0, dir * speed);
-      scrollRaf.current = requestAnimationFrame(step);
-    };
+    const step = () => { window.scrollBy(0, dir * speed); scrollRaf.current = requestAnimationFrame(step); };
     scrollRaf.current = requestAnimationFrame(step);
-  };
+  }, [stopAutoScroll]);
 
-  // handlers directos al document con passive:false → e.preventDefault() garantizado
+  const detachListeners = useCallback(() => {
+    if (stableMove.current) { document.removeEventListener('touchmove', stableMove.current); stableMove.current = null; }
+    if (stableEnd.current)  { document.removeEventListener('touchend',  stableEnd.current);  stableEnd.current  = null; }
+  }, []);
+
   const handleTouchMove = useCallback((e) => {
     if (!touchState.current.active) {
-      const delta = Math.abs(e.touches[0].clientY - touchState.current.startY);
-      if (delta > 8) clearTimeout(touchState.current.timer);
+      // #3 — cancela long-press si el dedo se movió (horizontal O vertical)
+      const dx = Math.abs(e.touches[0].clientX - touchState.current.startX);
+      const dy = Math.abs(e.touches[0].clientY - touchState.current.startY);
+      if (dx > 8 || dy > 8) clearTimeout(touchState.current.timer);
       return;
     }
 
     e.preventDefault();
 
     const touch = e.touches[0];
-    const y     = touch.clientY;
-    const vh    = window.innerHeight;
-    const ZONE  = 110;
+    const y = touch.clientY;
+    const vh = window.innerHeight;
+    const ZONE = 110;
 
-    if (y < ZONE) {
-      startAutoScroll(-1, Math.round(6 + ((ZONE - y) / ZONE) * 14));
-    } else if (y > vh - ZONE) {
-      startAutoScroll(1, Math.round(6 + ((y - (vh - ZONE)) / ZONE) * 14));
-    } else {
-      stopAutoScroll();
-    }
+    if (y < ZONE)            startAutoScroll(-1, Math.round(6 + ((ZONE - y)           / ZONE) * 14));
+    else if (y > vh - ZONE)  startAutoScroll( 1, Math.round(6 + ((y - (vh - ZONE))    / ZONE) * 14));
+    else                     stopAutoScroll();
 
     const el   = document.elementFromPoint(touch.clientX, touch.clientY);
     const card = el?.closest('[data-drag-id]');
     if (card) {
       const targetId = parseInt(card.dataset.dragId, 10);
-      if (targetId !== touchState.current.id) {
-        overIdRef.current = targetId;
-        setOverId(targetId);
-      }
+      if (targetId !== touchState.current.id) { overIdRef.current = targetId; setOverId(targetId); }
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [startAutoScroll, stopAutoScroll]);
 
   const handleTouchEnd = useCallback(() => {
     clearTimeout(touchState.current.timer);
     stopAutoScroll();
-    document.removeEventListener('touchmove', handleTouchMove);
-    document.removeEventListener('touchend',  handleTouchEnd);
+    detachListeners();  // #4
 
     if (touchState.current.active && touchState.current.id != null && overIdRef.current != null) {
-      setOrder((prev) => {
-        const newOrder = reinsert(prev, touchState.current.id, overIdRef.current);
-        onOrderChange(newOrder);
-        return newOrder;
-      });
+      const currentOrder  = orderRef.current;
+      const previousOrder = [...currentOrder];  // snapshot para rollback #2
+      const newOrder = reinsert(currentOrder, touchState.current.id, overIdRef.current);
+      setOrder(newOrder);
+      onOrderChangeRef.current(newOrder, () => setOrder(previousOrder));
     }
+
     touchState.current.active = false;
     touchState.current.id     = null;
     overIdRef.current          = null;
     setDraggingId(null);
     setOverId(null);
-  }, [handleTouchMove, onOrderChange]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [stopAutoScroll, detachListeners]);
+
+  // #4 — Limpieza en desmontaje: nunca dejar listeners colgados
+  useEffect(() => {
+    return () => {
+      clearTimeout(touchState.current.timer);
+      stopAutoScroll();
+      detachListeners();
+    };
+  }, [stopAutoScroll, detachListeners]);
+
+  // #5 — Cancelar drag si se activa búsqueda mientras se arrastra
+  useEffect(() => {
+    if (!disabled) return;
+    clearTimeout(touchState.current.timer);
+    stopAutoScroll();
+    detachListeners();
+    touchState.current.active = false;
+    touchState.current.id     = null;
+    overIdRef.current          = null;
+    setDraggingId(null);
+    setOverId(null);
+  }, [disabled, stopAutoScroll, detachListeners]);
 
   const onTouchStart = (id) => (e) => {
+    // #1 — Evita que el Layout detecte este toque como inicio de swipe horizontal
+    e.stopPropagation();
+
     touchState.current.id     = id;
+    touchState.current.startX = e.touches[0].clientX;
     touchState.current.startY = e.touches[0].clientY;
     touchState.current.active = false;
 
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend',  handleTouchEnd,  { passive: false });
+    // Wrappers estables: el mismo objeto que se pasó al add se pasa al remove
+    stableMove.current = (ev) => handleTouchMove(ev);
+    stableEnd.current  = ()   => handleTouchEnd();
+    document.addEventListener('touchmove', stableMove.current, { passive: false });
+    document.addEventListener('touchend',  stableEnd.current,  { passive: false });
 
     touchState.current.timer = setTimeout(() => {
       touchState.current.active = true;
@@ -285,17 +335,6 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     }, 300);
   };
 
-  // Reordena el array moviendo `fromId` a la posición de `toId`
-  function reinsert(ids, fromId, toId) {
-    const arr = [...ids];
-    const fromIdx = arr.indexOf(fromId);
-    const toIdx = arr.indexOf(toId);
-    arr.splice(fromIdx, 1);
-    arr.splice(toIdx, 0, fromId);
-    return arr;
-  }
-
-  // Construye los sorted items según el orden actual
   const sortedItems = order
     .map((id) => items.find((item) => item.id === id))
     .filter(Boolean);
@@ -304,20 +343,18 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     draggable: !disabled,
     'data-drag-id': id,
     onDragStart: disabled ? undefined : onDragStart(id),
-    onDragOver: disabled ? undefined : onDragOver(id),
-    onDrop: disabled ? undefined : onDrop(id),
-    onDragEnd: disabled ? undefined : onDragEnd,
+    onDragOver:  disabled ? undefined : onDragOver(id),
+    onDrop:      disabled ? undefined : onDrop(id),
+    onDragEnd:   disabled ? undefined : onDragEnd,
     onTouchStart: disabled ? undefined : onTouchStart(id),
     style: {
-      opacity: draggingId === id ? 0.4 : 1,
-      outline: overId === id && overId !== draggingId ? '2px dashed var(--color-brown)' : 'none',
+      opacity:    draggingId === id ? 0.4 : 1,
+      outline:    overId === id && overId !== draggingId ? '2px dashed var(--color-brown)' : 'none',
       transition: 'opacity 0.15s, outline 0.1s',
     },
   });
 
-  const dragHandleProps = {
-    style: { touchAction: 'none', cursor: 'grab' },
-  };
+  const dragHandleProps = { style: { touchAction: 'none', cursor: 'grab' } };
 
   return { sortedItems, draggingId, getItemProps, dragHandleProps };
 }
@@ -354,13 +391,15 @@ export default function Wishlist() {
     return () => controller.abort();
   }, [load]);
 
-  const handleOrderChange = async (orderedIds) => {
+  // rollback: función que revierte el orden local si el backend falla (#2)
+  const handleOrderChange = useCallback(async (orderedIds, rollback) => {
     try {
       await reorderWishlistBulk(orderedIds);
-    } catch (err) {
-      toast.error('No se pudo guardar el orden: ' + err.message);
+    } catch {
+      rollback?.();
+      toast.error('No se pudo guardar el orden');
     }
-  };
+  }, []);
 
   const { sortedItems, draggingId, getItemProps, dragHandleProps } = useDragSort({
     items: places,

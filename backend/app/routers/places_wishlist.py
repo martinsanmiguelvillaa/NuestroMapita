@@ -27,12 +27,20 @@ def reorder_all(
     """Reordena toda la lista de una vez. Recibe los IDs en el nuevo orden deseado."""
     if not data.ordered_ids:
         return {"ok": True}
+    # Validar que todos los IDs existan
     existing_ids = {
         row.id for row in db.query(PlaceWishlist.id).filter(PlaceWishlist.id.in_(data.ordered_ids)).all()
     }
     missing = [pid for pid in data.ordered_ids if pid not in existing_ids]
     if missing:
         raise HTTPException(status_code=422, detail=f"IDs no encontrados: {missing}")
+    # Validar que lleguen TODOS los lugares (evita order_index inconsistente)
+    total = db.query(func.count(PlaceWishlist.id)).scalar()
+    if len(data.ordered_ids) != total:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Se esperaban {total} IDs pero se recibieron {len(data.ordered_ids)}"
+        )
     for index, place_id in enumerate(data.ordered_ids):
         db.query(PlaceWishlist).filter(PlaceWishlist.id == place_id).update(
             {"order_index": index}
