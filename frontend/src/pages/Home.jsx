@@ -318,7 +318,14 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         layoutId="emoc-cloud"
         className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}${justDragged ? ' emoc-fab--just-dragged' : ''}`}
         style={{ left: pos.x, top: pos.y }}
-        transition={dragging ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 28, mass: 1 }}
+        initial={{ opacity: 0, scale: 0.35, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={dragging ? { duration: 0 } : {
+          default: { type: 'spring', stiffness: 300, damping: 28, mass: 1 },
+          opacity: { duration: 0.6, ease: 'easeOut', delay: 0.5 },
+          scale:   { type: 'spring', stiffness: 180, damping: 20, mass: 0.7, delay: 0.5 },
+          y:       { type: 'spring', stiffness: 180, damping: 20, mass: 0.7, delay: 0.5 },
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
