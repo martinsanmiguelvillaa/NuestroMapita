@@ -49,7 +49,17 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: var(--space-6) var(--space-4) var(--space-4);
-  border-bottom: 1.5px solid var(--color-beige-mid);
+  position: relative;
+}
+
+.names-top-bar__inner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--space-4);
+  right: var(--space-4);
+  height: 1.5px;
+  background: var(--color-beige-mid);
 }
 
 .names-title {
