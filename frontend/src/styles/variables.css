@@ -178,8 +178,8 @@
 @media (max-width: 768px) {
   :root {
     --bg-letters: url('/backgrounds/fondo-cartitas-celu.png');
-    --bg-visited: url('/backgrounds/fondo-ya-hicimos-celular.png');
-    --bg-wishlist: url('/backgrounds/fondo-por-hacer-celular.png');
+    --bg-visited: url('/backgrounds/fondo-ya-hicimos-celu.png');
+    --bg-wishlist: url('/backgrounds/fondo-por-hacer-celu.png');
     --bg-cine: url('/backgrounds/fondo-cine-celu.png');
     --bg-outfits: url('/backgrounds/fondo-outfits-celu.png');
     --bg-recipes: url('/backgrounds/fondo-recetas-celu.png');
