@@ -205,8 +205,8 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const y    = e.clientY;
     const vh   = window.innerHeight;
     const ZONE = 100;
-    if (y < ZONE)           startAutoScroll(-1, Math.round(14 + ((ZONE - y)        / ZONE) * 26));
-    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(14 + ((y - (vh - ZONE)) / ZONE) * 26));
+    if (y < ZONE)           startAutoScroll(-1, Math.round(20 + ((ZONE - y)        / ZONE) * 40));
+    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(20 + ((y - (vh - ZONE)) / ZONE) * 40));
     else                    stopAutoScroll();
   };
 
@@ -249,7 +249,8 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
 
   const startAutoScroll = useCallback((dir, speed) => {
     stopAutoScroll();
-    const step = () => { window.scrollBy(0, dir * speed); scrollRaf.current = requestAnimationFrame(step); };
+    const scroller = document.scrollingElement || document.documentElement;
+    const step = () => { scroller.scrollTop += dir * speed; scrollRaf.current = requestAnimationFrame(step); };
     scrollRaf.current = requestAnimationFrame(step);
   }, [stopAutoScroll]);
 
