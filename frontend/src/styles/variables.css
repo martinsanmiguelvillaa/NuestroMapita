@@ -177,6 +177,7 @@
 
 @media (max-width: 768px) {
   :root {
+    --bg-home: url('/backgrounds/fondo-principal-celu.png');
     --bg-letters: url('/backgrounds/fondo-cartitas-celu.png');
     --bg-visited: url('/backgrounds/fondo-ya-hicimos-celu.png');
     --bg-wishlist: url('/backgrounds/fondo-por-hacer-celu.png');
