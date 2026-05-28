@@ -197,6 +197,19 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     setDraggingId(id);
   };
 
+  // El evento `drag` se dispara continuamente en el elemento arrastrado
+  // con la posición actual del cursor → ideal para auto-scroll en desktop.
+  // clientY === 0 indica que el evento está comenzando/terminando → ignorar.
+  const onDrag = () => (e) => {
+    if (!e.clientY) { stopAutoScroll(); return; }
+    const y    = e.clientY;
+    const vh   = window.innerHeight;
+    const ZONE = 100;
+    if (y < ZONE)           startAutoScroll(-1, Math.round(6 + ((ZONE - y)        / ZONE) * 14));
+    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(6 + ((y - (vh - ZONE)) / ZONE) * 14));
+    else                    stopAutoScroll();
+  };
+
   const onDragOver = (id) => (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -205,16 +218,18 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
 
   const onDrop = (id) => (e) => {
     e.preventDefault();
+    stopAutoScroll();
     if (draggingId == null || draggingId === id) return;
-    const previousOrder = [...order];           // snapshot para rollback
+    const previousOrder = [...order];
     const newOrder = reinsert(order, draggingId, id);
     setOrder(newOrder);
     setDraggingId(null);
     setOverId(null);
-    onOrderChangeRef.current(newOrder, () => setOrder(previousOrder));  // #2
+    onOrderChangeRef.current(newOrder, () => setOrder(previousOrder));
   };
 
   const onDragEnd = () => {
+    stopAutoScroll();
     setDraggingId(null);
     setOverId(null);
   };
@@ -340,6 +355,7 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     draggable: !disabled,
     'data-drag-id': id,
     onDragStart: disabled ? undefined : onDragStart(id),
+    onDrag:      disabled ? undefined : onDrag(id),
     onDragOver:  disabled ? undefined : onDragOver(id),
     onDrop:      disabled ? undefined : onDrop(id),
     onDragEnd:   disabled ? undefined : onDragEnd,
