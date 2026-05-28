@@ -245,9 +245,10 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
     // position:absolute dentro de .home — restamos el top de .home (= altura del navbar)
     // para que la posición visual quede en el 36% del viewport.
     const homeTop = btnRef.current?.closest('.home')?.getBoundingClientRect().top ?? 0;
+    const isMobile = window.innerWidth <= 768;
     const initial = {
-      x: Math.round(window.innerWidth * 0.72),
-      y: Math.round(window.innerHeight * 0.36 - homeTop),
+      x: Math.round(window.innerWidth * (isMobile ? 0.78 : 0.84)),
+      y: Math.round(window.innerHeight * (isMobile ? 0.18 : 0.22) - homeTop),
     };
     posRef.current = initial;
     setPos(initial);
