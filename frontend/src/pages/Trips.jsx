@@ -205,8 +205,8 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const y    = e.clientY;
     const vh   = window.innerHeight;
     const ZONE = 100;
-    if (y < ZONE)           startAutoScroll(-1, Math.round(6 + ((ZONE - y)        / ZONE) * 14));
-    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(6 + ((y - (vh - ZONE)) / ZONE) * 14));
+    if (y < ZONE)           startAutoScroll(-1, Math.round(14 + ((ZONE - y)        / ZONE) * 26));
+    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(14 + ((y - (vh - ZONE)) / ZONE) * 26));
     else                    stopAutoScroll();
   };
 
@@ -257,8 +257,8 @@ function useDragSort({ items, onOrderChange, disabled = false }) {
     const y = touch.clientY;
     const vh = window.innerHeight;
     const ZONE = 110;
-    if (y < ZONE)           startAutoScroll(-1, Math.round(6 + ((ZONE - y)        / ZONE) * 14));
-    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(6 + ((y - (vh - ZONE)) / ZONE) * 14));
+    if (y < ZONE)           startAutoScroll(-1, Math.round(14 + ((ZONE - y)        / ZONE) * 26));
+    else if (y > vh - ZONE) startAutoScroll( 1, Math.round(14 + ((y - (vh - ZONE)) / ZONE) * 26));
     else                    stopAutoScroll();
     const el   = document.elementFromPoint(touch.clientX, touch.clientY);
     const card = el?.closest('[data-drag-id]');
