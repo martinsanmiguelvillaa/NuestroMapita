@@ -17,7 +17,7 @@ const links = [
   { to: '/cine',       label: 'Cine',        icon: '🎬' },
   { to: '/outfits',   label: 'Outfits',     icon: '👗' },
   { to: '/nombres',     label: 'Nombres',     icon: '👶' },
-  { to: '/emocionario', label: 'Emocionario', icon: '💭' },
+  { to: '/emocionario', label: 'Emocionario', icon: null, iconImg: '/icons/nutria-emocionario.png' },
 ];
 
 export default function Navbar() {
@@ -152,14 +152,16 @@ export default function Navbar() {
         {/* Links de navegación — envueltos en un div que maneja los fades */}
         <div className="navbar__scroll-area">
           <ul className="navbar__links" ref={linksRef}>
-            {links.map(({ to, label, icon }) => (
+            {links.map(({ to, label, icon, iconImg }) => (
               <li key={to} data-to={to}>
                 <NavLink
                   to={to}
                   end={to === '/'}
                   className={({ isActive }) => `navbar__link${isActive ? ' active' : ''}`}
                 >
-                  <span className="navbar__link-icon">{icon}</span>
+                  <span className="navbar__link-icon">
+                    {iconImg ? <img src={iconImg} alt="" className="navbar__link-icon-img" /> : icon}
+                  </span>
                   <span>{label}</span>
                 </NavLink>
               </li>
