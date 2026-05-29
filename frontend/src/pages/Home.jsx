@@ -343,8 +343,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
           >×</button>
         )}
         <span className="emoc-fab__inner">
-          <span className="emoc-fab__cloud">☁️</span>
-          <span className="emoc-fab__face">💭</span>
+          <img src="/icons/nutria-emocionario.png" alt="" className="emoc-fab__nutria" />
         </span>
       </motion.button>
 
@@ -475,7 +474,7 @@ export default function Home() {
   const moreLinks = [
     { to: '/cartitas',    icon: '💌', name: 'Cartitas' },
     { to: '/nombres',     icon: '👶', name: 'Nombres' },
-    { to: '/emocionario', icon: '💭', name: 'Emocionario' },
+    { to: '/emocionario', icon: null, iconImg: '/icons/nutria-emocionario.png', name: 'Emocionario' },
   ];
 
   const [showMore, setShowMore] = useState(false);
@@ -549,9 +548,11 @@ export default function Home() {
                   exit={{ opacity: 0, y: 6, scale: 0.94, transformOrigin: 'center bottom' }}
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  {moreLinks.map(({ to, icon, name }) => (
+                  {moreLinks.map(({ to, icon, iconImg, name }) => (
                     <Link key={to} to={to} className="home__more-panel-item" onClick={() => setShowMore(false)}>
-                      <span className="home__more-panel-icon">{icon}</span>
+                      <span className="home__more-panel-icon">
+                        {iconImg ? <img src={iconImg} alt="" style={{ width: '1.1em', height: '1.1em', objectFit: 'contain', display: 'block' }} /> : icon}
+                      </span>
                       <span className="home__more-panel-name">{name}</span>
                     </Link>
                   ))}

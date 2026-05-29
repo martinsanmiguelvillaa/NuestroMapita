@@ -555,18 +555,12 @@
   animation: emoc-fab-float 5s ease-in-out infinite;
 }
 
-.emoc-fab__cloud {
+.emoc-fab__nutria {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
   display: block;
-  font-size: 3rem;
-  line-height: 1;
-}
-
-.emoc-fab__face {
-  display: block;
-  font-size: 1.1rem;
-  text-align: center;
-  margin-top: -1.8rem;
-  pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
 }
 
 .emoc-fab--dragging {
