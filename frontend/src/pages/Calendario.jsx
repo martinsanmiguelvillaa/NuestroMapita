@@ -75,7 +75,6 @@ export default function Calendario() {
   const [loading, setLoading] = useState(true);
 
   const [selectedDay,  setSelectedDay]  = useState(null);
-  const [filterPart,   setFilterPart]   = useState('all');
   const [filterType,   setFilterType]   = useState(null);
 
   const [eventForm,  setEventForm]  = useState(null); // {event, date}
@@ -130,10 +129,9 @@ export default function Calendario() {
 
   const eventsForDay = useCallback((d) => events.filter((e) => {
     if (e.instance_date !== d) return false;
-    if (filterPart !== 'all' && e.participants !== filterPart && e.participants !== 'ambos') return false;
     if (filterType != null && e.type_id !== filterType) return false;
     return true;
-  }), [events, filterPart, filterType]);
+  }), [events, filterType]);
 
   const emotionsForDay = useCallback(
     (d) => emotions.filter((e) => e.date === d),
@@ -201,18 +199,6 @@ export default function Calendario() {
 
       {/* ─── Filters ─────────────────────────────────────────────── */}
       <div className="cal__filters">
-        {[
-          { key: 'all',    label: 'Todos' },
-          { key: 'van',    label: 'Van 🌸' },
-          { key: 'martin', label: 'Martín 🌿' },
-        ].map((p) => (
-          <button
-            key={p.key}
-            className={`cal__filter${filterPart === p.key ? ' is-active' : ''}`}
-            onClick={() => setFilterPart(p.key)}
-          >{p.label}</button>
-        ))}
-        {types.length > 0 && <span className="cal__filter-sep" />}
         {types.map((t) => (
           <button
             key={t.id}
@@ -488,9 +474,6 @@ function EventRow({ event, type, onEdit, onDelete }) {
         {event.description && <div className="cal__event-desc">{event.description}</div>}
         <div className="cal__event-meta">
           {type?.name && <span>{type.name}</span>}
-          <span>
-            {event.participants === 'ambos' ? 'Los dos' : event.participants === 'van' ? 'Van' : 'Martín'}
-          </span>
           {recurrenceLabel && <span>{recurrenceLabel} Recurrente</span>}
         </div>
       </div>
@@ -520,8 +503,6 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
     end_time:     event?.end_time     || '',
     all_day:      event?.all_day      ?? true,
     type_id:      event?.type_id      ?? '',
-    participants: event?.participants || 'ambos',
-    created_by:   event?.created_by   || 'van',
     notif_enabled: event?.notif_enabled || false,
     notif_minutes: event?.notif_minutes || 30,
     freq: getFreq(),
@@ -548,8 +529,8 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
       end_time:      !f.all_day && f.end_time   ? f.end_time   : null,
       all_day:       f.all_day,
       type_id:       f.type_id ? Number(f.type_id) : null,
-      participants:  f.participants,
-      created_by:    f.created_by,
+      participants:  'ambos',
+      created_by:    'van',
       notif_enabled: f.notif_enabled,
       notif_minutes: f.notif_enabled ? Number(f.notif_minutes) : null,
       recurrence,
@@ -620,24 +601,6 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
               <select value={f.type_id} onChange={(e) => set('type_id', e.target.value)}>
                 <option value="">Sin tipo</option>
                 {types.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-            </div>
-            <div className="cal__fg">
-              <label>Participantes</label>
-              <select value={f.participants} onChange={(e) => set('participants', e.target.value)}>
-                <option value="ambos">Los dos</option>
-                <option value="van">Van</option>
-                <option value="martin">Martín</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="cal__form-row">
-            <div className="cal__fg">
-              <label>Creado por</label>
-              <select value={f.created_by} onChange={(e) => set('created_by', e.target.value)}>
-                <option value="van">Van</option>
-                <option value="martin">Martín</option>
               </select>
             </div>
             <div className="cal__fg">
