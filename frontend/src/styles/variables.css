@@ -90,6 +90,7 @@
   --bg-outfits: url('/backgrounds/fondo-outfits.png');
   --bg-trips: url('/backgrounds/fondo-viajecitos.png');
   --bg-emocionario: url('/backgrounds/fondo-emocionario.png');
+  --bg-calendario:  url('/backgrounds/fondo-emocionario.png');
   --bg-nombres: url('/backgrounds/fondo-nombres.png');
 
   /* Paleta faltante */
@@ -187,5 +188,6 @@
     --bg-trips: url('/backgrounds/fondo-viajecitos-celu.png');
     --bg-nombres: url('/backgrounds/fondo-nombres-celu.png');
     --bg-emocionario: url('/backgrounds/fondo-emocionario-celu.png');
+    --bg-calendario:  url('/backgrounds/fondo-emocionario-celu.png');
   }
 }

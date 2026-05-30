@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine, recommendations, push, trips, outfits, names, outfit_notifications, emotional
+from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine, recommendations, push, trips, outfits, names, outfit_notifications, emotional, calendar
 from app.services.outfit_notification_scheduler import start_scheduler, stop_scheduler
 
 
@@ -50,6 +50,7 @@ app.include_router(outfits.router)
 app.include_router(names.router)
 app.include_router(outfit_notifications.router)
 app.include_router(emotional.router)
+app.include_router(calendar.router)
 
 
 @app.get("/health", tags=["Health"])

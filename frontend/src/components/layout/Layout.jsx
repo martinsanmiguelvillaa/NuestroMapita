@@ -29,12 +29,13 @@ const ROUTE_BG = {
   '/outfits':     { img: 'var(--bg-outfits)',    overlay: 'var(--color-cream-overlay)',         pos: 'center top' },
   '/nombres':     { img: 'var(--bg-nombres)',    overlay: 'var(--color-cream-overlay)',         pos: 'center top' },
   '/emocionario': { img: 'var(--bg-emocionario)', overlay: 'var(--color-cream-overlay)',       pos: 'center' },
+  '/calendario':  { img: 'var(--bg-calendario)',  overlay: 'var(--color-cream-overlay)',        pos: 'center' },
 };
 
 // Orden de navegación horizontal (Mapa queda a la izquierda de Inicio)
 const SWIPE_ROUTES = [
   '/mapa', '/', '/visitados', '/por-visitar', '/viajecitos',
-  '/cartitas', '/recetas', '/cine', '/outfits', '/nombres', '/emocionario',
+  '/cartitas', '/recetas', '/cine', '/outfits', '/nombres', '/calendario',
 ];
 
 // Selectores de elementos que manejan su propio gesto táctil

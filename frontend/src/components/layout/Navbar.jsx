@@ -17,7 +17,7 @@ const links = [
   { to: '/cine',       label: 'Cine',        icon: '🎬' },
   { to: '/outfits',   label: 'Outfits',     icon: '👗' },
   { to: '/nombres',     label: 'Nombres',     icon: '👶' },
-  { to: '/emocionario', label: 'Emocionario', icon: null, iconImg: '/icons/nutria-emocionario.png' },
+  { to: '/calendario', label: 'Calendario', icon: '📅', iconImg: null },
 ];
 
 export default function Navbar() {
