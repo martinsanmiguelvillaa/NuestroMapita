@@ -44,7 +44,8 @@ const BLOCKED = [
   '.home__polaroids',
   '.lightbox__thumbs',
   '.lightbox',
-  '[data-drag-id]',   // tarjetas arrastrables (wishlist) — el swipe no debe competir
+  '[data-drag-id]',      // tarjetas arrastrables (wishlist)
+  'input[type="range"]', // sliders — el gesto horizontal es del control, no del swipe
 ];
 
 // Fracción del ancho de pantalla para confirmar el swipe
