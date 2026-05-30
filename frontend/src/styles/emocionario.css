@@ -142,32 +142,36 @@
   border-color: var(--color-brown);
 }
 
-/* Chips de emociones */
+/* Chips de emociones — grilla de tarjetas verticales */
 .emoc-form__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--space-3);
 }
 
 .emoc-chip {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
-  border: 1.5px solid var(--color-beige-mid);
-  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  border: 2px solid var(--color-beige-mid);
+  border-radius: var(--radius-md);
   background: var(--color-cream);
   color: var(--color-text-mid);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-family: var(--font-body);
   cursor: pointer;
   transition: var(--transition-fast);
-  white-space: nowrap;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .emoc-chip:hover {
   border-color: var(--color-brown-light);
   background: var(--color-beige);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .emoc-chip--active {
@@ -175,15 +179,14 @@
   background: var(--color-beige);
   color: var(--color-brown-dark);
   font-weight: 700;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
 }
 
 .emoc-chip__emoji {
-  width: 2rem;
-  height: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
   object-fit: contain;
   display: block;
-  flex-shrink: 0;
 }
 
 .emoc-chip__label {
@@ -381,7 +384,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: 52px;
+  min-height: 68px;
   padding: var(--space-1) 2px;
   border-radius: var(--radius-sm);
   border: none;
@@ -429,14 +432,14 @@
 
 .emoc-calendar__emojis {
   display: flex;
-  gap: 1px;
+  gap: 2px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .emoc-calendar__emoji {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.8rem;
+  height: 1.8rem;
   object-fit: contain;
   display: block;
 }
@@ -547,8 +550,8 @@
 }
 
 .emoc-modal__emoji {
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 4rem;
+  height: 4rem;
   object-fit: contain;
   display: block;
   flex-shrink: 0;
@@ -675,7 +678,7 @@
   }
 
   .emoc-calendar__emoji {
-    width: 1rem;
-    height: 1rem;
+    width: 1.4rem;
+    height: 1.4rem;
   }
 }
