@@ -179,7 +179,11 @@
 }
 
 .emoc-chip__emoji {
-  font-size: 1.1em;
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
 }
 
 .emoc-chip__label {
@@ -431,8 +435,10 @@
 }
 
 .emoc-calendar__emoji {
-  font-size: 1rem;
-  line-height: 1.2;
+  width: 1.2rem;
+  height: 1.2rem;
+  object-fit: contain;
+  display: block;
 }
 
 /* ── Modal ── */
@@ -541,7 +547,11 @@
 }
 
 .emoc-modal__emoji {
-  font-size: 1.6rem;
+  width: 2.8rem;
+  height: 2.8rem;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
 }
 
 .emoc-modal__emotion-label {
@@ -665,6 +675,7 @@
   }
 
   .emoc-calendar__emoji {
-    font-size: 0.85rem;
+    width: 1rem;
+    height: 1rem;
   }
 }

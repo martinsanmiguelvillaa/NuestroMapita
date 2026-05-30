@@ -5,21 +5,21 @@ import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/emocionario.css';
 
 export const EMOTIONS = [
-  { key: 'feliz',       labelM: 'Feliz',        labelF: 'Feliz',        emoji: '😊' },
-  { key: 'enamorado',   labelM: 'Enamorado',    labelF: 'Enamorada',    emoji: '🥰' },
-  { key: 'tranquilo',   labelM: 'Tranquilo',    labelF: 'Tranquila',    emoji: '😌' },
-  { key: 'emocionado',  labelM: 'Emocionado',   labelF: 'Emocionada',   emoji: '🤩' },
-  { key: 'agradecido',  labelM: 'Agradecido',   labelF: 'Agradecida',   emoji: '🙏' },
-  { key: 'nostalgico',  labelM: 'Nostálgico',   labelF: 'Nostálgica',   emoji: '🥺' },
-  { key: 'ansioso',     labelM: 'Ansioso',      labelF: 'Ansiosa',      emoji: '😰' },
-  { key: 'triste',      labelM: 'Triste',       labelF: 'Triste',       emoji: '😢' },
-  { key: 'cansado',     labelM: 'Cansado',      labelF: 'Cansada',      emoji: '😴' },
-  { key: 'estresado',   labelM: 'Estresado',    labelF: 'Estresada',    emoji: '😤' },
-  { key: 'irritado',    labelM: 'Irritado',     labelF: 'Irritada',     emoji: '😠' },
-  { key: 'solo',        labelM: 'Solo',         labelF: 'Sola',         emoji: '😔' },
-  { key: 'confundido',  labelM: 'Confundido',   labelF: 'Confundida',   emoji: '😕' },
-  { key: 'asustado',    labelM: 'Asustado',     labelF: 'Asustada',     emoji: '😨' },
-  { key: 'orgulloso',   labelM: 'Orgulloso',    labelF: 'Orgullosa',    emoji: '🥹' },
+  { key: 'feliz',       labelM: 'Feliz',        labelF: 'Feliz',        img: '/icons/emocionario/feliz.png' },
+  { key: 'enamorado',   labelM: 'Enamorado',    labelF: 'Enamorada',    img: '/icons/emocionario/enamorada.png' },
+  { key: 'tranquilo',   labelM: 'Tranquilo',    labelF: 'Tranquila',    img: '/icons/emocionario/tranquila.png' },
+  { key: 'emocionado',  labelM: 'Emocionado',   labelF: 'Emocionada',   img: '/icons/emocionario/emocionada.png' },
+  { key: 'agradecido',  labelM: 'Agradecido',   labelF: 'Agradecida',   img: '/icons/emocionario/agradecida.png' },
+  { key: 'nostalgico',  labelM: 'Nostálgico',   labelF: 'Nostálgica',   img: '/icons/emocionario/nostalgica.png' },
+  { key: 'ansioso',     labelM: 'Ansioso',      labelF: 'Ansiosa',      img: '/icons/emocionario/ansiosa.png' },
+  { key: 'triste',      labelM: 'Triste',       labelF: 'Triste',       img: '/icons/emocionario/triste.png' },
+  { key: 'cansado',     labelM: 'Cansado',      labelF: 'Cansada',      img: '/icons/emocionario/cansada.png' },
+  { key: 'estresado',   labelM: 'Estresado',    labelF: 'Estresada',    img: '/icons/emocionario/estresada.png' },
+  { key: 'irritado',    labelM: 'Irritado',     labelF: 'Irritada',     img: '/icons/emocionario/irritada.png' },
+  { key: 'solo',        labelM: 'Solo',         labelF: 'Sola',         img: '/icons/emocionario/sola.png' },
+  { key: 'confundido',  labelM: 'Confundido',   labelF: 'Confundida',   img: '/icons/emocionario/confundida.png' },
+  { key: 'asustado',    labelM: 'Asustado',     labelF: 'Asustada',     img: '/icons/emocionario/asustada.png' },
+  { key: 'orgulloso',   labelM: 'Orgulloso',    labelF: 'Orgullosa',    img: '/icons/emocionario/orgullosa.png' },
 ];
 
 function emotionLabel(em, userKey) {
@@ -151,7 +151,7 @@ export function EmotionForm({ onSaved, prefill }) {
           <button key={em.key} type="button"
             className={`emoc-chip${emotionKeys.has(em.key) ? ' emoc-chip--active' : ''}`}
             onClick={() => toggleEmotion(em.key)}>
-            <span className="emoc-chip__emoji">{em.emoji}</span>
+            <img src={em.img} alt="" className="emoc-chip__emoji" />
             <span className="emoc-chip__label">{emotionLabel(em, userKey)}</span>
           </button>
         ))}
@@ -274,7 +274,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                           {isEditing ? (
                             <div className="emoc-modal__inline-edit">
                               <div className="emoc-modal__emotion">
-                                <span className="emoc-modal__emoji">{EMOTION_MAP[editEmoKey]?.emoji}</span>
+                                <img src={EMOTION_MAP[editEmoKey]?.img} alt="" className="emoc-modal__emoji" />
                                 <span className="emoc-modal__emotion-label">{EMOTION_MAP[editEmoKey] ? emotionLabel(EMOTION_MAP[editEmoKey], entry.user_key) : ''}</span>
                               </div>
                               <div className="emoc-form__intensity">
@@ -306,7 +306,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
                           ) : (
                             <>
                               <div className="emoc-modal__emotion">
-                                <span className="emoc-modal__emoji">{em?.emoji}</span>
+                                <img src={em?.img} alt="" className="emoc-modal__emoji" />
                                 <span className="emoc-modal__emotion-label">{em ? emotionLabel(em, entry.user_key) : ''}</span>
                               </div>
                               <div className="emoc-modal__intensity-dots">
@@ -398,10 +398,10 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick, loa
                 {dayEntries.map((e) => {
                   const em = EMOTION_MAP[e.emotion_key];
                   return em ? (
-                    <span key={e.id} className="emoc-calendar__emoji"
-                      title={`${e.user_key === 'van' ? 'Van' : 'Martín'}: ${emotionLabel(em, e.user_key)}`}>
-                      {em.emoji}
-                    </span>
+                    <img key={e.id} src={em.img} alt=""
+                      className="emoc-calendar__emoji"
+                      title={`${e.user_key === 'van' ? 'Van' : 'Martín'}: ${emotionLabel(em, e.user_key)}`}
+                    />
                   ) : null;
                 })}
               </div>
