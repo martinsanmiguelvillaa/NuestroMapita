@@ -189,6 +189,13 @@
   display: block;
 }
 
+/* Algunas ilustraciones usan menos espacio del canvas → se agrandan individualmente */
+.emoc-chip__emoji[src*="tranquila"]  { transform: scale(1.55); }
+.emoc-chip__emoji[src*="emocionada"] { transform: scale(1.35); }
+.emoc-chip__emoji[src*="nostalgica"] { transform: scale(1.35); }
+.emoc-chip__emoji[src*="sola"]       { transform: scale(1.3);  }
+.emoc-chip__emoji[src*="confundida"] { transform: scale(1.3);  }
+
 .emoc-chip__label {
   line-height: 1.2;
 }
