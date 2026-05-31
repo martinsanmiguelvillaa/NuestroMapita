@@ -224,7 +224,7 @@ export default function Navbar() {
                 {/* Todas las notificaciones — solo si hay alguna configurada */}
                 {(supported && permission !== 'denied' && (subscribed || hasOutfitSubs)) && (
                   <button className="navbar__config-item" onClick={toggleAll}>
-                    <img src={`${C}notificaciones.png`} alt="" className="navbar__config-icon" />
+                    <img src={anyNotifActive ? `${C}notificaciones.png` : `${C}notificacion-desactivada.png`} alt="" className="navbar__config-icon" />
                     <span>{anyNotifActive ? 'Silenciar todas las notificaciones' : 'Activar todas las notificaciones'}</span>
                   </button>
                 )}
