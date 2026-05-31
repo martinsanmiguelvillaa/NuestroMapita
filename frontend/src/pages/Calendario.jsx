@@ -509,8 +509,20 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
           {rangeEvs.slice(0, 3).map((ev, i) => {
             let rule = {};
             try { rule = JSON.parse(ev.recurrence); } catch {}
-            const isFirst = ev.instance_date === ev.date || dow === 0;
-            const isLast  = ev.instance_date === rule.end_date || dow === 6;
+            const exdates = new Set(rule.exdates || []);
+            const shiftDay = (iso, delta) => {
+              const d = new Date(iso + 'T12:00:00');
+              d.setDate(d.getDate() + delta);
+              return d.toISOString().slice(0, 10);
+            };
+            let effectiveStart = ev.date;
+            while (exdates.has(effectiveStart) && effectiveStart <= rule.end_date)
+              effectiveStart = shiftDay(effectiveStart, 1);
+            let effectiveEnd = rule.end_date;
+            while (exdates.has(effectiveEnd) && effectiveEnd >= ev.date)
+              effectiveEnd = shiftDay(effectiveEnd, -1);
+            const isFirst = ev.instance_date === effectiveStart || dow === 0;
+            const isLast  = ev.instance_date === effectiveEnd   || dow === 6;
             return (
               <div
                 key={i}
