@@ -461,20 +461,23 @@ export default function Home() {
 
   useEffect(() => { load(); }, []);
 
+  const S = '/icons/iconos-secciones/';
+
   const navCards = [
-    { to: '/mapa',        icon: '🗺️', name: 'Mapa',       desc: 'Ver todos en el mapa' },
-    { to: '/visitados',   icon: '✓', name: 'Ya hicimos',  desc: `${stats.visited} lugar${stats.visited !== 1 ? 'es' : ''}` },
-    { to: '/por-visitar', icon: '★', name: 'Por hacer',   desc: `${stats.wishlist} pendiente${stats.wishlist !== 1 ? 's' : ''}` },
-    { to: '/recetas',     icon: '🍴', name: 'Recetas',     desc: 'Ver nuestras recetas' },
-    { to: '/cine',        icon: '🎬', name: 'Cine',        desc: 'Películas y series' },
-    { to: '/viajecitos',  icon: '✈️', name: 'Viajecitos',  desc: 'Nuestros próximos viajes' },
-    { to: '/outfits',     icon: '👗', name: 'Outfits',     desc: 'Qué ponerse hoy' },
+    { to: '/mapa',        iconImg: `${S}mapita.png`,             name: 'Mapa',       desc: 'Ver todos en el mapa' },
+    { to: '/visitados',   iconImg: `${S}ya-hicimos.png`,         name: 'Ya hicimos', desc: `${stats.visited} lugar${stats.visited !== 1 ? 'es' : ''}` },
+    { to: '/por-visitar', iconImg: `${S}por-hacer.png`,          name: 'Por hacer',  desc: `${stats.wishlist} pendiente${stats.wishlist !== 1 ? 's' : ''}` },
+    { to: '/recetas',     iconImg: `${S}recetas.png`,            name: 'Recetas',    desc: 'Ver nuestras recetas' },
+    { to: '/cine',        iconImg: `${S}cine.png`,               name: 'Cine',       desc: 'Películas y series' },
+    { to: '/viajecitos',  iconImg: `${S}viajecitos.png`,         name: 'Viajecitos', desc: 'Nuestros próximos viajes' },
+    { to: '/outfits',     iconImg: `${S}clima-en-outfits.png`,   name: 'Outfits',    desc: 'Qué ponerse hoy' },
   ];
 
   const moreLinks = [
-    { to: '/cartitas',    icon: '💌', name: 'Cartitas' },
-    { to: '/nombres',     icon: '👶', name: 'Nombres' },
-    { to: '/emocionario', icon: null, iconImg: '/icons/nutria-emocionario.png', name: 'Emocionario' },
+    { to: '/cartitas',    iconImg: `${S}cartitas.png`,              name: 'Cartitas' },
+    { to: '/nombres',     iconImg: `${S}nombres.png`,               name: 'Nombres' },
+    { to: '/calendario',  iconImg: `${S}calendario.png`,            name: 'Calendario' },
+    { to: '/emocionario', iconImg: '/icons/nutria-emocionario.png', name: 'Emocionario' },
   ];
 
   const [showMore, setShowMore] = useState(false);
@@ -518,9 +521,13 @@ export default function Home() {
       <section className="home__sections">
         <h2 className="home__section-title">Nuestro espacio</h2>
         <div className="home__nav-cards">
-          {navCards.map(({ to, icon, name, desc }) => (
+          {navCards.map(({ to, icon, iconImg, name, desc }) => (
             <Link key={to} to={to} className="home__nav-card">
-              <span className="home__nav-card-icon">{icon}</span>
+              <span className="home__nav-card-icon">
+                {iconImg
+                  ? <img src={iconImg} alt="" className="home__nav-card-icon-img" />
+                  : icon}
+              </span>
               <span className="home__nav-card-name">{name}</span>
               <span className="home__nav-card-desc">{desc}</span>
             </Link>
@@ -551,7 +558,7 @@ export default function Home() {
                   {moreLinks.map(({ to, icon, iconImg, name }) => (
                     <Link key={to} to={to} className="home__more-panel-item" onClick={() => setShowMore(false)}>
                       <span className="home__more-panel-icon">
-                        {iconImg ? <img src={iconImg} alt="" style={{ width: '1.1em', height: '1.1em', objectFit: 'contain', display: 'block' }} /> : icon}
+                        {iconImg ? <img src={iconImg} alt="" /> : icon}
                       </span>
                       <span className="home__more-panel-name">{name}</span>
                     </Link>

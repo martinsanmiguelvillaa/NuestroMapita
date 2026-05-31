@@ -166,6 +166,13 @@
   line-height: 1;
 }
 
+.home__nav-card-icon-img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  display: block;
+}
+
 .home__nav-card-name {
   font-family: var(--font-heading);
   font-size: var(--text-lg);
@@ -268,6 +275,13 @@
   font-size: 1.6rem;
   line-height: 1;
   flex-shrink: 0;
+}
+
+.home__more-panel-icon img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+  display: block;
 }
 
 .home__more-panel-name {

@@ -7,18 +7,20 @@ import { getDeviceStatus, updateDeviceSettings } from '../../api/push';
 import { getOrCreateDeviceId } from '../../utils/deviceId';
 import '../../styles/navbar.css';
 
+const S = '/icons/iconos-secciones/';
+
 const links = [
-  { to: '/',           label: 'Inicio',      icon: '🏠' },
-  { to: '/mapa',       label: 'Mapa',        icon: '🗺️' },
-  { to: '/visitados',  label: 'Ya hicimos',  icon: '✓' },
-  { to: '/por-visitar',label: 'Por hacer',   icon: '★' },
-  { to: '/viajecitos', label: 'Viajecitos',  icon: '✈️' },
-  { to: '/cartitas',   label: 'Cartitas',    icon: '💌' },
-  { to: '/recetas',    label: 'Recetas',     icon: '🍴' },
-  { to: '/cine',       label: 'Cine',        icon: '🎬' },
-  { to: '/outfits',   label: 'Outfits',     icon: '👗' },
-  { to: '/nombres',     label: 'Nombres',     icon: '👶' },
-  { to: '/calendario', label: 'Calendario', icon: '📅', iconImg: null },
+  { to: '/',            label: 'Inicio',     iconImg: `${S}inicio.png` },
+  { to: '/mapa',        label: 'Mapa',       iconImg: `${S}mapita.png` },
+  { to: '/visitados',   label: 'Ya hicimos', iconImg: `${S}ya-hicimos.png` },
+  { to: '/por-visitar', label: 'Por hacer',  iconImg: `${S}por-hacer.png` },
+  { to: '/viajecitos',  label: 'Viajecitos', iconImg: `${S}viajecitos.png` },
+  { to: '/cartitas',    label: 'Cartitas',   iconImg: `${S}cartitas.png` },
+  { to: '/recetas',     label: 'Recetas',    iconImg: `${S}recetas.png` },
+  { to: '/cine',        label: 'Cine',       iconImg: `${S}cine.png` },
+  { to: '/outfits',     label: 'Outfits',    iconImg: `${S}clima-en-outfits.png` },
+  { to: '/nombres',     label: 'Nombres',    iconImg: `${S}nombres.png` },
+  { to: '/calendario',  label: 'Calendario', iconImg: `${S}calendario.png` },
 ];
 
 export default function Navbar() {
