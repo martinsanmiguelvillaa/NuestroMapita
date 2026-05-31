@@ -192,6 +192,7 @@
 
 .home__nav-card--more-btn {
   width: 100%;
+  height: 100%;
   cursor: pointer;
   font-family: var(--font-body);
   border: 1.5px dashed var(--color-beige-dark);
