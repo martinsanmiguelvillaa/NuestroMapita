@@ -24,6 +24,18 @@ const RECURRENCE_OPTS = [
 
 const EMOTION_MAP = Object.fromEntries(EMOTIONS.map((e) => [e.key, e]));
 
+function buildRange(a, b) {
+  const [start, end] = a <= b ? [a, b] : [b, a];
+  const range = new Set();
+  const cur = new Date(start + 'T12:00:00');
+  const fin = new Date(end   + 'T12:00:00');
+  while (cur <= fin) {
+    range.add(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`);
+    cur.setDate(cur.getDate() + 1);
+  }
+  return range;
+}
+
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -181,18 +193,7 @@ export default function Calendario() {
   const dragStartRef = useRef(null);
   const dragEndRef   = useRef(null);
   const [dragRange, setDragRange] = useState(new Set());
-
-  const buildRange = (a, b) => {
-    const [start, end] = a <= b ? [a, b] : [b, a];
-    const range = new Set();
-    const cur = new Date(start + 'T12:00:00');
-    const fin = new Date(end   + 'T12:00:00');
-    while (cur <= fin) {
-      range.add(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`);
-      cur.setDate(cur.getDate() + 1);
-    }
-    return range;
-  };
+  const gridRef = useRef(null);
 
   const handleCellMouseDown = useCallback((d) => {
     dragStartRef.current = d;
@@ -206,8 +207,41 @@ export default function Calendario() {
     setDragRange(buildRange(dragStartRef.current, d));
   }, []);
 
+  // Touch: touchstart via event delegation on the grid wrapper
+  const handleGridTouchStart = useCallback((e) => {
+    const cell = e.target.closest('[data-date]');
+    if (!cell || !cell.dataset.date) return;
+    const d = cell.dataset.date;
+    dragStartRef.current = d;
+    dragEndRef.current   = d;
+    setDragRange(new Set([d]));
+  }, []);
+
+  // Touch: touchmove — non-passive so we can preventDefault when dragging across cells
   useEffect(() => {
-    const onMouseUp = () => {
+    const el = gridRef.current;
+    if (!el) return;
+    const onTouchMove = (e) => {
+      if (!dragStartRef.current) return;
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target) return;
+      const cell = target.closest('[data-date]');
+      if (!cell || !cell.dataset.date) return;
+      const d = cell.dataset.date;
+      if (d !== dragEndRef.current) {
+        e.preventDefault(); // lock scroll once crossing cells
+        dragEndRef.current = d;
+        setDragRange(buildRange(dragStartRef.current, d));
+      }
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  }, []); // gridRef is stable after mount
+
+  // Mouse up + touch end/cancel (global)
+  useEffect(() => {
+    const finish = () => {
       const start = dragStartRef.current;
       const end   = dragEndRef.current;
       if (!start) return;
@@ -221,8 +255,30 @@ export default function Calendario() {
         setEventForm({ event: null, date: a, endDate: b });
       }
     };
-    document.addEventListener('mouseup', onMouseUp);
-    return () => document.removeEventListener('mouseup', onMouseUp);
+
+    const onMouseUp = finish;
+
+    const onTouchEnd = (e) => {
+      if (!dragStartRef.current) return;
+      e.preventDefault(); // prevent synthesized mousedown/click after drag
+      finish();
+    };
+
+    const onTouchCancel = () => {
+      // OS took over (scroll, gesture) — cancel drag silently
+      dragStartRef.current = null;
+      dragEndRef.current   = null;
+      setDragRange(new Set());
+    };
+
+    document.addEventListener('mouseup',     onMouseUp);
+    document.addEventListener('touchend',    onTouchEnd);
+    document.addEventListener('touchcancel', onTouchCancel);
+    return () => {
+      document.removeEventListener('mouseup',     onMouseUp);
+      document.removeEventListener('touchend',    onTouchEnd);
+      document.removeEventListener('touchcancel', onTouchCancel);
+    };
   }, [selectDay]);
 
   return (
@@ -269,7 +325,7 @@ export default function Calendario() {
 
       {/* ─── Body ────────────────────────────────────────────────── */}
       <div className="cal__body">
-        <div className="cal__grid-wrap">
+        <div className="cal__grid-wrap" ref={gridRef} onTouchStart={handleGridTouchStart}>
           <div className="cal__weekdays">
             {WEEK_DAYS.map((d) => <div key={d} className="cal__weekday">{d}</div>)}
           </div>
@@ -404,6 +460,7 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
         isDragSelected    ? 'cal__cell--drag'    : '',
         tall              ? 'cal__cell--tall'    : '',
       ].filter(Boolean).join(' ')}
+      data-date={dateStr}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
       style={{ userSelect: 'none' }}
