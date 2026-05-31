@@ -14,6 +14,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useMotionValue, animate } from 'framer-motion';
 import Navbar from './Navbar';
 import ClipboardImportBanner from '../ui/ClipboardImportBanner';
+import { useDeviceRegistration } from '../../hooks/useDeviceRegistration';
 import '../../styles/layout.css';
 
 // Config de fondo + overlay por ruta
@@ -53,6 +54,7 @@ const BLOCKED = [
 const COMMIT_THRESHOLD = 0.28;
 
 export default function Layout() {
+  useDeviceRegistration(); // registro silencioso en tabla unificada de push
   const location = useLocation();
   const navigate  = useNavigate();
   const bg = ROUTE_BG[location.pathname];

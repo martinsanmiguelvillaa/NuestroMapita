@@ -1,6 +1,6 @@
 """
 Servicio de Web Push Notifications usando VAPID.
-Envía notificaciones a todas las suscripciones guardadas.
+Envía notificaciones a todas las suscripciones guardadas en device_subscriptions.
 """
 import json
 import logging
@@ -8,7 +8,7 @@ from pywebpush import webpush, WebPushException
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.models.push_subscription import PushSubscription
+from app.models.device_subscription import DeviceSubscription
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,6 @@ def send_push_to_endpoint(
         resp_text = e.response.text if e.response is not None else "(sin respuesta)"
         if status in (404, 410):
             return False  # Suscripción expirada
-        # 401/403 = VAPID key mismatch — la suscripción fue creada con otra clave pública
         logger.error(
             "Push error status=%s endpoint=%s respuesta=%s",
             status, endpoint[:40], resp_text[:200],
@@ -55,35 +54,31 @@ def send_push_to_endpoint(
 
 def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None:
     """
-    Envía una notificación push a todos los endpoints registrados en el sistema.
-    Incluye push_subscriptions (tabla genérica) y outfit_notification_subscriptions
-    (donde se registran los dispositivos al activar notificaciones de outfits).
+    Envía una notificación push a todos los dispositivos habilitados.
+    Deduplica por endpoint para no enviar dos veces al mismo dispositivo físico
+    (un dispositivo puede tener filas para "van" y "martin" con el mismo endpoint).
     """
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
         return
 
-    from app.models.outfit_notification import OutfitNotificationSubscription
+    subs = db.query(DeviceSubscription).filter(
+        DeviceSubscription.enabled == True  # noqa: E712
+    ).all()
 
-    # Recolectar endpoints únicos de ambas tablas
-    # {endpoint: (p256dh, auth, source, id)}
-    endpoints: dict[str, tuple] = {}
+    # Deduplicar: un endpoint único = un envío
+    seen: dict[str, DeviceSubscription] = {}
+    for sub in subs:
+        if sub.endpoint not in seen:
+            seen[sub.endpoint] = sub
 
-    for sub in db.query(PushSubscription).all():
-        endpoints[sub.endpoint] = (sub.p256dh, sub.auth, "generic", sub.id)
+    dead_endpoints: list[str] = []
 
-    for sub in db.query(OutfitNotificationSubscription).filter_by(enabled=True).all():
-        if sub.endpoint not in endpoints:
-            endpoints[sub.endpoint] = (sub.p256dh, sub.auth, "outfit", sub.id)
-
-    dead_generic: list[int] = []
-    dead_outfit: list[int]  = []
-
-    for endpoint, (p256dh, auth, source, sub_id) in endpoints.items():
+    for endpoint, sub in seen.items():
         try:
             webpush(
                 subscription_info={
                     "endpoint": endpoint,
-                    "keys": {"p256dh": p256dh, "auth": auth},
+                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth},
                 },
                 data=json.dumps({"title": title, "body": body, "url": url}),
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
@@ -92,20 +87,13 @@ def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None
         except WebPushException as e:
             status = e.response.status_code if e.response is not None else None
             if status in (404, 410):
-                if source == "generic":
-                    dead_generic.append(sub_id)
-                else:
-                    dead_outfit.append(sub_id)
+                dead_endpoints.append(endpoint)
             else:
                 logger.warning("Push error (endpoint=%s): %s", endpoint[:40], e)
 
-    if dead_generic:
-        db.query(PushSubscription).filter(PushSubscription.id.in_(dead_generic)).delete(
-            synchronize_session=False
-        )
-    if dead_outfit:
-        db.query(OutfitNotificationSubscription).filter(
-            OutfitNotificationSubscription.id.in_(dead_outfit)
+    if dead_endpoints:
+        # Deshabilitar todas las filas con ese endpoint (van + martin + ambos del mismo dispositivo)
+        db.query(DeviceSubscription).filter(
+            DeviceSubscription.endpoint.in_(dead_endpoints)
         ).update({"enabled": False}, synchronize_session=False)
-    if dead_generic or dead_outfit:
         db.commit()

@@ -1,8 +1,8 @@
 """
 Scheduler para notificaciones push de outfits.
 
-Cada minuto revisa qué suscripciones activas deben recibir su notificación
-según el horario configurado y la timezone de cada dispositivo.
+Cada minuto revisa los dispositivos habilitados que tienen outfit_notif_enabled=True
+y envía la notificación según el horario configurado y la timezone de cada dispositivo.
 """
 import json
 import logging
@@ -14,8 +14,7 @@ import requests as http
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.database import SessionLocal
-from app.models.outfit_notification import OutfitNotificationSubscription
-from app.models.outfit_cache import OutfitCache
+from app.models.device_subscription import DeviceSubscription
 from app.services.push_service import send_push_to_endpoint
 from app.config import settings
 
@@ -43,6 +42,8 @@ def _fetch_and_cache_outfit(user_key: str, db) -> bool:
         )
         if not resp.ok:
             return False
+
+        from app.models.outfit_cache import OutfitCache
 
         data = resp.json()
         outfit = data.get("outfit") or data.get("outfit_recommendation") or data
@@ -72,10 +73,10 @@ def _fetch_and_cache_outfit(user_key: str, db) -> bool:
 def send_now(user_key: str, device_id: str, db) -> dict:
     """
     Pre-genera el outfit, lo cachea y envía la notificación de prueba.
-    No actualiza last_sent_at.
+    No actualiza outfit_last_sent_at.
     """
     sub = (
-        db.query(OutfitNotificationSubscription)
+        db.query(DeviceSubscription)
         .filter_by(user_key=user_key, device_id=device_id)
         .first()
     )
@@ -106,11 +107,16 @@ def send_now(user_key: str, device_id: str, db) -> dict:
 
 
 def _check_and_send() -> None:
-    """Job principal: revisa suscripciones activas y envía las que correspondan."""
+    """Job principal: revisa dispositivos activos y envía las notificaciones de outfit que correspondan."""
     db = SessionLocal()
     try:
         now_utc = datetime.now(dt_timezone.utc)
-        subs = db.query(OutfitNotificationSubscription).filter_by(enabled=True).all()
+        subs = db.query(DeviceSubscription).filter(
+            DeviceSubscription.enabled == True,           # noqa: E712
+            DeviceSubscription.outfit_notif_enabled == True,  # noqa: E712
+            DeviceSubscription.outfit_notif_time.isnot(None),
+            DeviceSubscription.user_key.in_(["van", "martin"]),
+        ).all()
 
         print(f"[outfit-notif] job tick UTC={now_utc.strftime('%H:%M')} subs_activas={len(subs)}")
 
@@ -126,10 +132,10 @@ def _check_and_send() -> None:
 
                 print(
                     f"[outfit-notif] user={sub.user_key} device={sub.device_id[:8]} "
-                    f"hora_local={current_hhmm} hora_config={sub.notification_time}"
+                    f"hora_local={current_hhmm} hora_config={sub.outfit_notif_time}"
                 )
 
-                if current_hhmm != sub.notification_time:
+                if current_hhmm != sub.outfit_notif_time:
                     continue
 
                 # Pre-generar y cachear el outfit antes de notificar
@@ -149,7 +155,7 @@ def _check_and_send() -> None:
                 )
 
                 if success:
-                    sub.last_sent_at = datetime.utcnow()
+                    sub.outfit_last_sent_at = datetime.utcnow()
                     db.commit()
                     print(f"[outfit-notif] ✓ enviado user={sub.user_key} device={sub.device_id[:8]}")
                 else:
@@ -172,7 +178,6 @@ def start_scheduler() -> None:
         return
 
     _scheduler = BackgroundScheduler(timezone="UTC")
-    # Corre cada minuto en el segundo 0
     _scheduler.add_job(_check_and_send, "cron", second=0, id="outfit_notifications")
     _scheduler.start()
     print("[outfit-notif] Scheduler iniciado — job cada minuto.")

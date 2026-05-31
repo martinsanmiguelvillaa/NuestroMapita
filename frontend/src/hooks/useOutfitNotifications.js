@@ -169,27 +169,8 @@ export function useOutfitNotifications(userKey) {
     try {
       const deviceId = getOrCreateDeviceId();
       await unsubscribeOutfitNotification({ user_key: userKey, device_id: deviceId });
-
-      // Cancelar la suscripción push en el navegador SOLO si ningún otro usuario
-      // del mismo dispositivo tiene notificaciones activas.
-      // (Van y Martín pueden compartir el mismo navegador con endpoints distintos
-      // o incluso el mismo endpoint; cancelarlo afectaría al otro usuario.)
-      try {
-        const otherUserKey = userKey === 'van' ? 'martin' : 'van';
-        const otherDeviceId = getOrCreateDeviceId(); // mismo device_id para este navegador
-        const otherStatus = await getOutfitNotificationStatus(otherUserKey, otherDeviceId).catch(() => null);
-        const otherIsActive = otherStatus?.exists && otherStatus?.enabled;
-
-        if (!otherIsActive) {
-          const reg = await navigator.serviceWorker.ready;
-          const pushSub = await reg.pushManager.getSubscription();
-          if (pushSub) await pushSub.unsubscribe();
-        }
-      } catch {
-        // Si falla la verificación, NO cancelamos el push del navegador para no
-        // afectar al otro usuario por error.
-      }
-
+      // El dispositivo permanece registrado para notificaciones globales (calendario, cartitas).
+      // Solo se desactivan las notificaciones de outfit para este usuario.
       setStatus('inactive');
     } finally {
       setSaving(false);

@@ -65,7 +65,6 @@ export default function Navbar() {
   const toggleAll = async () => {
     const anyActive = subscribed || outfitNotif.van?.enabled || outfitNotif.martin?.enabled;
     if (anyActive) {
-      // Desactivar todo
       if (subscribed) await unsubscribe();
       for (const userKey of ['van', 'martin']) {
         if (outfitNotif[userKey]?.exists && outfitNotif[userKey]?.enabled) {
@@ -79,7 +78,6 @@ export default function Navbar() {
         }
       }
     } else {
-      // Activar todo lo que tiene suscripción
       if (!subscribed && supported && permission !== 'denied') await subscribe();
       for (const userKey of ['van', 'martin']) {
         if (outfitNotif[userKey]?.exists && !outfitNotif[userKey]?.enabled) {

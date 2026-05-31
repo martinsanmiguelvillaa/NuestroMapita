@@ -1,13 +1,13 @@
 """
 Endpoints para gestionar notificaciones push de outfits por usuario y dispositivo.
-Cada suscripción es única por (user_key, device_id).
+Usa device_subscriptions (tabla unificada). Cada suscripción es única por (user_key, device_id).
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
-from app.models.outfit_notification import OutfitNotificationSubscription
+from app.models.device_subscription import DeviceSubscription
 from app.services.outfit_notification_scheduler import send_now
 from app.config import settings
 from app.schemas.outfit_notification import (
@@ -20,9 +20,9 @@ from app.schemas.outfit_notification import (
 router = APIRouter(prefix="/outfits/notifications", tags=["Outfit Notifications"])
 
 
-def _get_sub(db: Session, user_key: str, device_id: str) -> OutfitNotificationSubscription | None:
+def _get_sub(db: Session, user_key: str, device_id: str) -> DeviceSubscription | None:
     return (
-        db.query(OutfitNotificationSubscription)
+        db.query(DeviceSubscription)
         .filter_by(user_key=user_key, device_id=device_id)
         .first()
     )
@@ -34,28 +34,30 @@ def subscribe(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Crea o actualiza la suscripción para un usuario en un dispositivo específico."""
+    """Crea o actualiza la suscripción de outfit para un usuario en un dispositivo específico."""
     sub = _get_sub(db, body.user_key, body.device_id)
 
     if sub:
         sub.endpoint = body.subscription.endpoint
         sub.p256dh = body.subscription.keys.p256dh
         sub.auth = body.subscription.keys.auth
-        sub.notification_time = body.notification_time
+        sub.outfit_notif_time = body.notification_time
         sub.timezone = body.timezone
         sub.enabled = True
+        sub.outfit_notif_enabled = True
         if body.device_label:
             sub.device_label = body.device_label
     else:
-        sub = OutfitNotificationSubscription(
+        sub = DeviceSubscription(
             user_key=body.user_key,
             device_id=body.device_id,
             endpoint=body.subscription.endpoint,
             p256dh=body.subscription.keys.p256dh,
             auth=body.subscription.keys.auth,
-            notification_time=body.notification_time,
+            outfit_notif_time=body.notification_time,
             timezone=body.timezone,
             enabled=True,
+            outfit_notif_enabled=True,
             device_label=body.device_label,
         )
         db.add(sub)
@@ -71,7 +73,7 @@ def get_status(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Devuelve el estado de las notificaciones para este usuario y dispositivo."""
+    """Devuelve el estado de las notificaciones de outfit para este usuario y dispositivo."""
     sub = _get_sub(db, user_key, device_id)
     if not sub:
         return OutfitNotificationStatusResponse(
@@ -83,8 +85,8 @@ def get_status(
         )
     return OutfitNotificationStatusResponse(
         exists=True,
-        enabled=sub.enabled,
-        notification_time=sub.notification_time,
+        enabled=sub.outfit_notif_enabled or False,
+        notification_time=sub.outfit_notif_time,
         timezone=sub.timezone,
         device_label=sub.device_label,
     )
@@ -96,15 +98,15 @@ def update_settings(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Actualiza horario o estado enabled de una suscripción existente."""
+    """Actualiza horario o estado enabled de outfit de una suscripción existente."""
     sub = _get_sub(db, body.user_key, body.device_id)
     if not sub:
         raise HTTPException(status_code=404, detail="Suscripción no encontrada")
 
     if body.notification_time is not None:
-        sub.notification_time = body.notification_time
+        sub.outfit_notif_time = body.notification_time
     if body.enabled is not None:
-        sub.enabled = body.enabled
+        sub.outfit_notif_enabled = body.enabled
 
     db.commit()
     return {"ok": True}
@@ -117,7 +119,7 @@ def test_push(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Envía una notificación de prueba inmediatamente. No modifica last_sent_at."""
+    """Envía una notificación de prueba inmediatamente. No modifica outfit_last_sent_at."""
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
         raise HTTPException(
             status_code=503,
@@ -136,11 +138,11 @@ def reset_last_sent(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Resetea last_sent_at para que el scheduler pueda enviar hoy (útil para testear)."""
+    """Resetea outfit_last_sent_at para que el scheduler pueda enviar hoy (útil para testear)."""
     sub = _get_sub(db, user_key, device_id)
     if not sub:
         raise HTTPException(status_code=404, detail="Suscripción no encontrada")
-    sub.last_sent_at = None
+    sub.outfit_last_sent_at = None
     db.commit()
     return {"ok": True}
 
@@ -151,9 +153,13 @@ def unsubscribe(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Elimina la suscripción de este dispositivo."""
+    """
+    Desactiva las notificaciones de outfit para este usuario+dispositivo.
+    El dispositivo permanece registrado para notificaciones globales (calendario, cartitas).
+    """
     sub = _get_sub(db, body.user_key, body.device_id)
     if sub:
-        db.delete(sub)
+        sub.outfit_notif_enabled = False
+        sub.outfit_notif_time = None
         db.commit()
     return {"ok": True}
