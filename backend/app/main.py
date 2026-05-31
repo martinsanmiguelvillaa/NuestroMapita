@@ -4,14 +4,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers import auth, places_visited, places_wishlist, photos, letters, search, map, recipes, cine, recommendations, push, trips, outfits, names, outfit_notifications, emotional, calendar
-from app.services.outfit_notification_scheduler import start_scheduler, stop_scheduler
+from app.services.outfit_notification_scheduler import start_scheduler as start_outfit_scheduler, stop_scheduler as stop_outfit_scheduler
+from app.services.calendar_notification_scheduler import start_scheduler as start_calendar_scheduler, stop_scheduler as stop_calendar_scheduler
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    start_scheduler()
+    start_outfit_scheduler()
+    start_calendar_scheduler()
     yield
-    stop_scheduler()
+    stop_outfit_scheduler()
+    stop_calendar_scheduler()
 
 
 app = FastAPI(
