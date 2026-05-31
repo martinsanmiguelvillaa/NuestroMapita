@@ -99,8 +99,8 @@
 .navbar__link-icon-img[src*="recetas"],
 .navbar__link-icon-img[src*="nombres"],
 .navbar__link-icon-img[src*="calendario"] {
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 6rem;
+  height: 6rem;
 }
 
 .navbar__logout {
