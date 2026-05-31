@@ -44,6 +44,8 @@
   display: flex;
   align-items: center;
   margin-left: auto;
+  height: var(--navbar-height);
+  overflow: hidden;
 }
 
 .navbar__links {
