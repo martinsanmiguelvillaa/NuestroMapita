@@ -528,6 +528,25 @@
   color: var(--color-text);
 }
 
+.cal__emo-intensity {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.cal__emo-idot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-beige-mid);
+  flex-shrink: 0;
+}
+
+.cal__emo-idot--on {
+  background: var(--color-brown);
+}
+
 .cal__emo-row-note {
   font-size: var(--text-xs);
   color: var(--color-text-light);

@@ -427,6 +427,13 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
                         <span className="cal__emo-row-name">
                           {em.user_key === 'van' ? e?.labelF : e?.labelM}
                         </span>
+                        {em.intensity && (
+                          <div className="cal__emo-intensity">
+                            {[1,2,3,4,5].map((n) => (
+                              <span key={n} className={`cal__emo-idot${Math.round(em.intensity) >= n ? ' cal__emo-idot--on' : ''}`} />
+                            ))}
+                          </div>
+                        )}
                         {em.note && <span className="cal__emo-row-note">{em.note}</span>}
                       </div>
                       <div className="cal__emo-row-btns">
