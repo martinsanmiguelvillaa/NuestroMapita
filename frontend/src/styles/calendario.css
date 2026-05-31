@@ -292,9 +292,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* Cancel padding + cross the 1px cell border on both sides */
+  /* Explicit width so the bar visually spans edge-to-edge across cell borders.
+     Negative margin in flexbox only shifts position, not rendered width.  */
+  width: calc(100% + 2 * var(--space-2) + 2px);
   margin-left: calc(-1 * var(--space-2) - 1px);
-  margin-right: calc(-1 * var(--space-2) - 1px);
 }
 
 .cal__range-bar {
