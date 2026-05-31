@@ -135,6 +135,12 @@ def events_for_range(db: Session, year: int, month: int) -> list[dict]:
 
     results = [_event_to_dict(e, e.date) for e in direct]
 
+    # También expandir eventos directos que tienen recurrencia (el start ya está, agrega el resto)
+    for ev in direct:
+        if ev.recurrence:
+            for inst_date in expand_event_for_month(ev, year, month):
+                results.append(_event_to_dict(ev, inst_date))
+
     for ev in recurring:
         for inst_date in expand_event_for_month(ev, year, month):
             results.append(_event_to_dict(ev, inst_date))
