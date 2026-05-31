@@ -292,9 +292,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  /* Extend to cell edges (cancel horizontal padding) */
-  margin-left: calc(-1 * var(--space-2));
-  margin-right: calc(-1 * var(--space-2));
+  /* Cancel padding + cross the 1px cell border on both sides */
+  margin-left: calc(-1 * var(--space-2) - 1px);
+  margin-right: calc(-1 * var(--space-2) - 1px);
 }
 
 .cal__range-bar {
@@ -304,22 +304,22 @@
   flex-shrink: 0;
 }
 
-/* First day of range: left rounded cap, extends right to border */
+/* First day: rounded left cap, right side crosses into next cell */
 .cal__range-bar--first {
-  margin-left: var(--space-2);
+  margin-left: calc(var(--space-2) + 4px);
   border-radius: 3px 0 0 3px;
 }
 
-/* Last day of range: extends left to border, right rounded cap */
+/* Last day: left side crosses from prev cell, rounded right cap */
 .cal__range-bar--last {
-  margin-right: var(--space-2);
+  margin-right: calc(var(--space-2) + 4px);
   border-radius: 0 3px 3px 0;
 }
 
-/* Both first and last (short range on same visual row) */
+/* Both first and last (single day or row-wrap boundary on same day) */
 .cal__range-bar--first.cal__range-bar--last {
-  margin-left: var(--space-2);
-  margin-right: var(--space-2);
+  margin-left: calc(var(--space-2) + 4px);
+  margin-right: calc(var(--space-2) + 4px);
   border-radius: 3px;
 }
 
