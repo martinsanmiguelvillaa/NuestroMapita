@@ -296,8 +296,8 @@
 }
 
 .cal__cell-emo {
-  width: 32px;
-  height: 32px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 
@@ -887,8 +887,8 @@
   }
 
   .cal__cell-emo {
-    width: 22px;
-    height: 22px;
+    width: 44px;
+    height: 44px;
   }
 
   .cal__weekday {
