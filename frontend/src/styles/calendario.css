@@ -163,7 +163,6 @@
   align-items: flex-start;
   flex: 1;
   min-height: 0;
-  position: relative;
 }
 
 .cal__grid-wrap {
@@ -302,57 +301,7 @@
   object-fit: contain;
 }
 
-/* ─── Day panel ───────────────────────────────────────────────────────────────── */
-
-.cal__panel {
-  width: 320px;
-  background: var(--color-beige-light, #FEFBF3);
-  border: none;
-  border-left: 1px solid rgba(160, 116, 90, 0.20);
-  border-radius: 0;
-  box-shadow: -6px 0 28px rgba(74, 55, 40, 0.14);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 10;
-}
-
-.cal__panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-beige-mid);
-  flex-shrink: 0;
-}
-
-.cal__panel-title {
-  font-family: var(--font-heading);
-  font-size: var(--text-base);
-  color: var(--color-text);
-  line-height: 1.3;
-}
-
-.cal__panel-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-light);
-  font-size: var(--text-base);
-  line-height: 1;
-  padding: var(--space-1);
-  border-radius: var(--radius-sm);
-  transition: var(--transition-fast);
-  flex-shrink: 0;
-}
-.cal__panel-close:hover {
-  background: var(--color-beige-mid);
-  color: var(--color-text);
-}
+/* ─── Day panel (inside Modal) ────────────────────────────────────────────── */
 
 .cal__panel-tabs {
   display: flex;
@@ -399,7 +348,7 @@
 .cal__panel-body {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -935,23 +884,6 @@
   .cal__weekday {
     font-size: 10px;
     padding: 4px 0;
-  }
-
-  /* Panel as bottom sheet on mobile */
-  .cal__panel {
-    width: 100%;
-    position: fixed;
-    bottom: var(--mobile-nav-height);
-    left: 0;
-    right: 0;
-    max-height: 65vh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    border-bottom: none;
-    border-left: none;
-    border-right: none;
-    z-index: 200;
-    box-shadow: 0 -4px 24px rgba(74, 55, 40, 0.18);
-    position: fixed;
   }
 
   .cal__backdrop {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
+import Modal from '../components/ui/Modal';
 import {
   getEvents, createEvent, updateEvent, deleteEvent,
   getEventTypes, createEventType, deleteEventType,
@@ -217,7 +218,7 @@ export default function Calendario() {
 
       {/* ─── Body ────────────────────────────────────────────────── */}
       <div className="cal__body">
-        <div className={`cal__grid-wrap${selectedDay ? ' has-panel' : ''}`}>
+        <div className="cal__grid-wrap">
           <div className="cal__weekdays">
             {WEEK_DAYS.map((d) => <div key={d} className="cal__weekday">{d}</div>)}
           </div>
@@ -255,23 +256,24 @@ export default function Calendario() {
             </div>
           )}
         </div>
-
-        {selectedDay && (
-          <DayPanel
-            dateStr={selectedDay}
-            events={eventsForDay(selectedDay)}
-            emotions={emotionsForDay(selectedDay)}
-            typeMap={typeMap}
-            onClose={() => setSelectedDay(null)}
-            onAddEvent={() => setEventForm({ event: null, date: selectedDay })}
-            onEditEvent={(ev) => setEventForm({ event: ev, date: ev.date })}
-            onDeleteEvent={(ev) => setDelConfirm(ev)}
-            onEmotionChange={load}
-          />
-        )}
       </div>
 
       {loading && <div className="cal__loading">Cargando...</div>}
+
+      {/* ─── Day panel modal ──────────────────────────────────────── */}
+      {selectedDay && (
+        <DayPanel
+          dateStr={selectedDay}
+          events={eventsForDay(selectedDay)}
+          emotions={emotionsForDay(selectedDay)}
+          typeMap={typeMap}
+          onClose={() => setSelectedDay(null)}
+          onAddEvent={() => setEventForm({ event: null, date: selectedDay })}
+          onEditEvent={(ev) => setEventForm({ event: ev, date: ev.date })}
+          onDeleteEvent={(ev) => setDelConfirm(ev)}
+          onEmotionChange={load}
+        />
+      )}
 
       {/* ─── Modals ───────────────────────────────────────────────── */}
       {eventForm !== null && (
@@ -350,22 +352,16 @@ function DayCell({ dateStr, today, selected, events, emotions, typeMap, onClick,
 // ─── DayPanel ─────────────────────────────────────────────────────────────────
 
 function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onEditEvent, onDeleteEvent, onEmotionChange }) {
-  const [tab, setTab]       = useState('events');
+  const [tab, setTab]         = useState('events');
   const [editEmo, setEditEmo] = useState(null);
 
   const dayDate = new Date(dateStr + 'T12:00:00');
   const label   = `${WEEK_DAYS[(dayDate.getDay() + 6) % 7]}, ${dayDate.getDate()} de ${MONTHS_ES[dayDate.getMonth()]}`;
 
-  // Reset edit state when day changes
   useEffect(() => { setEditEmo(null); }, [dateStr]);
 
   return (
-    <div className="cal__panel">
-      <div className="cal__panel-head">
-        <div className="cal__panel-title">{label}</div>
-        <button className="cal__panel-close" onClick={onClose}>✕</button>
-      </div>
-
+    <Modal isOpen onClose={onClose} title={label} fullscreen noPadding>
       <div className="cal__panel-tabs">
         <button className={`cal__ptab${tab === 'events' ? ' is-active' : ''}`} onClick={() => setTab('events')}>
           Eventos
@@ -447,7 +443,7 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
           </>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }
 

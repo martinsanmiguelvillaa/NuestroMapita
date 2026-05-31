@@ -10,7 +10,7 @@ const CLOSE_THRESHOLD = 160; // px arrastrados para cerrar
 let _openModalCount = 0;
 export const getOpenModalCount = () => _openModalCount;
 
-export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false, isDirty = false }) {
+export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false, isDirty = false, noPadding = false }) {
   const sheetRef = useRef(null);
   const drag = useRef({ active: false, startY: 0, dy: 0 });
 
@@ -91,7 +91,7 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
             ×
           </button>
         </div>
-        <div className="modal-body">{children}</div>
+        <div className={`modal-body${noPadding ? ' modal-body--no-padding' : ''}`}>{children}</div>
       </div>
     </div>,
     document.body,
