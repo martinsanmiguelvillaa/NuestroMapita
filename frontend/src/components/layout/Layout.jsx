@@ -47,6 +47,7 @@ const BLOCKED = [
   '.lightbox',
   '[data-drag-id]',      // tarjetas arrastrables (wishlist)
   'input[type="range"]', // sliders — el gesto horizontal es del control, no del swipe
+  '[data-date]',         // celdas del calendario — el gesto es para crear eventos
 ];
 
 // Fracción del ancho de pantalla para confirmar el swipe
