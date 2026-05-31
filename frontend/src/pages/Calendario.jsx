@@ -5,7 +5,8 @@ import {
   getEvents, createEvent, updateEvent, deleteEvent,
   getEventTypes, createEventType, deleteEventType,
 } from '../api/calendar';
-import { getEmotionalEntries } from '../api/emotional';
+import { getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
+import { useConfirm } from '../context/ConfirmContext';
 import { EmotionForm, EMOTIONS } from './Emocionario';
 import '../styles/calendario.css';
 
@@ -354,6 +355,19 @@ function DayCell({ dateStr, today, selected, events, emotions, typeMap, onClick,
 function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onEditEvent, onDeleteEvent, onEmotionChange }) {
   const [tab, setTab]         = useState('events');
   const [editEmo, setEditEmo] = useState(null);
+  const confirm               = useConfirm();
+
+  const handleDeleteEmo = (em) => {
+    confirm('Eliminar emoción', '¿Eliminás esta entrada del emocionario?', async () => {
+      try {
+        await deleteEmotionalEntry(em.id);
+        toast.success('Emoción eliminada');
+        onEmotionChange();
+      } catch {
+        toast.error('No se pudo eliminar');
+      }
+    });
+  };
 
   const dayDate = new Date(dateStr + 'T12:00:00');
   const label   = `${WEEK_DAYS[(dayDate.getDay() + 6) % 7]}, ${dayDate.getDate()} de ${MONTHS_ES[dayDate.getMonth()]}`;
@@ -415,11 +429,20 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
                         </span>
                         {em.note && <span className="cal__emo-row-note">{em.note}</span>}
                       </div>
-                      <button
-                        className="cal__emo-edit-btn"
-                        onClick={() => setEditEmo(isEditing ? null : em)}
-                        title={isEditing ? 'Cancelar edición' : 'Editar'}
-                      >{isEditing ? '✕' : '✎'}</button>
+                      <div className="cal__emo-row-btns">
+                        <button
+                          className="cal__emo-edit-btn"
+                          onClick={() => setEditEmo(isEditing ? null : em)}
+                          title={isEditing ? 'Cancelar edición' : 'Editar'}
+                        >{isEditing ? '✕' : '✎'}</button>
+                        {!isEditing && (
+                          <button
+                            className="cal__emo-edit-btn cal__emo-del-btn"
+                            onClick={() => handleDeleteEmo(em)}
+                            title="Eliminar"
+                          >✕</button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}

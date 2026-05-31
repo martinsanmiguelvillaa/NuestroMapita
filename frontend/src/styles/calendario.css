@@ -536,6 +536,12 @@
   text-overflow: ellipsis;
 }
 
+.cal__emo-row-btns {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
 .cal__emo-edit-btn {
   background: none;
   border: none;
@@ -555,6 +561,10 @@
 .cal__emo-edit-btn:hover {
   background: var(--color-beige-mid);
   color: var(--color-text);
+}
+.cal__emo-del-btn:hover {
+  background: var(--color-rose-light);
+  color: var(--color-error);
 }
 
 .cal__emo-form-wrap {
