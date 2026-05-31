@@ -28,5 +28,8 @@ export const createEvent = (data) =>
 export const updateEvent = (id, data) =>
   apiFetch(`${BASE}/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 
-export const deleteEvent = (id, deleteSeries = false) =>
-  apiFetch(`${BASE}/events/${id}?delete_series=${deleteSeries}`, { method: 'DELETE' });
+export const deleteEvent = (id, deleteSeries = false, instanceDate = null) => {
+  const params = new URLSearchParams({ delete_series: deleteSeries });
+  if (!deleteSeries && instanceDate) params.append('instance_date', instanceDate);
+  return apiFetch(`${BASE}/events/${id}?${params}`, { method: 'DELETE' });
+};

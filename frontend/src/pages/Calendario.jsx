@@ -175,7 +175,7 @@ export default function Calendario() {
 
   const handleDeleteEvent = async (event, series = false) => {
     try {
-      await deleteEvent(event.id, series);
+      await deleteEvent(event.id, series, series ? null : event.instance_date);
       toast.success('Evento eliminado');
       setDelConfirm(null);
       load();

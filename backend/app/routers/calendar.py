@@ -110,8 +110,9 @@ def expand_event_for_month(event: CalendarEvent, year: int, month: int) -> list[
                 current += timedelta(days=interval)
                 count += 1
 
-    # Excluir la fecha original si ya va a aparecer como evento normal
-    return [d for d in instances if d != event.date]
+    # Excluir la fecha original (ya aparece como evento normal) y fechas excluidas
+    exdates = set(rule.get("exdates", []))
+    return [d for d in instances if d != event.date and d not in exdates]
 
 
 def events_for_range(db: Session, year: int, month: int) -> list[dict]:
@@ -133,7 +134,19 @@ def events_for_range(db: Session, year: int, month: int) -> list[dict]:
         CalendarEvent.date < month_start,
     ).all()
 
-    results = [_event_to_dict(e, e.date) for e in direct]
+    def _exdates(ev: CalendarEvent) -> set:
+        if not ev.recurrence:
+            return set()
+        try:
+            return set(json.loads(ev.recurrence).get("exdates", []))
+        except Exception:
+            return set()
+
+    results = [
+        _event_to_dict(e, e.date)
+        for e in direct
+        if e.date not in _exdates(e)
+    ]
 
     # También expandir eventos directos que tienen recurrencia (el start ya está, agrega el resto)
     for ev in direct:
@@ -273,6 +286,7 @@ def update_event(
 def delete_event(
     event_id: int,
     delete_series: bool = Query(False, description="Eliminar toda la serie recurrente"),
+    instance_date: Optional[str] = Query(None, description="Fecha de la instancia a excluir (solo este)"),
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
@@ -280,8 +294,19 @@ def delete_event(
     if not event:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
 
-    if delete_series and event.series_id:
-        db.query(CalendarEvent).filter_by(series_id=event.series_id).delete()
+    if delete_series:
+        if event.series_id:
+            db.query(CalendarEvent).filter_by(series_id=event.series_id).delete()
+        else:
+            db.delete(event)
+    elif event.recurrence and instance_date:
+        # Excluir solo esta instancia agregando la fecha a exdates
+        rule = json.loads(event.recurrence)
+        exdates = rule.get("exdates", [])
+        if instance_date not in exdates:
+            exdates.append(instance_date)
+        rule["exdates"] = exdates
+        event.recurrence = json.dumps(rule)
     else:
         db.delete(event)
 
