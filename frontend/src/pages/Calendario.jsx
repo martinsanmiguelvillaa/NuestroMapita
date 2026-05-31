@@ -290,14 +290,17 @@ export default function Calendario() {
         // Tap corto: el long-press no llegó a disparar → abrir panel del día
         const d = touchPendingCell.current;
         touchPendingCell.current = null;
-        if (d) selectDay(d);
+        if (d) {
+          e.preventDefault(); // evita que mouse events sintéticos llamen selectDay una segunda vez
+          selectDay(d);
+        }
         return;
       }
 
       touchDragActive.current  = false;
       touchPendingCell.current = null;
       delete document.body.dataset.calDrag;
-      e.preventDefault(); // evita mousedown/click sintéticos
+      e.preventDefault();
       finishDrag();
     };
 
