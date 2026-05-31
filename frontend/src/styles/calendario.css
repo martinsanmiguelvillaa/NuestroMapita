@@ -305,6 +305,12 @@
   flex-shrink: 0;
 }
 
+/* Invisible placeholder to keep lanes consistent across cells in the same week */
+.cal__range-spacer {
+  height: 6px;
+  flex-shrink: 0;
+}
+
 /* First day: rounded left cap, right side crosses into next cell */
 .cal__range-bar--first {
   margin-left: calc(var(--space-2) + 4px);

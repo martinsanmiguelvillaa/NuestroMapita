@@ -189,6 +189,27 @@ export default function Calendario() {
     []
   );
 
+  // ─── Range-event lane assignment ────────────────────────────────────────────
+  // Computes a stable ordered list of range events for a week so every cell in
+  // the same week renders bars in the same vertical "lane".
+  const isRangeEv = (ev) => {
+    if (!ev.recurrence) return false;
+    try { return !!JSON.parse(ev.recurrence).end_date; } catch { return false; }
+  };
+
+  const computeWeekRangeOrder = useCallback((weekDays) => {
+    const seen = new Map();
+    for (const d of weekDays) {
+      if (!d) continue;
+      for (const ev of eventsForDay(d)) {
+        if (isRangeEv(ev) && !seen.has(ev.id)) seen.set(ev.id, ev);
+      }
+    }
+    return [...seen.values()].sort((a, b) =>
+      a.date < b.date ? -1 : a.date > b.date ? 1 : a.id - b.id
+    );
+  }, [eventsForDay]);
+
   // ─── Drag-to-select ────────────────────────────────────────────────────────
   const dragStartRef = useRef(null);
   const dragEndRef   = useRef(null);
@@ -375,38 +396,50 @@ export default function Calendario() {
 
           {view === 'month' ? (
             <div className="cal__month-grid" onMouseLeave={() => { if (dragStartRef.current) { dragEndRef.current = dragStartRef.current; setDragRange(new Set([dragStartRef.current])); } }}>
-              {grid.map((d, i) => (
-                <DayCell
-                  key={i}
-                  dateStr={d}
-                  today={today}
-                  selected={selectedDay}
-                  isDragSelected={d ? dragRange.has(d) : false}
-                  events={d ? eventsForDay(d) : []}
-                  emotions={d ? emotionsForDay(d) : []}
-                  typeMap={typeMap}
-                  onMouseDown={() => d && handleCellMouseDown(d)}
-                  onMouseEnter={() => d && handleCellMouseEnter(d)}
-                />
-              ))}
+              {(() => {
+                const weeks = [];
+                for (let i = 0; i < grid.length; i += 7) weeks.push(grid.slice(i, i + 7));
+                return weeks.map((week, wi) => {
+                  const rangeOrder = computeWeekRangeOrder(week);
+                  return week.map((d, di) => (
+                    <DayCell
+                      key={wi * 7 + di}
+                      dateStr={d}
+                      today={today}
+                      selected={selectedDay}
+                      isDragSelected={d ? dragRange.has(d) : false}
+                      events={d ? eventsForDay(d) : []}
+                      emotions={d ? emotionsForDay(d) : []}
+                      typeMap={typeMap}
+                      rangeOrder={rangeOrder}
+                      onMouseDown={() => d && handleCellMouseDown(d)}
+                      onMouseEnter={() => d && handleCellMouseEnter(d)}
+                    />
+                  ));
+                });
+              })()}
             </div>
           ) : (
             <div className="cal__week-grid">
-              {weekDays.map((d) => (
-                <DayCell
-                  key={d}
-                  dateStr={d}
-                  today={today}
-                  selected={selectedDay}
-                  isDragSelected={dragRange.has(d)}
-                  events={eventsForDay(d)}
-                  emotions={emotionsForDay(d)}
-                  typeMap={typeMap}
-                  tall
-                  onMouseDown={() => handleCellMouseDown(d)}
-                  onMouseEnter={() => handleCellMouseEnter(d)}
-                />
-              ))}
+              {(() => {
+                const rangeOrder = computeWeekRangeOrder(weekDays);
+                return weekDays.map((d) => (
+                  <DayCell
+                    key={d}
+                    dateStr={d}
+                    today={today}
+                    selected={selectedDay}
+                    isDragSelected={dragRange.has(d)}
+                    events={eventsForDay(d)}
+                    emotions={emotionsForDay(d)}
+                    typeMap={typeMap}
+                    rangeOrder={rangeOrder}
+                    tall
+                    onMouseDown={() => handleCellMouseDown(d)}
+                    onMouseEnter={() => handleCellMouseEnter(d)}
+                  />
+                ));
+              })()}
             </div>
           )}
         </div>
@@ -475,21 +508,27 @@ export default function Calendario() {
 
 // ─── DayCell ──────────────────────────────────────────────────────────────────
 
-function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, typeMap, onMouseDown, onMouseEnter, tall }) {
+function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, typeMap, rangeOrder = [], onMouseDown, onMouseEnter, tall }) {
   if (!dateStr) return <div className="cal__cell cal__cell--empty" />;
   const dayNum = +dateStr.split('-')[2];
   const dow = (new Date(dateStr + 'T12:00:00').getDay() + 6) % 7; // 0=Mon, 6=Sun
 
-  // Separate range events (recurrence with end_date) from regular dot events
-  const rangeEvs = [];
-  const dotEvs   = [];
+  // Build a map of range events present on this specific day
+  const dayRangeMap = new Map();
+  const dotEvs = [];
   for (const ev of events) {
     let isRange = false;
-    if (ev.recurrence) {
-      try { isRange = !!JSON.parse(ev.recurrence).end_date; } catch {}
-    }
-    (isRange ? rangeEvs : dotEvs).push(ev);
+    if (ev.recurrence) { try { isRange = !!JSON.parse(ev.recurrence).end_date; } catch {} }
+    if (isRange) dayRangeMap.set(ev.id, ev);
+    else dotEvs.push(ev);
   }
+
+  // Build ordered slots from week-level lane assignment; null = spacer
+  const rangeSlots = rangeOrder.map(ev => dayRangeMap.get(ev.id) || null);
+  // Trim trailing nulls so empty weeks don't add extra height
+  let lastReal = -1;
+  for (let i = rangeSlots.length - 1; i >= 0; i--) { if (rangeSlots[i]) { lastReal = i; break; } }
+  const trimmedSlots = rangeSlots.slice(0, lastReal + 1);
 
   const shownDots = dotEvs.slice(0, 3);
   const moreDots  = dotEvs.length - shownDots.length;
@@ -510,9 +549,10 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
     >
       <span className="cal__cell-num">{dayNum}</span>
 
-      {rangeEvs.length > 0 && (
+      {trimmedSlots.length > 0 && (
         <div className="cal__cell-ranges">
-          {rangeEvs.slice(0, 3).map((ev, i) => {
+          {trimmedSlots.map((ev, i) => {
+            if (!ev) return <div key={i} className="cal__range-spacer" />;
             let rule = {};
             try { rule = JSON.parse(ev.recurrence); } catch {}
             const exdates = new Set(rule.exdates || []);
