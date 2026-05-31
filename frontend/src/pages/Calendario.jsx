@@ -693,8 +693,13 @@ function TypesModal({ types, onClose }) {
 
   const add = async () => {
     if (!name.trim()) return;
+    const trimmed = name.trim();
+    if (list.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) {
+      toast.error('Ya existe un tipo con ese nombre');
+      return;
+    }
     try {
-      const t = await createEventType({ name: name.trim(), color, created_by: 'van' });
+      const t = await createEventType({ name: trimmed, color, created_by: 'van' });
       setList((l) => [...l, t]);
       setName('');
       setColor('#A0745A');
