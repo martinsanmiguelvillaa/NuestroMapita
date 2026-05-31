@@ -167,8 +167,8 @@
 }
 
 .home__nav-card-icon-img {
-  width: 2rem;
-  height: 2rem;
+  width: 3rem;
+  height: 3rem;
   object-fit: contain;
   display: block;
 }
@@ -278,8 +278,8 @@
 }
 
 .home__more-panel-icon img {
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2.2rem;
+  height: 2.2rem;
   object-fit: contain;
   display: block;
 }
