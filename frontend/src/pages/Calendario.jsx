@@ -176,6 +176,54 @@ export default function Calendario() {
     []
   );
 
+  // ─── Drag-to-select ────────────────────────────────────────────────────────
+  const dragStartRef = useRef(null);
+  const dragEndRef   = useRef(null);
+  const [dragRange, setDragRange] = useState(new Set());
+
+  const buildRange = (a, b) => {
+    const [start, end] = a <= b ? [a, b] : [b, a];
+    const range = new Set();
+    const cur = new Date(start + 'T12:00:00');
+    const fin = new Date(end   + 'T12:00:00');
+    while (cur <= fin) {
+      range.add(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`);
+      cur.setDate(cur.getDate() + 1);
+    }
+    return range;
+  };
+
+  const handleCellMouseDown = useCallback((d) => {
+    dragStartRef.current = d;
+    dragEndRef.current   = d;
+    setDragRange(new Set([d]));
+  }, []);
+
+  const handleCellMouseEnter = useCallback((d) => {
+    if (!dragStartRef.current) return;
+    dragEndRef.current = d;
+    setDragRange(buildRange(dragStartRef.current, d));
+  }, []);
+
+  useEffect(() => {
+    const onMouseUp = () => {
+      const start = dragStartRef.current;
+      const end   = dragEndRef.current;
+      if (!start) return;
+      dragStartRef.current = null;
+      dragEndRef.current   = null;
+      setDragRange(new Set());
+      if (!end || start === end) {
+        selectDay(start);
+      } else {
+        const [a, b] = start <= end ? [start, end] : [end, start];
+        setEventForm({ event: null, date: a, endDate: b });
+      }
+    };
+    document.addEventListener('mouseup', onMouseUp);
+    return () => document.removeEventListener('mouseup', onMouseUp);
+  }, [selectDay]);
+
   return (
     <div className="cal">
       {/* ─── Header ─────────────────────────────────────────────── */}
@@ -225,17 +273,19 @@ export default function Calendario() {
           </div>
 
           {view === 'month' ? (
-            <div className="cal__month-grid">
+            <div className="cal__month-grid" onMouseLeave={() => { if (dragStartRef.current) { dragEndRef.current = dragStartRef.current; setDragRange(new Set([dragStartRef.current])); } }}>
               {grid.map((d, i) => (
                 <DayCell
                   key={i}
                   dateStr={d}
                   today={today}
                   selected={selectedDay}
+                  isDragSelected={d ? dragRange.has(d) : false}
                   events={d ? eventsForDay(d) : []}
                   emotions={d ? emotionsForDay(d) : []}
                   typeMap={typeMap}
-                  onClick={() => d && selectDay(d)}
+                  onMouseDown={() => d && handleCellMouseDown(d)}
+                  onMouseEnter={() => d && handleCellMouseEnter(d)}
                 />
               ))}
             </div>
@@ -247,11 +297,13 @@ export default function Calendario() {
                   dateStr={d}
                   today={today}
                   selected={selectedDay}
+                  isDragSelected={dragRange.has(d)}
                   events={eventsForDay(d)}
                   emotions={emotionsForDay(d)}
                   typeMap={typeMap}
                   tall
-                  onClick={() => selectDay(d)}
+                  onMouseDown={() => handleCellMouseDown(d)}
+                  onMouseEnter={() => handleCellMouseEnter(d)}
                 />
               ))}
             </div>
@@ -307,7 +359,7 @@ export default function Calendario() {
 
 // ─── DayCell ──────────────────────────────────────────────────────────────────
 
-function DayCell({ dateStr, today, selected, events, emotions, typeMap, onClick, tall }) {
+function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, typeMap, onMouseDown, onMouseEnter, tall }) {
   if (!dateStr) return <div className="cal__cell cal__cell--empty" />;
   const dayNum = +dateStr.split('-')[2];
   const shown  = events.slice(0, 3);
@@ -317,11 +369,14 @@ function DayCell({ dateStr, today, selected, events, emotions, typeMap, onClick,
     <div
       className={[
         'cal__cell',
-        dateStr === today    ? 'cal__cell--today'    : '',
-        dateStr === selected ? 'cal__cell--selected' : '',
-        tall                 ? 'cal__cell--tall'     : '',
+        dateStr === today ? 'cal__cell--today'    : '',
+        dateStr === selected && !isDragSelected ? 'cal__cell--selected' : '',
+        isDragSelected    ? 'cal__cell--drag'    : '',
+        tall              ? 'cal__cell--tall'    : '',
       ].filter(Boolean).join(' ')}
-      onClick={onClick}
+      onMouseDown={onMouseDown}
+      onMouseEnter={onMouseEnter}
+      style={{ userSelect: 'none' }}
     >
       <span className="cal__cell-num">{dayNum}</span>
 
@@ -514,8 +569,9 @@ function EventRow({ event, type, onEdit, onDelete }) {
 
 // ─── EventFormModal ────────────────────────────────────────────────────────────
 
-function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
-  const editing = !!event?.id;
+function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onClose }) {
+  const editing   = !!event?.id;
+  const isRange   = !editing && !!defaultEndDate && defaultEndDate !== defaultDate;
 
   const getFreq = () => {
     if (!event?.recurrence) return 'none';
@@ -523,16 +579,17 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
   };
 
   const [f, setF] = useState({
-    title:        event?.title        || '',
-    description:  event?.description  || '',
-    date:         event?.date         || defaultDate || todayISO(),
-    start_time:   event?.start_time   || '',
-    end_time:     event?.end_time     || '',
-    all_day:      event?.all_day      ?? true,
-    type_id:      event?.type_id      ?? '',
+    title:         event?.title        || '',
+    description:   event?.description  || '',
+    date:          event?.date         || defaultDate    || todayISO(),
+    end_date:      defaultEndDate      || event?.date    || defaultDate || todayISO(),
+    start_time:    event?.start_time   || '',
+    end_time:      event?.end_time     || '',
+    all_day:       event?.all_day      ?? true,
+    type_id:       event?.type_id      ?? '',
     notif_enabled: event?.notif_enabled || false,
     notif_minutes: event?.notif_minutes || 30,
-    freq: getFreq(),
+    freq:          isRange ? 'range' : getFreq(),
   });
   const [saving, setSaving] = useState(false);
 
@@ -543,9 +600,14 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
     if (!f.title.trim()) return;
     setSaving(true);
 
-    const recurrence = f.freq === 'none'
-      ? null
-      : JSON.stringify({ freq: f.freq, interval: 1 });
+    let recurrence = null;
+    if (f.freq === 'range') {
+      recurrence = f.end_date > f.date
+        ? JSON.stringify({ freq: 'daily', interval: 1, end_date: f.end_date })
+        : null;
+    } else if (f.freq !== 'none') {
+      recurrence = JSON.stringify({ freq: f.freq, interval: 1 });
+    }
 
     const payload = {
       ...(event?.id ? { id: event.id } : {}),
@@ -554,7 +616,7 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
       date:          f.date,
       start_time:    !f.all_day && f.start_time ? f.start_time : null,
       end_time:      !f.all_day && f.end_time   ? f.end_time   : null,
-      all_day:       f.all_day,
+      all_day:       f.freq === 'range' ? true : f.all_day,
       type_id:       f.type_id ? Number(f.type_id) : null,
       participants:  'ambos',
       created_by:    'van',
@@ -597,11 +659,23 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
             />
           </div>
 
+          {isRange && (
+            <div className="cal__range-banner">
+              📅 Evento de varios días: del <strong>{f.date}</strong> al <strong>{f.end_date}</strong>
+            </div>
+          )}
+
           <div className="cal__form-row">
             <div className="cal__fg">
-              <label>Fecha</label>
+              <label>{isRange ? 'Inicio' : 'Fecha'}</label>
               <input type="date" value={f.date} onChange={(e) => set('date', e.target.value)} required />
             </div>
+            {isRange ? (
+              <div className="cal__fg">
+                <label>Fin</label>
+                <input type="date" value={f.end_date} min={f.date} onChange={(e) => set('end_date', e.target.value)} required />
+              </div>
+            ) : (
             <div className="cal__fg cal__fg--check">
               <label>
                 <input type="checkbox" checked={f.all_day} onChange={(e) => set('all_day', e.target.checked)} />
@@ -711,20 +785,21 @@ function TypesModal({ types, onClose }) {
     }
   };
 
-  const remove = (id) => {
+  const remove = async (id) => {
     const tipo = list.find((t) => t.id === id);
-    confirm(
-      'Eliminar tipo',
-      `¿Eliminar "${tipo?.name}"? Los eventos de este tipo quedarán sin categoría.`,
-      async () => {
-        try {
-          await deleteEventType(id);
-          setList((l) => l.filter((t) => t.id !== id));
-        } catch {
-          toast.error('Error al eliminar tipo');
-        }
-      },
-    );
+    const ok = await confirm({
+      title: 'Eliminar tipo',
+      message: `¿Eliminar "${tipo?.name}"? Los eventos de este tipo quedarán sin categoría.`,
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteEventType(id);
+      setList((l) => l.filter((t) => t.id !== id));
+    } catch {
+      toast.error('Error al eliminar tipo');
+    }
   };
 
   return (
