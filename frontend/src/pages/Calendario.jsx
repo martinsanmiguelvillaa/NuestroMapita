@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import Modal from '../components/ui/Modal';
 import {
@@ -678,15 +678,17 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
 
 function TypesModal({ types, onClose }) {
   const TYPE_PALETTE = [
-    '#A0745A', '#C4956A', '#D4B896', '#8B6F47', '#6B4F3A',
-    '#7A9E7E', '#4A7C59', '#B5C9B7', '#3D6B5E', '#9DC3B5',
-    '#8B9DC3', '#5B6FA6', '#C4A882', '#D4927B', '#B07A82',
-    '#8E7BAD', '#C9A96E', '#A67C6E', '#7B9E87', '#C4B5A5',
+    '#8A5F49', '#A9745A', '#C48F6A', '#D8B08A', '#F1DCC4',
+    '#D9A6A1', '#C98F8A', '#B9797E', '#E6B7AD', '#F0C9BE',
+    '#B79AC8', '#9278A8', '#D2B7D8',
+    '#A8B89B', '#8FA37E', '#B9C8AA',
+    '#8F9DB8', '#7888A8', '#AEB9CF',
+    '#D2A85F', '#E0BD7A', '#C9826A', '#B86F5E', '#E4B09D',
   ];
 
   const [list,  setList]  = useState(types);
   const [name,  setName]  = useState('');
-  const [color, setColor] = useState('#A0745A');
+  const [color, setColor] = useState('#8A5F49');
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   const add = async () => {

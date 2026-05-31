@@ -830,7 +830,7 @@
   bottom: calc(100% + 8px);
   left: 0;
   display: grid;
-  grid-template-columns: repeat(5, 28px);
+  grid-template-columns: repeat(6, 28px);
   gap: 6px;
   padding: 10px;
   background: var(--color-white);
