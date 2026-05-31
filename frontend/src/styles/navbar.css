@@ -77,13 +77,13 @@
 }
 
 .navbar__link-icon {
-  font-size: 3.6rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
 .navbar__link-icon-img {
-  width: 3.0rem;
-  height: 3.0rem;
+  width: 4.5rem;
+  height: 4.5rem;
   object-fit: contain;
   display: inline-block;
   vertical-align: middle;
