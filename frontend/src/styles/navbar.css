@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -82,8 +82,8 @@
 }
 
 .navbar__link-icon-img {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.8rem;
+  height: 2.8rem;
   object-fit: contain;
   display: inline-block;
   vertical-align: middle;
