@@ -193,7 +193,11 @@ export default function Calendario() {
   const dragStartRef = useRef(null);
   const dragEndRef   = useRef(null);
   const [dragRange, setDragRange] = useState(new Set());
-  const gridRef = useRef(null);
+  const gridRef            = useRef(null);
+  const longPressTimer     = useRef(null);   // setTimeout handle
+  const touchPendingCell   = useRef(null);   // celda tocada, esperando long-press
+  const touchStartPos      = useRef({ x: 0, y: 0 });
+  const touchDragActive    = useRef(false);  // long-press disparado, drag en curso
 
   const handleCellMouseDown = useCallback((d) => {
     dragStartRef.current = d;
@@ -207,24 +211,44 @@ export default function Calendario() {
     setDragRange(buildRange(dragStartRef.current, d));
   }, []);
 
-  // Touch: touchstart via event delegation on the grid wrapper
+  // Touch: touchstart — registra celda y arranca timer de long-press (350 ms)
   const handleGridTouchStart = useCallback((e) => {
     const cell = e.target.closest('[data-date]');
     if (!cell || !cell.dataset.date) return;
     const d = cell.dataset.date;
-    dragStartRef.current = d;
-    dragEndRef.current   = d;
-    setDragRange(new Set([d]));
+    touchPendingCell.current  = d;
+    touchStartPos.current     = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    touchDragActive.current   = false;
+
+    longPressTimer.current = setTimeout(() => {
+      touchDragActive.current  = true;
+      dragStartRef.current     = d;
+      dragEndRef.current       = d;
+      setDragRange(new Set([d]));
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, 350);
   }, []);
 
-  // Touch: touchmove — non-passive so we can preventDefault when dragging across cells
+  // Touch: touchmove — cancela long-press si el dedo se movió antes de los 350 ms;
+  // cuando el drag ya está activo bloquea el scroll y actualiza el rango.
   useEffect(() => {
     const el = gridRef.current;
     if (!el) return;
     const onTouchMove = (e) => {
-      if (!dragStartRef.current) return;
-      e.preventDefault(); // bloquea scroll vertical y horizontal mientras hay drag activo
-      const touch = e.touches[0];
+      if (!touchDragActive.current) {
+        // Todavía en espera: si se movió más de 8 px cancela el long-press
+        if (touchPendingCell.current) {
+          const dx = Math.abs(e.touches[0].clientX - touchStartPos.current.x);
+          const dy = Math.abs(e.touches[0].clientY - touchStartPos.current.y);
+          if (dx > 8 || dy > 8) {
+            clearTimeout(longPressTimer.current);
+            touchPendingCell.current = null;
+          }
+        }
+        return;
+      }
+      e.preventDefault();
+      const touch  = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       if (!target) return;
       const cell = target.closest('[data-date]');
@@ -237,17 +261,17 @@ export default function Calendario() {
     };
     el.addEventListener('touchmove', onTouchMove, { passive: false });
     return () => el.removeEventListener('touchmove', onTouchMove);
-  }, []); // gridRef is stable after mount
+  }, []);
 
   // Mouse up + touch end/cancel (global)
   useEffect(() => {
-    const finish = () => {
+    const finishDrag = () => {
       const start = dragStartRef.current;
       const end   = dragEndRef.current;
-      if (!start) return;
       dragStartRef.current = null;
       dragEndRef.current   = null;
       setDragRange(new Set());
+      if (!start) return;
       if (!end || start === end) {
         selectDay(start);
       } else {
@@ -256,18 +280,31 @@ export default function Calendario() {
       }
     };
 
-    const onMouseUp = finish;
+    const onMouseUp = finishDrag;
 
     const onTouchEnd = (e) => {
-      if (!dragStartRef.current) return;
-      e.preventDefault(); // prevent synthesized mousedown/click after drag
-      finish();
+      clearTimeout(longPressTimer.current);
+
+      if (!touchDragActive.current) {
+        // Tap corto: el long-press no llegó a disparar → abrir panel del día
+        const d = touchPendingCell.current;
+        touchPendingCell.current = null;
+        if (d) selectDay(d);
+        return;
+      }
+
+      touchDragActive.current  = false;
+      touchPendingCell.current = null;
+      e.preventDefault(); // evita mousedown/click sintéticos
+      finishDrag();
     };
 
     const onTouchCancel = () => {
-      // OS took over (scroll, gesture) — cancel drag silently
-      dragStartRef.current = null;
-      dragEndRef.current   = null;
+      clearTimeout(longPressTimer.current);
+      touchDragActive.current  = false;
+      touchPendingCell.current = null;
+      dragStartRef.current     = null;
+      dragEndRef.current       = null;
       setDragRange(new Set());
     };
 
