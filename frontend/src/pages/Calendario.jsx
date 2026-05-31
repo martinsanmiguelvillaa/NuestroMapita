@@ -35,8 +35,9 @@ function buildGrid(year, month) {
   const firstDay = new Date(year, month, 1).getDay();
   const startOffset = (firstDay + 6) % 7; // Mon = 0
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
   const cells = [];
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < totalCells; i++) {
     const day = i - startOffset + 1;
     cells.push(
       day >= 1 && day <= daysInMonth
