@@ -15,5 +15,4 @@ export const SWIPE_ROUTES = [
   '/cine',
   '/outfits',
   '/nombres',
-  '/emocionario',
 ];

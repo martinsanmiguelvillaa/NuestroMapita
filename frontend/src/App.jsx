@@ -23,7 +23,6 @@ import Cine from './pages/Cine';
 import Outfits from './pages/Outfits';
 import Trips from './pages/Trips';
 import Names from './pages/Names';
-import Emocionario from './pages/Emocionario';
 import Calendario from './pages/Calendario';
 import ShareTarget from './pages/ShareTarget';
 
@@ -61,7 +60,6 @@ export default function App() {
               <Route path="/cine" element={<Cine />} />
               <Route path="/outfits" element={<Outfits />} />
               <Route path="/nombres" element={<Names />} />
-              <Route path="/emocionario" element={<Emocionario />} />
               <Route path="/calendario" element={<Calendario />} />
             </Route>
           </Route>

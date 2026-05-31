@@ -29,7 +29,6 @@ const ROUTE_BG = {
   '/cine':        { img: 'var(--bg-cine)',       overlay: 'var(--color-cream-overlay-strong)', pos: 'center' },
   '/outfits':     { img: 'var(--bg-outfits)',    overlay: 'var(--color-cream-overlay)',         pos: 'center top' },
   '/nombres':     { img: 'var(--bg-nombres)',    overlay: 'var(--color-cream-overlay)',         pos: 'center top' },
-  '/emocionario': { img: 'var(--bg-emocionario)', overlay: 'var(--color-cream-overlay)',       pos: 'center' },
   '/calendario':  { img: 'var(--bg-calendario)',  overlay: 'var(--color-cream-overlay)',        pos: 'center' },
 };
 
