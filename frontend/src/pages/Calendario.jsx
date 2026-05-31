@@ -761,12 +761,14 @@ function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onC
                 onChange={(v) => set('type_id', v)}
               />
             </div>
-            <div className="cal__fg">
-              <label>Se repite</label>
-              <select value={f.freq} onChange={(e) => set('freq', e.target.value)}>
-                {RECURRENCE_OPTS.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
-              </select>
-            </div>
+            {!isRange && (
+              <div className="cal__fg">
+                <label>Se repite</label>
+                <select value={f.freq} onChange={(e) => set('freq', e.target.value)}>
+                  {RECURRENCE_OPTS.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="cal__fg">
