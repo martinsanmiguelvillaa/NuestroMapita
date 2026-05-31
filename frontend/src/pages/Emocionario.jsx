@@ -56,7 +56,7 @@ export function EmotionForm({ onSaved, prefill }) {
   const [intensity, setIntensity]     = useState(prefill?.entry?.intensity ?? 3);
   const [note, setNote]               = useState(prefill?.entry?.note ?? '');
   const [saving, setSaving]           = useState(false);
-  const isEditing = !!prefill;
+  const isEditing = !!prefill?.entry?.id;
 
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
