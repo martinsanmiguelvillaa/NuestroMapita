@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -289,8 +289,8 @@
   }
 
   .navbar__link-icon-img {
-    width: 3.0rem;
-    height: 3.0rem;
+    width: 2.4rem;
+    height: 2.4rem;
   }
 
   /* Botón de config: fuera del scroll, siempre visible a la derecha */
