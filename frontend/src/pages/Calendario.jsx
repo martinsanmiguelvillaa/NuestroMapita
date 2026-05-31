@@ -579,6 +579,7 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
           <div className="cal__fg">
             <label>Título *</label>
             <input
+              type="text"
               value={f.title}
               onChange={(e) => set('title', e.target.value)}
               placeholder="Nombre del evento"
