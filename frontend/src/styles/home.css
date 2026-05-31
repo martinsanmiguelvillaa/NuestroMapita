@@ -544,6 +544,10 @@
     right: 0;
   }
 
+  .home__more-panel::after {
+    left: 61%;
+  }
+
   .home__nav-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
