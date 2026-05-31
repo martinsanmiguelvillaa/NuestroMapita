@@ -54,19 +54,36 @@ def send_push_to_endpoint(
 
 
 def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None:
-    """Envía una notificación push a todas las suscripciones registradas."""
+    """
+    Envía una notificación push a todos los endpoints registrados en el sistema.
+    Incluye push_subscriptions (tabla genérica) y outfit_notification_subscriptions
+    (donde se registran los dispositivos al activar notificaciones de outfits).
+    """
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
         return
 
-    subscriptions = db.query(PushSubscription).all()
-    dead = []
+    from app.models.outfit_notification import OutfitNotificationSubscription
 
-    for sub in subscriptions:
+    # Recolectar endpoints únicos de ambas tablas
+    # {endpoint: (p256dh, auth, source, id)}
+    endpoints: dict[str, tuple] = {}
+
+    for sub in db.query(PushSubscription).all():
+        endpoints[sub.endpoint] = (sub.p256dh, sub.auth, "generic", sub.id)
+
+    for sub in db.query(OutfitNotificationSubscription).filter_by(enabled=True).all():
+        if sub.endpoint not in endpoints:
+            endpoints[sub.endpoint] = (sub.p256dh, sub.auth, "outfit", sub.id)
+
+    dead_generic: list[int] = []
+    dead_outfit: list[int]  = []
+
+    for endpoint, (p256dh, auth, source, sub_id) in endpoints.items():
         try:
             webpush(
                 subscription_info={
-                    "endpoint": sub.endpoint,
-                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth},
+                    "endpoint": endpoint,
+                    "keys": {"p256dh": p256dh, "auth": auth},
                 },
                 data=json.dumps({"title": title, "body": body, "url": url}),
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
@@ -75,13 +92,20 @@ def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None
         except WebPushException as e:
             status = e.response.status_code if e.response is not None else None
             if status in (404, 410):
-                # Suscripción expirada o inválida — eliminar
-                dead.append(sub.id)
+                if source == "generic":
+                    dead_generic.append(sub_id)
+                else:
+                    dead_outfit.append(sub_id)
             else:
-                logger.warning("Push error (endpoint=%s): %s", sub.endpoint[:40], e)
+                logger.warning("Push error (endpoint=%s): %s", endpoint[:40], e)
 
-    if dead:
-        db.query(PushSubscription).filter(PushSubscription.id.in_(dead)).delete(
+    if dead_generic:
+        db.query(PushSubscription).filter(PushSubscription.id.in_(dead_generic)).delete(
             synchronize_session=False
         )
+    if dead_outfit:
+        db.query(OutfitNotificationSubscription).filter(
+            OutfitNotificationSubscription.id.in_(dead_outfit)
+        ).update({"enabled": False}, synchronize_session=False)
+    if dead_generic or dead_outfit:
         db.commit()
