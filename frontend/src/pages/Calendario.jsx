@@ -651,7 +651,7 @@ function EventRow({ event, type, onEdit, onDelete }) {
   if (event.recurrence) {
     try {
       const r = JSON.parse(event.recurrence);
-      if (r.freq && r.freq !== 'none') recurrenceLabel = '↻';
+      if (r.freq && r.freq !== 'none' && !r.end_date) recurrenceLabel = '↻';
     } catch { /* ignore */ }
   }
 
@@ -1048,7 +1048,11 @@ function TypesModal({ types, onClose }) {
 // ─── DeleteModal ──────────────────────────────────────────────────────────────
 
 function DeleteModal({ event, onCancel, onDelete }) {
-  const isSeries = !!event.series_id;
+  const isSeries = (() => {
+    if (!event.series_id || !event.recurrence) return false;
+    try { const r = JSON.parse(event.recurrence); return r.freq !== 'none' && !r.end_date; }
+    catch { return false; }
+  })();
   return (
     <div className="cal__backdrop" onClick={onCancel}>
       <div className="cal__modal cal__modal--sm" onClick={(e) => e.stopPropagation()}>
