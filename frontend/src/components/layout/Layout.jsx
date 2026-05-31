@@ -47,7 +47,6 @@ const BLOCKED = [
   '.lightbox',
   '[data-drag-id]',      // tarjetas arrastrables (wishlist)
   'input[type="range"]', // sliders — el gesto horizontal es del control, no del swipe
-  '[data-date]',         // celdas del calendario — el gesto es para crear eventos
 ];
 
 // Fracción del ancho de pantalla para confirmar el swipe
@@ -131,6 +130,8 @@ export default function Layout() {
 
     const onTouchMove = (e) => {
       if (!g.current.active) return;
+      // El calendario activó su drag (long-press) → cancelar swipe de páginas
+      if (document.body.dataset.calDrag) { g.current.active = false; return; }
 
       const dx  = e.touches[0].clientX - g.current.startX;
       const dy  = e.touches[0].clientY - g.current.startY;

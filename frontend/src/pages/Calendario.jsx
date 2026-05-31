@@ -225,6 +225,7 @@ export default function Calendario() {
       dragStartRef.current     = d;
       dragEndRef.current       = d;
       setDragRange(new Set([d]));
+      document.body.dataset.calDrag = '1'; // señal para Layout: cancelar swipe de páginas
       if (navigator.vibrate) navigator.vibrate(40);
     }, 350);
   }, []);
@@ -295,6 +296,7 @@ export default function Calendario() {
 
       touchDragActive.current  = false;
       touchPendingCell.current = null;
+      delete document.body.dataset.calDrag;
       e.preventDefault(); // evita mousedown/click sintéticos
       finishDrag();
     };
@@ -305,6 +307,7 @@ export default function Calendario() {
       touchPendingCell.current = null;
       dragStartRef.current     = null;
       dragEndRef.current       = null;
+      delete document.body.dataset.calDrag;
       setDragRange(new Set());
     };
 
