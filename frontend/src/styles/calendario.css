@@ -173,6 +173,7 @@
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-sm);
+  overflow: hidden;
   box-shadow: 0 2px 20px rgba(74, 55, 40, 0.13);
 }
 
@@ -221,7 +222,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow: hidden;
 }
 .cal__cell:hover { background: rgba(240, 228, 208, 0.92); }
 
@@ -296,8 +296,8 @@
 }
 
 .cal__cell-emo {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
 }
 
@@ -887,8 +887,8 @@
   }
 
   .cal__cell-emo {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
   }
 
   .cal__weekday {
