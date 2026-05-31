@@ -223,6 +223,7 @@ export default function Calendario() {
     if (!el) return;
     const onTouchMove = (e) => {
       if (!dragStartRef.current) return;
+      e.preventDefault(); // bloquea scroll vertical y horizontal mientras hay drag activo
       const touch = e.touches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
       if (!target) return;
@@ -230,7 +231,6 @@ export default function Calendario() {
       if (!cell || !cell.dataset.date) return;
       const d = cell.dataset.date;
       if (d !== dragEndRef.current) {
-        e.preventDefault(); // lock scroll once crossing cells
         dragEndRef.current = d;
         setDragRange(buildRange(dragStartRef.current, d));
       }
