@@ -471,6 +471,7 @@ export default function Home() {
 
   const [showMore, setShowMore] = useState(false);
   const moreRef = useRef(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
   useEffect(() => {
     if (!showMore) return;
@@ -538,7 +539,7 @@ export default function Home() {
               {showMore && (
                 <motion.div
                   className="home__more-panel"
-                  style={{ x: '-50%' }}
+                  style={{ x: isMobile ? '0%' : '-50%' }}
                   initial={{ opacity: 0, y: 8, scale: 0.92, transformOrigin: 'center bottom' }}
                   animate={{ opacity: 1, y: 0, scale: 1, transformOrigin: 'center bottom' }}
                   exit={{ opacity: 0, y: 6, scale: 0.94, transformOrigin: 'center bottom' }}

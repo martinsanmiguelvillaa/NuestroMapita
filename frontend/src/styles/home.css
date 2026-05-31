@@ -539,6 +539,11 @@
     padding: var(--space-8) var(--space-4) var(--space-6);
   }
 
+  .home__more-panel {
+    left: auto;
+    right: 0;
+  }
+
   .home__nav-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
