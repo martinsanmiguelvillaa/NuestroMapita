@@ -249,6 +249,26 @@
 .cal__cell--selected:hover { background: rgba(232, 196, 196, 0.80); }
 .cal__cell--today.cal__cell--selected { background: rgba(232, 196, 196, 0.75); }
 
+@keyframes dragPulse {
+  0%, 100% { background: rgba(196, 160, 130, 0.32); }
+  50%       { background: rgba(196, 160, 130, 0.56); }
+}
+
+.cal__cell--drag {
+  animation: dragPulse 0.85s ease-in-out infinite;
+  cursor: crosshair;
+}
+.cal__cell--drag:hover { animation: dragPulse 0.85s ease-in-out infinite; }
+
+.cal__range-banner {
+  background: rgba(196, 160, 130, 0.18);
+  border: 1px solid rgba(160, 116, 90, 0.30);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-mid);
+}
+
 .cal__cell--tall {
   min-height: 120px;
 }

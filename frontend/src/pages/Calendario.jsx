@@ -333,6 +333,7 @@ export default function Calendario() {
         <EventFormModal
           event={eventForm.event}
           defaultDate={eventForm.date}
+          defaultEndDate={eventForm.endDate}
           types={types}
           onSave={handleSaveEvent}
           onClose={() => setEventForm(null)}
@@ -676,15 +677,16 @@ function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onC
                 <input type="date" value={f.end_date} min={f.date} onChange={(e) => set('end_date', e.target.value)} required />
               </div>
             ) : (
-            <div className="cal__fg cal__fg--check">
-              <label>
-                <input type="checkbox" checked={f.all_day} onChange={(e) => set('all_day', e.target.checked)} />
-                Todo el día
-              </label>
-            </div>
+              <div className="cal__fg cal__fg--check">
+                <label>
+                  <input type="checkbox" checked={f.all_day} onChange={(e) => set('all_day', e.target.checked)} />
+                  Todo el día
+                </label>
+              </div>
+            )}
           </div>
 
-          {!f.all_day && (
+          {!isRange && !f.all_day && (
             <div className="cal__form-row">
               <div className="cal__fg">
                 <label>Inicio</label>
