@@ -579,7 +579,9 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
                 ].filter(Boolean).join(' ')}
                 style={{ background: typeMap[ev.type_id]?.color || 'var(--color-brown)' }}
                 title={ev.title}
-              />
+              >
+                {isFirst && <span className="cal__range-bar-label">{ev.title}</span>}
+              </div>
             );
           })}
         </div>
