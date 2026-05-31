@@ -8,6 +8,7 @@ import { getOrCreateDeviceId } from '../../utils/deviceId';
 import '../../styles/navbar.css';
 
 const S = '/icons/iconos-secciones/';
+const C = '/icons/config/';
 
 const links = [
   { to: '/',            label: 'Inicio',     iconImg: `${S}inicio.png` },
@@ -223,7 +224,7 @@ export default function Navbar() {
                 {/* Todas las notificaciones — solo si hay alguna configurada */}
                 {(supported && permission !== 'denied' && (subscribed || hasOutfitSubs)) && (
                   <button className="navbar__config-item" onClick={toggleAll}>
-                    <span>{anyNotifActive ? '🔔' : '🔕'}</span>
+                    <img src={`${C}notificaciones.png`} alt="" className="navbar__config-icon" />
                     <span>{anyNotifActive ? 'Silenciar todas las notificaciones' : 'Activar todas las notificaciones'}</span>
                   </button>
                 )}
@@ -234,7 +235,7 @@ export default function Navbar() {
                     className="navbar__config-item"
                     onClick={subscribed ? unsubscribe : subscribe}
                   >
-                    <span>{subscribed ? '💌' : '💌'}</span>
+                    <img src={`${C}cartitas.png`} alt="" className="navbar__config-icon" />
                     <span>{subscribed ? 'Desactivar notificaciones de cartitas' : 'Activar notificaciones de cartitas'}</span>
                   </button>
                 )}
@@ -246,7 +247,7 @@ export default function Navbar() {
                     onClick={toggleCalendar}
                     disabled={togglingCalendar}
                   >
-                    <span>📅</span>
+                    <img src={`${C}calendario.png`} alt="" className="navbar__config-icon" />
                     <span>{calendarNotif.enabled ? 'Desactivar notificaciones de calendario' : 'Activar notificaciones de calendario'}</span>
                   </button>
                 )}
@@ -258,7 +259,7 @@ export default function Navbar() {
                     onClick={() => toggleOutfit('van')}
                     disabled={togglingOutfit.van}
                   >
-                    <span>👗</span>
+                    <img src={`${C}outfit-van.png`} alt="" className="navbar__config-icon" />
                     <span>{outfitNotif.van.enabled ? 'Desactivar outfit de Van' : 'Activar outfit de Van'}</span>
                   </button>
                 )}
@@ -268,7 +269,7 @@ export default function Navbar() {
                     onClick={() => toggleOutfit('martin')}
                     disabled={togglingOutfit.martin}
                   >
-                    <span>👔</span>
+                    <img src={`${C}outfit-martin.png`} alt="" className="navbar__config-icon" />
                     <span>{outfitNotif.martin.enabled ? 'Desactivar outfit de Martín' : 'Activar outfit de Martín'}</span>
                   </button>
                 )}

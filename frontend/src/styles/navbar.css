@@ -147,6 +147,13 @@
   background: var(--color-beige);
 }
 
+.navbar__config-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .navbar__config-item--danger {
   color: var(--color-error);
 }
