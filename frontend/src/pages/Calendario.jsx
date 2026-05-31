@@ -686,6 +686,8 @@ function TypesModal({ types, onClose }) {
     '#D2A85F', '#E0BD7A', '#C9826A', '#B86F5E', '#E4B09D',
   ];
 
+  const confirm = useConfirm();
+
   const [list,  setList]  = useState(types);
   const [name,  setName]  = useState('');
   const [color, setColor] = useState('#8A5F49');
@@ -709,13 +711,20 @@ function TypesModal({ types, onClose }) {
     }
   };
 
-  const remove = async (id) => {
-    try {
-      await deleteEventType(id);
-      setList((l) => l.filter((t) => t.id !== id));
-    } catch {
-      toast.error('Error al eliminar tipo');
-    }
+  const remove = (id) => {
+    const tipo = list.find((t) => t.id === id);
+    confirm(
+      'Eliminar tipo',
+      `¿Eliminar "${tipo?.name}"? Los eventos de este tipo quedarán sin categoría.`,
+      async () => {
+        try {
+          await deleteEventType(id);
+          setList((l) => l.filter((t) => t.id !== id));
+        } catch {
+          toast.error('Error al eliminar tipo');
+        }
+      },
+    );
   };
 
   return (
