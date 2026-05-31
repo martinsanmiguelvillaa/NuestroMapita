@@ -365,7 +365,7 @@ export default function Calendario() {
               >{label}</button>
             ))}
           </div>
-          <button className="cal__ctrl-btn" onClick={() => setEmoToday(true)}><img src="/icons/nutria-emocionario.png" alt="" style={{width:'1.4em',height:'1.4em',objectFit:'contain',verticalAlign:'middle'}} /> Emocionario</button>
+          <button className="cal__ctrl-btn" style={{whiteSpace:'nowrap'}} onClick={() => setEmoToday(true)}><img src="/icons/nutria-emocionario.png" alt="" style={{width:'1.4em',height:'1.4em',objectFit:'contain',verticalAlign:'middle'}} /> Emocionario</button>
         </div>
       </div>
 
