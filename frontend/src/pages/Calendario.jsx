@@ -379,8 +379,21 @@ export default function Calendario() {
 function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, typeMap, onMouseDown, onMouseEnter, tall }) {
   if (!dateStr) return <div className="cal__cell cal__cell--empty" />;
   const dayNum = +dateStr.split('-')[2];
-  const shown  = events.slice(0, 3);
-  const more   = events.length - shown.length;
+  const dow = (new Date(dateStr + 'T12:00:00').getDay() + 6) % 7; // 0=Mon, 6=Sun
+
+  // Separate range events (recurrence with end_date) from regular dot events
+  const rangeEvs = [];
+  const dotEvs   = [];
+  for (const ev of events) {
+    let isRange = false;
+    if (ev.recurrence) {
+      try { isRange = !!JSON.parse(ev.recurrence).end_date; } catch {}
+    }
+    (isRange ? rangeEvs : dotEvs).push(ev);
+  }
+
+  const shownDots = dotEvs.slice(0, 3);
+  const moreDots  = dotEvs.length - shownDots.length;
 
   return (
     <div
@@ -397,17 +410,42 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
     >
       <span className="cal__cell-num">{dayNum}</span>
 
-      <div className="cal__cell-dots">
-        {shown.map((ev, i) => (
-          <span
-            key={i}
-            className="cal__dot"
-            style={{ background: typeMap[ev.type_id]?.color || 'var(--color-brown)' }}
-            title={ev.title}
-          />
-        ))}
-        {more > 0 && <span className="cal__dot-more">+{more}</span>}
-      </div>
+      {rangeEvs.length > 0 && (
+        <div className="cal__cell-ranges">
+          {rangeEvs.slice(0, 3).map((ev, i) => {
+            let rule = {};
+            try { rule = JSON.parse(ev.recurrence); } catch {}
+            const isFirst = ev.instance_date === ev.date || dow === 0;
+            const isLast  = ev.instance_date === rule.end_date || dow === 6;
+            return (
+              <div
+                key={i}
+                className={[
+                  'cal__range-bar',
+                  isFirst ? 'cal__range-bar--first' : '',
+                  isLast  ? 'cal__range-bar--last'  : '',
+                ].filter(Boolean).join(' ')}
+                style={{ background: typeMap[ev.type_id]?.color || 'var(--color-brown)' }}
+                title={ev.title}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {shownDots.length > 0 && (
+        <div className="cal__cell-dots">
+          {shownDots.map((ev, i) => (
+            <span
+              key={i}
+              className="cal__dot"
+              style={{ background: typeMap[ev.type_id]?.color || 'var(--color-brown)' }}
+              title={ev.title}
+            />
+          ))}
+          {moreDots > 0 && <span className="cal__dot-more">+{moreDots}</span>}
+        </div>
+      )}
 
       <div className="cal__cell-emos">
         {emotions.slice(0, 4).map((em, i) => {

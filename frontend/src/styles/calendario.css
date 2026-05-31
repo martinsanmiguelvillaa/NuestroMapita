@@ -286,6 +286,43 @@
   letter-spacing: -0.01em;
 }
 
+/* ─── Range event bars ────────────────────────────────────────────────────── */
+
+.cal__cell-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Extend to cell edges (cancel horizontal padding) */
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
+}
+
+.cal__range-bar {
+  height: 6px;
+  border-radius: 0;
+  opacity: 0.88;
+  flex-shrink: 0;
+}
+
+/* First day of range: left rounded cap, extends right to border */
+.cal__range-bar--first {
+  margin-left: var(--space-2);
+  border-radius: 3px 0 0 3px;
+}
+
+/* Last day of range: extends left to border, right rounded cap */
+.cal__range-bar--last {
+  margin-right: var(--space-2);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Both first and last (short range on same visual row) */
+.cal__range-bar--first.cal__range-bar--last {
+  margin-left: var(--space-2);
+  margin-right: var(--space-2);
+  border-radius: 3px;
+}
+
 .cal__cell-dots {
   display: flex;
   flex-wrap: wrap;
