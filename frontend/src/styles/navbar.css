@@ -57,7 +57,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px;
+  padding: 0 12px;
+  height: 50px;
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -65,6 +66,7 @@
   text-decoration: none;
   white-space: nowrap;
   transition: var(--transition-fast);
+  overflow: visible;
 }
 
 .navbar__link:hover {
@@ -79,14 +81,15 @@
 .navbar__link-icon {
   font-size: 1rem;
   line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .navbar__link-icon-img {
   width: 4.5rem;
   height: 4.5rem;
   object-fit: contain;
-  display: inline-block;
-  vertical-align: middle;
+  display: block;
 }
 
 .navbar__logout {
