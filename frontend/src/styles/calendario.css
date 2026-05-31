@@ -391,13 +391,13 @@
 .cal__cell-emos {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 4px;
   margin-top: auto;
 }
 
 .cal__cell-emo {
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 
@@ -1169,8 +1169,8 @@
   }
 
   .cal__cell-emo {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 
   .cal__weekday {
