@@ -92,6 +92,17 @@
   display: block;
 }
 
+.navbar__link-icon-img[src*="ya-hicimos"],
+.navbar__link-icon-img[src*="por-hacer"],
+.navbar__link-icon-img[src*="viajecitos"],
+.navbar__link-icon-img[src*="cartitas"],
+.navbar__link-icon-img[src*="recetas"],
+.navbar__link-icon-img[src*="nombres"],
+.navbar__link-icon-img[src*="calendario"] {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
 .navbar__logout {
   font-size: var(--text-xs);
   color: var(--color-text-light);
