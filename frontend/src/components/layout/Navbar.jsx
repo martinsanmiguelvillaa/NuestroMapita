@@ -210,7 +210,9 @@ export default function Navbar() {
             onClick={() => setConfigOpen((v) => !v)}
             title="Configuración"
           >
-            <span className="navbar__link-icon">⚙️</span>
+            <span className="navbar__link-icon">
+              <img src={`${S}configuracion.png`} alt="" className="navbar__link-icon-img" />
+            </span>
             <span>Config</span>
           </button>
           {configOpen && (
