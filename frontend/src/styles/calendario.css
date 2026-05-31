@@ -923,7 +923,19 @@
 @media (max-width: 768px) {
   .cal {
     padding: var(--space-3) var(--space-2) var(--space-2);
-    height: calc(100vh - var(--navbar-height) - var(--mobile-nav-height));
+    height: auto;
+    min-height: calc(100vh - var(--navbar-height) - var(--mobile-nav-height));
+    overflow-y: auto;
+  }
+
+  .cal__grid-wrap {
+    overflow: visible;
+  }
+
+  .cal__month-grid,
+  .cal__week-grid {
+    grid-auto-rows: minmax(72px, auto);
+    flex: none;
   }
 
   .cal__header {
@@ -943,6 +955,7 @@
 
   .cal__body {
     flex-direction: column;
+    flex: none;
   }
 
   .cal__cell {
