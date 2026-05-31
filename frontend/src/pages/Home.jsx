@@ -10,14 +10,20 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats } from '../api/photos';
 import { getLetters } from '../api/letters';
 import { polaroidUrl, fullUrl } from '../utils/cloudinary';
 import { toast } from 'sonner';
+import { EmotionForm } from './Emocionario';
 import '../styles/home.css';
 import '../styles/photos.css';
+
+// Variable de módulo: vive mientras el módulo JS esté cargado.
+// Persiste al cambiar de pestaña y volver (mismo módulo), pero se
+// resetea en cada recarga de página (el módulo se re-ejecuta desde cero).
+let fabDismissedSession = false;
 
 // ── Polaroid de video con autoplay por visibilidad ─────────────────
 function VideoPolaroid({ photo }) {
@@ -223,6 +229,183 @@ function HomeLightbox({ photos, index, onClose }) {
   );
 }
 
+// ── Botón flotante nube ────────────────────────────────────────────
+// layoutId="emoc-cloud" → Framer Motion morfea este botón en el modal al abrirse
+function FloatingEmocButton({ onOpen, onDismiss }) {
+  const btnRef     = useRef(null);
+  const dropZoneRef = useRef(null);
+  const [pos, setPos]         = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [justDragged, setJustDragged] = useState(false);
+  const [overDrop, setOverDrop] = useState(false);
+  const s      = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 });
+  const posRef = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const homeTop = btnRef.current?.closest('.home')?.getBoundingClientRect().top ?? 0;
+    const isMobile = window.innerWidth <= 768;
+    const initial = {
+      x: Math.round(window.innerWidth * (isMobile ? 0.78 : 0.84)),
+      y: Math.round(window.innerHeight * (isMobile ? 0.18 : 0.22) - homeTop),
+    };
+    posRef.current = initial;
+    setPos(initial);
+  }, []);
+
+  const clamp = (x, y) => {
+    const homeH = btnRef.current?.closest('.home')?.offsetHeight ?? window.innerHeight;
+    return {
+      x: Math.max(8, Math.min(window.innerWidth - 68, x)),
+      y: Math.max(8, Math.min(homeH - 68, y)),
+    };
+  };
+
+  const onPointerDown = useCallback((e) => {
+    e.preventDefault();
+    btnRef.current.setPointerCapture(e.pointerId);
+    s.current = { active: true, moved: false, startX: e.clientX, startY: e.clientY,
+                  originX: posRef.current.x, originY: posRef.current.y };
+  }, []);
+
+  const onPointerMove = useCallback((e) => {
+    if (!s.current.active) return;
+    const dx = e.clientX - s.current.startX;
+    const dy = e.clientY - s.current.startY;
+    if (!s.current.moved && Math.hypot(dx, dy) < 8) return;
+    s.current.moved = true;
+    setDragging(true);
+    const next = clamp(s.current.originX + dx, s.current.originY + dy);
+    posRef.current = next;
+    setPos(next);
+    const dz = dropZoneRef.current;
+    if (dz) {
+      const r = dz.getBoundingClientRect();
+      setOverDrop(e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onPointerUp = useCallback((e) => {
+    if (!s.current.active) return;
+    s.current.active = false;
+    setDragging(false);
+    setOverDrop(false);
+    if (!s.current.moved) {
+      onOpen();
+    } else {
+      const dz = dropZoneRef.current;
+      if (dz) {
+        const r = dz.getBoundingClientRect();
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+          onDismiss();
+          return;
+        }
+      }
+      setJustDragged(true);
+    }
+  }, [onOpen, onDismiss]);
+
+  if (!pos) return null;
+
+  return (
+    <>
+      <motion.button
+        ref={btnRef}
+        layoutId="emoc-cloud"
+        className={`emoc-fab${dragging ? ' emoc-fab--dragging' : ''}${justDragged ? ' emoc-fab--just-dragged' : ''}`}
+        style={{ left: pos.x, top: pos.y }}
+        initial={{ opacity: 0, scale: 0.35, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={dragging ? { duration: 0 } : {
+          default: { type: 'spring', stiffness: 300, damping: 28, mass: 1 },
+          opacity: { duration: 0.6, ease: 'easeOut', delay: 0.5 },
+          scale:   { type: 'spring', stiffness: 180, damping: 20, mass: 0.7, delay: 0.5 },
+          y:       { type: 'spring', stiffness: 180, damping: 20, mass: 0.7, delay: 0.5 },
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={() => setJustDragged(false)}
+        aria-label="Registrar emoción"
+      >
+        {window.innerWidth > 768 && (
+          <button
+            className="emoc-fab__dismiss"
+            aria-label="Ocultar atajo"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onDismiss(); }}
+          >×</button>
+        )}
+        <span className="emoc-fab__inner">
+          <img src="/icons/nutria-emocionario.png" alt="" className="emoc-fab__nutria" />
+        </span>
+      </motion.button>
+
+      <AnimatePresence>
+        {dragging && window.innerWidth <= 768 && (
+          <motion.div
+            ref={dropZoneRef}
+            className={`emoc-fab__dropzone${overDrop ? ' emoc-fab__dropzone--over' : ''}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <span className="emoc-fab__dropzone-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+// ── Modal rápido del emocionario ───────────────────────────────────
+function EmocQuickModal({ onClose }) {
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const spring = { type: 'spring', stiffness: 300, damping: 28, mass: 1 };
+
+  return (
+    <motion.div
+      className="emoc-quick-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      onClick={onClose}
+    >
+      <motion.div
+        layoutId="emoc-cloud"
+        className="emoc-quick-modal"
+        style={{ borderRadius: 24 }}
+        transition={spring}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, delay: prefersReducedMotion ? 0 : 0.15 }}
+        >
+          <button className="emoc-quick-close" onClick={onClose} aria-label="Cerrar">✕</button>
+          <EmotionForm onSaved={onClose} prefill={null} />
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ── Página principal ───────────────────────────────────────────────
 export default function Home() {
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
@@ -230,6 +413,11 @@ export default function Home() {
   const [previewLetters, setPreviewLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [showEmocModal, setShowEmocModal] = useState(false);
+  const [fabDismissed, setFabDismissed]   = useState(fabDismissedSession);
+  const openEmoc   = useCallback(() => setShowEmocModal(true), []);
+  const closeEmoc  = useCallback(() => setShowEmocModal(false), []);
+  const dismissFab = useCallback(() => { fabDismissedSession = true; setFabDismissed(true); }, []);
 
   const load = async () => {
     try {
@@ -435,6 +623,15 @@ export default function Home() {
         document.body
       )}
 
+      <AnimatePresence>
+        {!showEmocModal && !fabDismissed && (
+          <FloatingEmocButton key="emoc-btn" onOpen={openEmoc} onDismiss={dismissFab} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showEmocModal && <EmocQuickModal key="emoc-modal" onClose={closeEmoc} />}
+      </AnimatePresence>
     </div>
   );
 }
