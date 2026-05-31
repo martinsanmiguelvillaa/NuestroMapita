@@ -677,9 +677,17 @@ function EventFormModal({ event, defaultDate, types, onSave, onClose }) {
 // ─── TypesModal ───────────────────────────────────────────────────────────────
 
 function TypesModal({ types, onClose }) {
+  const TYPE_PALETTE = [
+    '#A0745A', '#C4956A', '#D4B896', '#8B6F47', '#6B4F3A',
+    '#7A9E7E', '#4A7C59', '#B5C9B7', '#3D6B5E', '#9DC3B5',
+    '#8B9DC3', '#5B6FA6', '#C4A882', '#D4927B', '#B07A82',
+    '#8E7BAD', '#C9A96E', '#A67C6E', '#7B9E87', '#C4B5A5',
+  ];
+
   const [list,  setList]  = useState(types);
   const [name,  setName]  = useState('');
   const [color, setColor] = useState('#A0745A');
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const add = async () => {
     if (!name.trim()) return;
@@ -723,12 +731,29 @@ function TypesModal({ types, onClose }) {
         </div>
 
         <div className="cal__type-new">
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="cal__color-pick"
-          />
+          <div className="cal__color-wrap">
+            <button
+              className="cal__color-pick"
+              style={{ background: color }}
+              onClick={() => setPaletteOpen((v) => !v)}
+              type="button"
+              title="Elegir color"
+            />
+            {paletteOpen && (
+              <div className="cal__palette">
+                {TYPE_PALETTE.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`cal__palette-swatch${color === c ? ' is-selected' : ''}`}
+                    style={{ background: c }}
+                    onClick={() => { setColor(c); setPaletteOpen(false); }}
+                    title={c}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
           <input
             type="text"
             value={name}
