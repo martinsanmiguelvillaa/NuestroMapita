@@ -83,6 +83,7 @@ export default function Calendario() {
   const [eventForm,  setEventForm]  = useState(null); // {event, date}
   const [typesMgr,   setTypesMgr]   = useState(false);
   const [delConfirm, setDelConfirm] = useState(null);
+  const [emoToday,   setEmoToday]   = useState(false);
 
   const mk = monthKey(year, month);
 
@@ -244,6 +245,7 @@ export default function Calendario() {
               >{label}</button>
             ))}
           </div>
+          <button className="cal__ctrl-btn" onClick={() => setEmoToday(true)}>🫀 Emocionario</button>
           <button className="cal__ctrl-btn" onClick={() => setTypesMgr(true)}>⚙ Tipos</button>
         </div>
       </div>
@@ -314,7 +316,21 @@ export default function Calendario() {
       {loading && <div className="cal__loading">Cargando...</div>}
 
       {/* ─── Day panel modal ──────────────────────────────────────── */}
-      {selectedDay && (
+      {emoToday && (
+        <DayPanel
+          dateStr={today}
+          events={eventsForDay(today)}
+          emotions={emotionsForDay(today)}
+          typeMap={typeMap}
+          onClose={() => setEmoToday(false)}
+          onAddEvent={() => { setEmoToday(false); setEventForm({ event: null, date: today }); }}
+          onEditEvent={(ev) => { setEmoToday(false); setEventForm({ event: ev, date: ev.date }); }}
+          onDeleteEvent={(ev) => { setEmoToday(false); setDelConfirm(ev); }}
+          onEmotionChange={load}
+          initialTab="emoc"
+        />
+      )}
+      {!emoToday && selectedDay && (
         <DayPanel
           dateStr={selectedDay}
           events={eventsForDay(selectedDay)}
@@ -408,8 +424,8 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
 
 // ─── DayPanel ─────────────────────────────────────────────────────────────────
 
-function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onEditEvent, onDeleteEvent, onEmotionChange }) {
-  const [tab, setTab]         = useState('events');
+function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onEditEvent, onDeleteEvent, onEmotionChange, initialTab }) {
+  const [tab, setTab]         = useState(initialTab || 'events');
   const [editEmo, setEditEmo] = useState(null);
   const confirm               = useConfirm();
 
