@@ -357,16 +357,16 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
   const [editEmo, setEditEmo] = useState(null);
   const confirm               = useConfirm();
 
-  const handleDeleteEmo = (em) => {
-    confirm('Eliminar emoción', '¿Eliminás esta entrada del emocionario?', async () => {
-      try {
-        await deleteEmotionalEntry(em.id);
-        toast.success('Emoción eliminada');
-        onEmotionChange();
-      } catch {
-        toast.error('No se pudo eliminar');
-      }
-    });
+  const handleDeleteEmo = async (em) => {
+    const ok = await confirm({ title: 'Eliminar emoción', message: '¿Eliminás esta entrada del emocionario?', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
+    try {
+      await deleteEmotionalEntry(em.id);
+      toast.success('Emoción eliminada');
+      onEmotionChange();
+    } catch {
+      toast.error('No se pudo eliminar');
+    }
   };
 
   const dayDate = new Date(dateStr + 'T12:00:00');
