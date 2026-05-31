@@ -366,7 +366,6 @@ export default function Calendario() {
             ))}
           </div>
           <button className="cal__ctrl-btn" onClick={() => setEmoToday(true)}>🫀 Emocionario</button>
-          <button className="cal__ctrl-btn" onClick={() => setTypesMgr(true)}>⚙ Tipos</button>
         </div>
       </div>
 
@@ -385,6 +384,7 @@ export default function Calendario() {
             {t.name}
           </button>
         ))}
+        <button className="cal__ctrl-btn cal__ctrl-btn--tipos" onClick={() => setTypesMgr(true)}>⚙ Tipos</button>
       </div>
 
       {/* ─── Body ────────────────────────────────────────────────── */}
