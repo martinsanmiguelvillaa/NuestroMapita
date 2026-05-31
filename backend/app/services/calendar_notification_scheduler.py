@@ -13,7 +13,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.database import SessionLocal
 from app.models.calendar_event import CalendarEvent
-from app.services.push_service import send_push_to_all
+from app.services.push_service import send_calendar_push_to_all
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +175,7 @@ def _check_and_send() -> None:
 
                 print(f"[cal-notif] enviando '{event.title}' (id={event.id}) fire={fire_hhmm}")
 
-                send_push_to_all(
+                send_calendar_push_to_all(
                     db=db,
                     title=f"📅 {event.title}",
                     body=(
@@ -183,7 +183,6 @@ def _check_and_send() -> None:
                         if event.notif_minutes > 1
                         else "Ahora"
                     ),
-                    url="/calendario",
                 )
 
                 print(f"[cal-notif] ✓ enviado '{event.title}'")

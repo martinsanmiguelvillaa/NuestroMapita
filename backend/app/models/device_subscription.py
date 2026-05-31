@@ -27,9 +27,12 @@ class DeviceSubscription(Base):
     enabled     = Column(Boolean, nullable=False, default=True)  # master on/off
 
     # Campos específicos de outfits (NULL = outfits no configurados en este dispositivo)
-    outfit_notif_enabled  = Column(Boolean, nullable=True)
-    outfit_notif_time     = Column(String(5), nullable=True)   # "HH:MM"
-    outfit_last_sent_at   = Column(DateTime, nullable=True)
+    outfit_notif_enabled    = Column(Boolean, nullable=True)
+    outfit_notif_time       = Column(String(5), nullable=True)   # "HH:MM"
+    outfit_last_sent_at     = Column(DateTime, nullable=True)
+
+    # Campos específicos de calendario (NULL = activado por defecto — opt-out)
+    calendar_notif_enabled  = Column(Boolean, nullable=True)
 
     created_at  = Column(DateTime, default=datetime.utcnow)
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

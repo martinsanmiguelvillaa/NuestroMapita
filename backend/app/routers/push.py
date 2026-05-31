@@ -60,6 +60,7 @@ class SettingsRequest(BaseModel):
     enabled: Optional[bool] = None
     outfit_notif_enabled: Optional[bool] = None
     outfit_notif_time: Optional[str] = None
+    calendar_notif_enabled: Optional[bool] = None
 
     @field_validator("outfit_notif_time")
     @classmethod
@@ -161,6 +162,7 @@ def get_device_status(
         "enabled": sub.enabled,
         "outfit_notif_enabled": sub.outfit_notif_enabled,
         "outfit_notif_time": sub.outfit_notif_time,
+        "calendar_notif_enabled": sub.calendar_notif_enabled,
         "device_label": sub.device_label,
     }
 
@@ -181,6 +183,8 @@ def update_settings(
         sub.outfit_notif_enabled = body.outfit_notif_enabled
     if body.outfit_notif_time is not None:
         sub.outfit_notif_time = body.outfit_notif_time
+    if body.calendar_notif_enabled is not None:
+        sub.calendar_notif_enabled = body.calendar_notif_enabled
     db.commit()
     return {"ok": True}
 

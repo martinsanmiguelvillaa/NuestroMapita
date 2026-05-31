@@ -52,20 +52,8 @@ def send_push_to_endpoint(
         return True  # Error transitorio — no deshabilitar
 
 
-def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None:
-    """
-    Envía una notificación push a todos los dispositivos habilitados.
-    Deduplica por endpoint para no enviar dos veces al mismo dispositivo físico
-    (un dispositivo puede tener filas para "van" y "martin" con el mismo endpoint).
-    """
-    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
-        return
-
-    subs = db.query(DeviceSubscription).filter(
-        DeviceSubscription.enabled == True  # noqa: E712
-    ).all()
-
-    # Deduplicar: un endpoint único = un envío
+def _send_to_subs(db: Session, subs: list, title: str, body: str, url: str) -> None:
+    """Envía a una lista de suscripciones ya filtradas, deduplicando por endpoint."""
     seen: dict[str, DeviceSubscription] = {}
     for sub in subs:
         if sub.endpoint not in seen:
@@ -92,8 +80,39 @@ def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None
                 logger.warning("Push error (endpoint=%s): %s", endpoint[:40], e)
 
     if dead_endpoints:
-        # Deshabilitar todas las filas con ese endpoint (van + martin + ambos del mismo dispositivo)
         db.query(DeviceSubscription).filter(
             DeviceSubscription.endpoint.in_(dead_endpoints)
         ).update({"enabled": False}, synchronize_session=False)
         db.commit()
+
+
+def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None:
+    """
+    Envía a todos los dispositivos habilitados (master switch).
+    Para cartitas y otros eventos globales sin preferencia por feature.
+    """
+    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
+        return
+
+    subs = db.query(DeviceSubscription).filter(
+        DeviceSubscription.enabled == True  # noqa: E712
+    ).all()
+
+    _send_to_subs(db, subs, title, body, url)
+
+
+def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/calendario") -> None:
+    """
+    Envía a dispositivos con notificaciones de calendario habilitadas.
+    NULL en calendar_notif_enabled = opt-out no realizado = enviar.
+    False = el usuario eligió no recibir notificaciones de calendario en este dispositivo.
+    """
+    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
+        return
+
+    subs = db.query(DeviceSubscription).filter(
+        DeviceSubscription.enabled == True,                    # noqa: E712
+        DeviceSubscription.calendar_notif_enabled != False,   # NULL o True
+    ).all()
+
+    _send_to_subs(db, subs, title, body, url)

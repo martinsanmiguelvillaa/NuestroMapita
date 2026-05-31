@@ -3,6 +3,7 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { getOutfitNotificationStatus, updateOutfitNotificationSettings } from '../../api/outfitNotifications';
+import { getDeviceStatus, updateDeviceSettings } from '../../api/push';
 import { getOrCreateDeviceId } from '../../utils/deviceId';
 import '../../styles/navbar.css';
 
@@ -35,13 +36,30 @@ export default function Navbar() {
   const [outfitNotif, setOutfitNotif] = useState({ van: null, martin: null });
   const [togglingOutfit, setTogglingOutfit] = useState({ van: false, martin: false });
 
+  // Estado del toggle de calendario para este dispositivo
+  // null = no cargado, true/false = estado real; undefined calendar_notif_enabled = true (opt-out)
+  const [calendarNotif, setCalendarNotif] = useState(null); // { registered, enabled }
+  const [togglingCalendar, setTogglingCalendar] = useState(false);
+
   useEffect(() => {
     if (!configOpen) return;
     const deviceId = getOrCreateDeviceId();
     Promise.all([
       getOutfitNotificationStatus('van', deviceId).catch(() => null),
       getOutfitNotificationStatus('martin', deviceId).catch(() => null),
-    ]).then(([van, martin]) => setOutfitNotif({ van, martin }));
+      getDeviceStatus(deviceId, 'ambos').catch(() => null),
+    ]).then(([van, martin, deviceStatus]) => {
+      setOutfitNotif({ van, martin });
+      if (deviceStatus?.exists) {
+        // NULL en calendar_notif_enabled = opt-out no realizado = activado
+        setCalendarNotif({
+          registered: true,
+          enabled: deviceStatus.calendar_notif_enabled !== false,
+        });
+      } else {
+        setCalendarNotif({ registered: false, enabled: false });
+      }
+    });
   }, [configOpen]);
 
   const toggleOutfit = async (userKey) => {
@@ -90,6 +108,22 @@ export default function Navbar() {
           window.dispatchEvent(new CustomEvent('outfit-notif-changed', { detail: { userKey } }));
         }
       }
+    }
+  };
+
+  const toggleCalendar = async () => {
+    if (!calendarNotif?.registered) return;
+    setTogglingCalendar(true);
+    const newEnabled = !calendarNotif.enabled;
+    try {
+      await updateDeviceSettings({
+        device_id: getOrCreateDeviceId(),
+        user_key: 'ambos',
+        calendar_notif_enabled: newEnabled,
+      });
+      setCalendarNotif(prev => ({ ...prev, enabled: newEnabled }));
+    } finally {
+      setTogglingCalendar(false);
     }
   };
 
@@ -198,6 +232,18 @@ export default function Navbar() {
                   >
                     <span>{subscribed ? '💌' : '💌'}</span>
                     <span>{subscribed ? 'Desactivar notificaciones de cartitas' : 'Activar notificaciones de cartitas'}</span>
+                  </button>
+                )}
+
+                {/* Notificaciones de calendario */}
+                {calendarNotif?.registered && (
+                  <button
+                    className="navbar__config-item"
+                    onClick={toggleCalendar}
+                    disabled={togglingCalendar}
+                  >
+                    <span>📅</span>
+                    <span>{calendarNotif.enabled ? 'Desactivar notificaciones de calendario' : 'Activar notificaciones de calendario'}</span>
                   </button>
                 )}
 
