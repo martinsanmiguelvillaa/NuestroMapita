@@ -572,6 +572,8 @@ function EventRow({ event, type, onEdit, onDelete }) {
 
 function TypeSelect({ types, value, onChange }) {
   const [open, setOpen] = useState(false);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
+  const triggerRef = useRef(null);
   const ref = useRef(null);
   const selected = types.find((t) => String(t.id) === String(value));
 
@@ -581,12 +583,21 @@ function TypeSelect({ types, value, onChange }) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const handleOpen = () => {
+    if (!open && triggerRef.current) {
+      const r = triggerRef.current.getBoundingClientRect();
+      setDropPos({ top: r.bottom + 4, left: r.left, width: r.width });
+    }
+    setOpen((v) => !v);
+  };
+
   return (
     <div className="cal__type-select" ref={ref}>
       <button
         type="button"
+        ref={triggerRef}
         className="cal__type-select-trigger"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleOpen}
       >
         {selected
           ? <><span className="cal__type-select-dot" style={{ background: selected.color }} />{selected.name}</>
@@ -595,7 +606,10 @@ function TypeSelect({ types, value, onChange }) {
         <span className="cal__type-select-arrow">▾</span>
       </button>
       {open && (
-        <div className="cal__type-select-dropdown">
+        <div
+          className="cal__type-select-dropdown"
+          style={{ position: 'fixed', top: dropPos.top, left: dropPos.left, width: dropPos.width }}
+        >
           <button
             type="button"
             className={`cal__type-select-opt${!value ? ' is-active' : ''}`}
