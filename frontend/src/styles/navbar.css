@@ -82,8 +82,8 @@
 }
 
 .navbar__link-icon-img {
-  width: 3.0rem;
-  height: 3.0rem;
+  width: 3.5rem;
+  height: 3.5rem;
   object-fit: contain;
   display: inline-block;
   vertical-align: middle;
@@ -286,6 +286,11 @@
   .navbar__link-icon {
     font-size: 1.4rem;
     line-height: 1;
+  }
+
+  .navbar__link-icon-img {
+    width: 3.0rem;
+    height: 3.0rem;
   }
 
   /* Botón de config: fuera del scroll, siempre visible a la derecha */
