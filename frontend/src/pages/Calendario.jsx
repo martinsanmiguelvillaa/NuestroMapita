@@ -688,7 +688,8 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
                       {e && <img src={e.img} alt="" className="cal__emo-row-img" />}
                       <div className="cal__emo-row-info">
                         <span className="cal__emo-row-who">
-                          {em.user_key === 'van' ? 'Van 🌸' : 'Martín 🌿'}
+                          <img src={em.user_key === 'van' ? '/icons/icono-van.png' : '/icons/icono-martin.png'} alt="" className="cal__emo-row-who-icon" />
+                          {em.user_key === 'van' ? 'Van' : 'Martín'}
                         </span>
                         <span className="cal__emo-row-name">
                           {em.user_key === 'van' ? e?.labelF : e?.labelM}

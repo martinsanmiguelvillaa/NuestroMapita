@@ -376,6 +376,7 @@ export default function Outfits() {
               onClick={() => handleSelectUser(u.key)}
               disabled={busy}
             >
+              <img src={`/icons/icono-${u.key}.png`} alt={u.name} className="outfits-page__user-icon" />
               {u.name}
             </button>
           ))}

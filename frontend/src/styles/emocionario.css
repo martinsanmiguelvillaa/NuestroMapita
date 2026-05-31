@@ -119,6 +119,13 @@
   border-color: var(--color-brown-light);
 }
 
+.emoc-form__user-avatar {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 /* Fecha */
 .emoc-form__date-row {
   display: flex;
@@ -542,7 +549,9 @@
 }
 
 .emoc-modal__user-avatar {
-  font-size: 1.2em;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .emoc-modal__user-name {

@@ -29,8 +29,8 @@ function emotionLabel(em, userKey) {
 const EMOTION_MAP = Object.fromEntries(EMOTIONS.map((e) => [e.key, e]));
 
 const USERS = [
-  { key: 'van',    label: 'Van',    avatar: '🌸' },
-  { key: 'martin', label: 'Martín', avatar: '🌿' },
+  { key: 'van',    label: 'Van',    avatar: '/icons/icono-van.png' },
+  { key: 'martin', label: 'Martín', avatar: '/icons/icono-martin.png' },
 ];
 
 const INTENSITY_LABELS = ['', 'Leve', 'Suave', 'Medio', 'Intenso', 'Muy intenso'];
@@ -130,7 +130,7 @@ export function EmotionForm({ onSaved, prefill }) {
             <button key={u.key} type="button"
               className={`emoc-form__user-btn${userKey === u.key ? ' emoc-form__user-btn--active' : ''}`}
               onClick={() => setUserKey(u.key)}>
-              <span>{u.avatar}</span><span>{u.label}</span>
+              <img src={u.avatar} alt={u.label} className="emoc-form__user-avatar" /><span>{u.label}</span>
             </button>
           ))}
         </div>
@@ -261,7 +261,7 @@ function DayModal({ day, entries, onClose, onDelete, onSaved }) {
             return (
               <div key={u.key} className="emoc-modal__user-card">
                 <div className="emoc-modal__user-header">
-                  <span className="emoc-modal__user-avatar">{u.avatar}</span>
+                  <img src={u.avatar} alt={u.label} className="emoc-modal__user-avatar" />
                   <span className="emoc-modal__user-name">{u.label}</span>
                 </div>
                 {userEntries.length > 0 ? (

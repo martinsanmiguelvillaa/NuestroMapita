@@ -415,10 +415,11 @@ function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
         </p>
         <div className="profile-cards">
           {[
-            { id: 'van',    label: 'Van',    avatar: null },
-            { id: 'martin', label: 'Martín', avatar: null },
-          ].map(({ id, label, avatar }) => (
+            { id: 'van',    label: 'Van',    icon: '/icons/icono-van.png' },
+            { id: 'martin', label: 'Martín', icon: '/icons/icono-martin.png' },
+          ].map(({ id, label, icon }) => (
             <button key={id} className="profile-card" onClick={() => onProfileChange(id)}>
+              <img src={icon} alt={label} className="profile-card__icon" />
               <span className="profile-card__name">{label}</span>
             </button>
           ))}

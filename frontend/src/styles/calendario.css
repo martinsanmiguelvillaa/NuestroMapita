@@ -616,10 +616,20 @@
 }
 
 .cal__emo-row-who {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   color: var(--color-text-light);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.cal__emo-row-who-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .cal__emo-row-name {

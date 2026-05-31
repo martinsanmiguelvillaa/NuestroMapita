@@ -375,9 +375,10 @@
   transform: translateY(-2px);
 }
 
-.profile-card__avatar {
-  font-size: 3rem;
-  line-height: 1;
+.profile-card__icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 
 .profile-card__name {
