@@ -350,6 +350,22 @@
   border-radius: 3px;
 }
 
+.cal__cell-dot-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cal__dot-event {
+  height: 18px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  opacity: 0.92;
+}
+
+/* legacy dot styles kept for any remaining uses */
 .cal__cell-dots {
   display: flex;
   flex-wrap: wrap;

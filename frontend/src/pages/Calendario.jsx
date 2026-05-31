@@ -588,14 +588,16 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
       )}
 
       {shownDots.length > 0 && (
-        <div className="cal__cell-dots">
+        <div className="cal__cell-dot-events">
           {shownDots.map((ev, i) => (
-            <span
+            <div
               key={i}
-              className="cal__dot"
+              className="cal__dot-event"
               style={{ background: typeMap[ev.type_id]?.color || 'var(--color-brown)' }}
               title={ev.title}
-            />
+            >
+              <span className="cal__range-bar-label">{ev.title}</span>
+            </div>
           ))}
           {moreDots > 0 && <span className="cal__dot-more">+{moreDots}</span>}
         </div>
