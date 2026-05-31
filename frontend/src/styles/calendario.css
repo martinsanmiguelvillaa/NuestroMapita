@@ -893,6 +893,94 @@
   border-color: var(--color-brown);
 }
 
+/* ─── TypeSelect ──────────────────────────────────────────────────────────────── */
+
+.cal__type-select {
+  position: relative;
+  width: 100%;
+}
+
+.cal__type-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition-fast);
+}
+.cal__type-select-trigger:hover,
+.cal__type-select-trigger:focus {
+  outline: none;
+  border-color: var(--color-brown);
+}
+
+.cal__type-select-placeholder {
+  color: var(--color-text-light);
+  flex: 1;
+}
+
+.cal__type-select-arrow {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--color-text-light);
+}
+
+.cal__type-select-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cal__type-select-dot--none {
+  border: 1.5px solid var(--color-beige-mid);
+  background: transparent !important;
+}
+
+.cal__type-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-beige-mid);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 16px rgba(100, 70, 40, 0.13);
+  z-index: 200;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cal__type-select-opt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+.cal__type-select-opt:hover {
+  background: rgba(240, 228, 208, 0.7);
+}
+.cal__type-select-opt.is-active {
+  background: rgba(240, 228, 208, 0.5);
+  font-weight: 600;
+}
+
 /* ─── Delete confirm ──────────────────────────────────────────────────────────── */
 
 .cal__del-text {

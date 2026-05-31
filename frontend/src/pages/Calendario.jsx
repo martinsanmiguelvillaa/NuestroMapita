@@ -568,6 +568,59 @@ function EventRow({ event, type, onEdit, onDelete }) {
   );
 }
 
+// ─── TypeSelect ───────────────────────────────────────────────────────────────
+
+function TypeSelect({ types, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = types.find((t) => String(t.id) === String(value));
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="cal__type-select" ref={ref}>
+      <button
+        type="button"
+        className="cal__type-select-trigger"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {selected
+          ? <><span className="cal__type-select-dot" style={{ background: selected.color }} />{selected.name}</>
+          : <span className="cal__type-select-placeholder">Sin tipo</span>
+        }
+        <span className="cal__type-select-arrow">▾</span>
+      </button>
+      {open && (
+        <div className="cal__type-select-dropdown">
+          <button
+            type="button"
+            className={`cal__type-select-opt${!value ? ' is-active' : ''}`}
+            onClick={() => { onChange(''); setOpen(false); }}
+          >
+            <span className="cal__type-select-dot cal__type-select-dot--none" />
+            Sin tipo
+          </button>
+          {types.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`cal__type-select-opt${String(value) === String(t.id) ? ' is-active' : ''}`}
+              onClick={() => { onChange(t.id); setOpen(false); }}
+            >
+              <span className="cal__type-select-dot" style={{ background: t.color }} />
+              {t.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── EventFormModal ────────────────────────────────────────────────────────────
 
 function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onClose }) {
@@ -702,10 +755,11 @@ function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onC
           <div className="cal__form-row">
             <div className="cal__fg">
               <label>Tipo de evento</label>
-              <select value={f.type_id} onChange={(e) => set('type_id', e.target.value)}>
-                <option value="">Sin tipo</option>
-                {types.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
+              <TypeSelect
+                types={types}
+                value={f.type_id}
+                onChange={(v) => set('type_id', v)}
+              />
             </div>
             <div className="cal__fg">
               <label>Se repite</label>
