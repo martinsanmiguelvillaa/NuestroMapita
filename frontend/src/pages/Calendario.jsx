@@ -1048,11 +1048,7 @@ function TypesModal({ types, onClose }) {
 // ─── DeleteModal ──────────────────────────────────────────────────────────────
 
 function DeleteModal({ event, onCancel, onDelete }) {
-  const isSeries = (() => {
-    if (!event.series_id || !event.recurrence) return false;
-    try { const r = JSON.parse(event.recurrence); return r.freq !== 'none' && !r.end_date; }
-    catch { return false; }
-  })();
+  const isSeries = !!event.series_id;
   return (
     <div className="cal__backdrop" onClick={onCancel}>
       <div className="cal__modal cal__modal--sm" onClick={(e) => e.stopPropagation()}>
