@@ -191,3 +191,9 @@
     --bg-calendario:  url('/backgrounds/fondo-emocionario-celu.png');
   }
 }
+
+/* El icono de Martín tiene más espacio en blanco que el de Van,
+   así que se agranda un poco para que se vean visualmente iguales. */
+img[src*="icono-martin"] {
+  transform: scale(1.2);
+}
