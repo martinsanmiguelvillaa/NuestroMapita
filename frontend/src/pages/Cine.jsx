@@ -19,8 +19,8 @@ const TYPE_TABS = [
 
 const STATUS_TABS = [
   { value: 'all',      label: 'Todas' },
-  { value: 'watching', label: '▶ Viendo' },
   { value: 'watched',  label: '✓ Ya vimos' },
+  { value: 'watching', label: '▶ Viendo' },
   { value: 'to_watch', label: '⏳ Por ver' },
 ];
 
