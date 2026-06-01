@@ -83,6 +83,7 @@ export default function Calendario() {
   const [year, setYear]   = useState(() => new Date().getFullYear());
   const [month, setMonth] = useState(() => new Date().getMonth());
   const [view, setView]   = useState('month');
+  const [weekAnchor, setWeekAnchor] = useState(todayISO);
 
   const [events,  setEvents]  = useState([]);
   const [types,   setTypes]   = useState([]);
@@ -132,14 +133,13 @@ export default function Calendario() {
   }, [month]);
 
   const shiftWeek = useCallback((delta) => {
-    const base = selectedDay || today;
-    const d = new Date(base + 'T12:00:00');
+    const d = new Date(weekAnchor + 'T12:00:00');
     d.setDate(d.getDate() + delta * 7);
-    const newDay = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    setSelectedDay(newDay);
+    const newAnchor = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    setWeekAnchor(newAnchor);
     setYear(d.getFullYear());
     setMonth(d.getMonth());
-  }, [selectedDay, today]);
+  }, [weekAnchor]);
 
   const goToday = useCallback(() => {
     const n = new Date();
@@ -165,7 +165,7 @@ export default function Calendario() {
   );
 
   const grid     = useMemo(() => buildGrid(year, month), [year, month]);
-  const weekDays = useMemo(() => weekOf(selectedDay || today), [selectedDay, today]);
+  const weekDays = useMemo(() => weekOf(weekAnchor), [weekAnchor]);
 
   const weekRangeLabel = useMemo(() => {
     const first = new Date(weekDays[0] + 'T12:00:00');
@@ -380,7 +380,7 @@ export default function Calendario() {
               <button
                 key={v}
                 className={`cal__view-btn${view === v ? ' is-active' : ''}`}
-                onClick={() => setView(v)}
+                onClick={() => { if (v === 'week') setWeekAnchor(selectedDay || today); setView(v); }}
               >{label}</button>
             ))}
           </div>
