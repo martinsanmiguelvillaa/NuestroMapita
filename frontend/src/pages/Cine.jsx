@@ -19,6 +19,7 @@ const TYPE_TABS = [
 
 const STATUS_TABS = [
   { value: 'all',      label: 'Todas' },
+  { value: 'watching', label: '▶ Viendo' },
   { value: 'watched',  label: '✓ Ya vimos' },
   { value: 'to_watch', label: '⏳ Por ver' },
 ];
@@ -30,6 +31,7 @@ function buildParams(typeFilter, statusFilter, search) {
   if (typeFilter === 'series')   params.type = 'series';
   if (typeFilter === 'favorite') params.is_favorite = true;
   if (statusFilter === 'to_watch') params.status = 'to_watch';
+  if (statusFilter === 'watching') params.status = 'watching';
   if (statusFilter === 'watched')  params.status = 'watched';
   return params;
 }
@@ -98,10 +100,9 @@ export default function Cine() {
     }
   };
 
-  const handleToggleStatus = async (item) => {
-    const next = item.status === 'to_watch' ? 'watched' : 'to_watch';
+  const handleToggleStatus = async (item, nextStatus) => {
     try {
-      await updateCineItem(item.id, { status: next });
+      await updateCineItem(item.id, { status: nextStatus });
       load();
     } catch (err) {
       toast.error('No se pudo actualizar: ' + err.message);
@@ -215,7 +216,7 @@ export default function Cine() {
                 onEdit={() => openEdit(item)}
                 onDelete={() => handleDelete(item)}
                 onToggleFavorite={() => handleToggleFavorite(item)}
-                onToggleStatus={() => handleToggleStatus(item)}
+                onToggleStatus={(nextStatus) => handleToggleStatus(item, nextStatus)}
               />
             ))}
           </div>

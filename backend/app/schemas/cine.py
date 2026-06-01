@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 VALID_TYPES = {"movie", "series"}
-VALID_STATUSES = {"to_watch", "watched"}
+VALID_STATUSES = {"to_watch", "watching", "watched"}
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +74,7 @@ class CineItemCreate(BaseModel):
     @classmethod
     def status_valid(cls, v: str) -> str:
         if v not in VALID_STATUSES:
-            raise ValueError('El estado debe ser "to_watch" o "watched"')
+            raise ValueError('El estado debe ser "to_watch", "watching" o "watched"')
         return v
 
     @field_validator("rating")
@@ -128,7 +128,7 @@ class CineItemUpdate(BaseModel):
     @classmethod
     def status_valid(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in VALID_STATUSES:
-            raise ValueError('El estado debe ser "to_watch" o "watched"')
+            raise ValueError('El estado debe ser "to_watch", "watching" o "watched"')
         return v
 
     @field_validator("rating")

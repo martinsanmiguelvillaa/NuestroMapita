@@ -2,7 +2,7 @@ import StarRating from '../places/StarRating';
 import '../../styles/cine.css';
 
 const TYPE_LABEL = { movie: '🎬 Película', series: '📺 Serie' };
-const STATUS_LABEL = { to_watch: 'Por ver', watched: 'Ya vimos' };
+const STATUS_LABEL = { to_watch: 'Por ver', watching: 'Viendo', watched: 'Ya vimos' };
 
 export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavorite, onToggleStatus, disabled = false }) {
   const lastComment = item.comments?.[item.comments.length - 1];
@@ -76,14 +76,18 @@ export default function CineCard({ item, onView, onEdit, onDelete, onToggleFavor
           >
             {item.is_favorite ? '♥' : '♡'}
           </button>
-          <button
-            className="cine-card__status-btn"
-            onClick={onToggleStatus}
-            disabled={disabled}
-            title={item.status === 'to_watch' ? 'Marcar como vista' : 'Volver a pendiente'}
-          >
-            {item.status === 'to_watch' ? '✓' : '↩'}
-          </button>
+          {item.status === 'to_watch' && <>
+            <button className="cine-card__status-btn" onClick={() => onToggleStatus('watching')} disabled={disabled} title="Viendo">▶</button>
+            <button className="cine-card__status-btn" onClick={() => onToggleStatus('watched')} disabled={disabled} title="Ya vimos">✓</button>
+          </>}
+          {item.status === 'watching' && <>
+            <button className="cine-card__status-btn" onClick={() => onToggleStatus('watched')} disabled={disabled} title="Ya vimos">✓</button>
+            <button className="cine-card__status-btn" onClick={() => onToggleStatus('to_watch')} disabled={disabled} title="Volver a por ver">↩</button>
+          </>}
+          {item.status === 'watched' && <>
+            <button className="cine-card__status-btn" onClick={() => onToggleStatus('watching')} disabled={disabled} title="Viendo de nuevo">▶</button>
+            <button className="cine-card__status-btn" onClick={() => onToggleStatus('to_watch')} disabled={disabled} title="Volver a por ver">↩</button>
+          </>}
         </div>
         <div className="cine-card__actions">
           <button className="btn btn-ghost btn-sm" onClick={onEdit} disabled={disabled}>Editar</button>

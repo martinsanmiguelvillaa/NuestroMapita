@@ -255,7 +255,7 @@ export default function CineForm({ initialData, onSaved, onClose, onCancel, onDi
       <div className="form-group">
         <label className="form-label">Estado *</label>
         <div className="cine-form__type-options">
-          {[['to_watch', '⏳ Por ver'], ['watched', '✓ Ya vimos']].map(([val, label]) => (
+          {[['to_watch', '⏳ Por ver'], ['watching', '▶ Viendo'], ['watched', '✓ Ya vimos']].map(([val, label]) => (
             <label
               key={val}
               className={`cine-form__type-btn ${form.status === val ? 'selected' : ''}`}

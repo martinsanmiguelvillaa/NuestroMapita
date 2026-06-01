@@ -359,6 +359,12 @@
   border: 1px solid var(--color-beige-mid);
 }
 
+.cine-status--watching {
+  background: rgba(219, 234, 254, 0.92);
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+
 .cine-status--watched {
   background: var(--color-cine-watched-bg);
   color: var(--color-cine-watched-text);
