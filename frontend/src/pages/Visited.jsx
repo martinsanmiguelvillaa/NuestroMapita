@@ -116,7 +116,7 @@ function PlaceCard({ place, onEdit, onDelete, onPhotosChanged }) {
           {place.name}
           {place.latitude != null && <span className="card-map-pin" title="Aparece en el mapa">📍</span>}
         </h3>
-        <p className="place-card__date">{formatDate(place.visit_date)}</p>
+        {place.visit_date && <p className="place-card__date">{formatDate(place.visit_date)}</p>}
         {place.rating && <StarRating value={place.rating} readOnly small />}
         {place.would_revisit != null && (
           <span className={`place-card__revisit-badge ${place.would_revisit ? 'place-card__revisit-badge--yes' : 'place-card__revisit-badge--no'}`}>

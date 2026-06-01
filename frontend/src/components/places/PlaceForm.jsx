@@ -71,7 +71,6 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
     setError('');
 
     if (!form.name.trim()) return setError('El nombre es obligatorio');
-    if (!form.visit_date) return setError('La fecha de visita es obligatoria');
 
     const payload = {
       name: form.name.trim(),
@@ -117,13 +116,12 @@ export default function PlaceForm({ initialData = {}, onSubmit, onCancel, loadin
       </div>
 
       <div className="form-group">
-        <label className="form-label">Fecha de visita *</label>
+        <label className="form-label">Fecha de visita</label>
         <input
           className="form-input"
           type="date"
           value={form.visit_date}
           onChange={(e) => set('visit_date', e.target.value)}
-          required
         />
       </div>
 

@@ -9,7 +9,7 @@ from app.schemas.photo import PhotoResponse
 class PlaceVisitedCreate(BaseModel):
     name: str
     address: Optional[str] = None
-    visit_date: date
+    visit_date: Optional[date] = None
     comment: Optional[str] = None
     rating: Optional[int] = None
     google_maps_url: Optional[str] = None
@@ -55,7 +55,7 @@ class PlaceVisitedResponse(BaseModel):
     id: int
     name: str
     address: Optional[str]
-    visit_date: date
+    visit_date: Optional[date]
     comment: Optional[str]
     rating: Optional[int]
     google_maps_url: Optional[str]
