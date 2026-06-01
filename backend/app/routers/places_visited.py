@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, selectinload
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 from app.models.photo import Photo
 
 from app.database import get_db
@@ -42,14 +42,15 @@ def list_visited(
     if revisit is not None:
         query = query.filter(PlaceVisited.would_revisit == revisit)
 
+    sort_date = func.coalesce(PlaceVisited.visit_date, PlaceVisited.created_at)
     if sort == "oldest":
-        query = query.order_by(PlaceVisited.created_at.asc())
+        query = query.order_by(sort_date.asc())
     elif sort == "rating":
         # nullslast no es compatible con todas las versiones de MySQL;
         # rating IS NULL devuelve 0 (no nulo) o 1 (nulo), ordenando nulos al final
         query = query.order_by(PlaceVisited.rating.is_(None), PlaceVisited.rating.desc())
     else:  # newest
-        query = query.order_by(PlaceVisited.created_at.desc())
+        query = query.order_by(sort_date.desc())
 
     return query.all()
 
