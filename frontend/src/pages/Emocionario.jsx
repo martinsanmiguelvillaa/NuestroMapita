@@ -47,7 +47,7 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 // Formulario rápido
 // ─────────────────────────────────────────────
-export function EmotionForm({ onSaved, prefill }) {
+export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
   const [emotionKeys, setEmotionKeys] = useState(() =>
@@ -60,6 +60,11 @@ export function EmotionForm({ onSaved, prefill }) {
 
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
+
+  useEffect(() => {
+    const dirty = emotionKeys.size > 0 || note.trim() !== '';
+    onDirtyChange?.(dirty);
+  }, [emotionKeys, note, onDirtyChange]);
 
   const toggleEmotion = (key) => {
     if (isEditing) {

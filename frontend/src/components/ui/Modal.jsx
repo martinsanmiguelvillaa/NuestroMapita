@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import '../../styles/modal.css';
 
@@ -13,11 +13,20 @@ export const getOpenModalCount = () => _openModalCount;
 export default function Modal({ isOpen, onClose, title, children, wide = false, fullscreen = false, isDirty = false, noPadding = false }) {
   const sheetRef = useRef(null);
   const drag = useRef({ active: false, startY: 0, dy: 0 });
+  const isDirtyRef = useRef(isDirty);
+  isDirtyRef.current = isDirty;
+
+  const [confirmClose, setConfirmClose] = useState(false);
+
+  const attemptClose = useCallback(() => {
+    if (isDirtyRef.current) setConfirmClose(true);
+    else onClose();
+  }, [onClose]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) { setConfirmClose(false); return; }
     _openModalCount++;
-    const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
+    const handleEsc = (e) => { if (e.key === 'Escape') attemptClose(); };
     document.addEventListener('keydown', handleEsc);
     document.body.style.overflow = 'hidden';
     return () => {
@@ -25,7 +34,7 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
       _openModalCount--;
       if (_openModalCount === 0) document.body.style.overflow = '';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, attemptClose]);
 
   if (!isOpen) return null;
 
@@ -57,11 +66,11 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
     const snap = 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
 
     if (drag.current.dy > CLOSE_THRESHOLD) {
-      if (isDirty) {
-        // Snap back — el formulario tiene cambios sin guardar, no cerrar
+      if (isDirtyRef.current) {
         el.style.transition = snap;
         el.style.transform = 'translateY(0)';
         if (overlay) { overlay.style.transition = 'opacity 0.3s'; overlay.style.opacity = '1'; }
+        setConfirmClose(true);
       } else {
         el.style.transition = snap;
         el.style.transform = 'translateY(110%)';
@@ -76,7 +85,7 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
   };
 
   return createPortal(
-    <div className={`modal-overlay${fullscreen ? ' modal-overlay--fullscreen' : ''}`} onClick={onClose}>
+    <div className={`modal-overlay${fullscreen ? ' modal-overlay--fullscreen' : ''}`} onClick={attemptClose}>
       <div
         ref={sheetRef}
         className={`modal-content${wide ? ' modal-wide' : ''}${fullscreen ? ' modal-fullscreen' : ''}`}
@@ -87,12 +96,24 @@ export default function Modal({ isOpen, onClose, title, children, wide = false, 
       >
         <div className="modal-header">
           {title && <h2 className="modal-title">{title}</h2>}
-          <button className="modal-close" onClick={onClose} aria-label="Cerrar">
+          <button className="modal-close" onClick={attemptClose} aria-label="Cerrar">
             ×
           </button>
         </div>
         <div className={`modal-body${noPadding ? ' modal-body--no-padding' : ''}`}>{children}</div>
       </div>
+
+      {confirmClose && (
+        <div className="unsaved-overlay" onClick={(e) => e.stopPropagation()}>
+          <div className="unsaved-dialog">
+            <p className="unsaved-dialog__text">¿Salir sin guardar los cambios?</p>
+            <div className="unsaved-dialog__actions">
+              <button className="btn btn-ghost btn-sm" onClick={() => setConfirmClose(false)}>Quedarme</button>
+              <button className="btn btn-rose btn-sm" onClick={onClose}>Salir sin guardar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>,
     document.body,
   );

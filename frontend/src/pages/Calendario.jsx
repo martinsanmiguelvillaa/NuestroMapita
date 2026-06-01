@@ -638,9 +638,10 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
 // ─── DayPanel ─────────────────────────────────────────────────────────────────
 
 function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onEditEvent, onDeleteEvent, onEmotionChange, initialTab }) {
-  const [tab, setTab]         = useState(initialTab || 'events');
-  const [editEmo, setEditEmo] = useState(null);
-  const confirm               = useConfirm();
+  const [tab, setTab]               = useState(initialTab || 'events');
+  const [editEmo, setEditEmo]       = useState(null);
+  const [emotionDirty, setEmotionDirty] = useState(false);
+  const confirm                     = useConfirm();
 
   const handleDeleteEmo = async (em) => {
     const ok = await confirm({ title: 'Eliminar emoción', message: '¿Eliminás esta entrada del emocionario?', confirmLabel: 'Eliminar', danger: true });
@@ -660,7 +661,7 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
   useEffect(() => { setEditEmo(null); }, [dateStr]);
 
   return (
-    <Modal isOpen onClose={onClose} title={label} fullscreen noPadding>
+    <Modal isOpen onClose={onClose} title={label} fullscreen noPadding isDirty={tab === 'emoc' && emotionDirty}>
       <div className="cal__panel-tabs">
         <button className={`cal__ptab${tab === 'events' ? ' is-active' : ''}`} onClick={() => setTab('events')}>
           Eventos
@@ -753,7 +754,8 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
                     ? { userKey: editEmo.user_key, entry: editEmo }
                     : { entry: { date: dateStr } }
                 }
-                onSaved={() => { setEditEmo(null); onEmotionChange(); }}
+                onSaved={() => { setEditEmo(null); setEmotionDirty(false); onEmotionChange(); }}
+                onDirtyChange={setEmotionDirty}
               />
             </div>
           </>
@@ -889,7 +891,15 @@ function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onC
     notif_minutes: event?.notif_minutes || 30,
     freq:          isRange ? 'range' : getFreq(),
   });
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [confirmClose, setConfirmClose] = useState(false);
+
+  const isDirty = f.title.trim() !== '' || f.description.trim() !== '';
+
+  const handleClose = () => {
+    if (isDirty) setConfirmClose(true);
+    else onClose();
+  };
 
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
 
@@ -928,11 +938,11 @@ function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onC
   };
 
   return (
-    <div className="cal__backdrop" onClick={onClose}>
+    <div className="cal__backdrop" onClick={handleClose}>
       <div className="cal__modal" onClick={(e) => e.stopPropagation()}>
         <div className="cal__modal-head">
           <h3 className="cal__modal-title">{editing ? 'Editar evento' : 'Nuevo evento'}</h3>
-          <button className="cal__modal-close" onClick={onClose}>✕</button>
+          <button className="cal__modal-close" onClick={handleClose}>✕</button>
         </div>
 
         <form className="cal__form" onSubmit={submit}>
@@ -1039,12 +1049,24 @@ function EventFormModal({ event, defaultDate, defaultEndDate, types, onSave, onC
           </div>
 
           <div className="cal__form-actions">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>Cancelar</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={handleClose}>Cancelar</button>
             <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
               {saving ? 'Guardando...' : editing ? 'Guardar cambios' : 'Crear evento'}
             </button>
           </div>
         </form>
+
+        {confirmClose && (
+          <div className="unsaved-overlay" onClick={(e) => e.stopPropagation()}>
+            <div className="unsaved-dialog">
+              <p className="unsaved-dialog__text">¿Salir sin guardar el evento?</p>
+              <div className="unsaved-dialog__actions">
+                <button className="btn btn-ghost btn-sm" onClick={() => setConfirmClose(false)}>Quedarme</button>
+                <button className="btn btn-rose btn-sm" onClick={onClose}>Salir sin guardar</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
