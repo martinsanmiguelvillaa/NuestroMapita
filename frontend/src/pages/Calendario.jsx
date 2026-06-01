@@ -131,6 +131,16 @@ export default function Calendario() {
     else setMonth((m) => m + 1);
   }, [month]);
 
+  const shiftWeek = useCallback((delta) => {
+    const base = selectedDay || today;
+    const d = new Date(base + 'T12:00:00');
+    d.setDate(d.getDate() + delta * 7);
+    const newDay = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    setSelectedDay(newDay);
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
+  }, [selectedDay, today]);
+
   const goToday = useCallback(() => {
     const n = new Date();
     setYear(n.getFullYear());
@@ -156,6 +166,15 @@ export default function Calendario() {
 
   const grid     = useMemo(() => buildGrid(year, month), [year, month]);
   const weekDays = useMemo(() => weekOf(selectedDay || today), [selectedDay, today]);
+
+  const weekRangeLabel = useMemo(() => {
+    const first = new Date(weekDays[0] + 'T12:00:00');
+    const last  = new Date(weekDays[6] + 'T12:00:00');
+    if (first.getMonth() === last.getMonth()) {
+      return `${first.getDate()} – ${last.getDate()} ${MONTHS_ES[first.getMonth()]} ${first.getFullYear()}`;
+    }
+    return `${first.getDate()} ${MONTHS_ES[first.getMonth()]} – ${last.getDate()} ${MONTHS_ES[last.getMonth()]} ${last.getFullYear()}`;
+  }, [weekDays]);
 
   const handleSaveEvent = async (data) => {
     try {
@@ -350,9 +369,9 @@ export default function Calendario() {
       {/* ─── Header ─────────────────────────────────────────────── */}
       <div className="cal__header">
         <div className="cal__nav">
-          <button className="cal__nav-btn" onClick={prevMonth}>‹</button>
-          <h2 className="cal__title">{MONTHS_ES[month]} {year}</h2>
-          <button className="cal__nav-btn" onClick={nextMonth}>›</button>
+          <button className="cal__nav-btn" onClick={view === 'week' ? () => shiftWeek(-1) : prevMonth}>‹</button>
+          <h2 className="cal__title">{view === 'week' ? weekRangeLabel : `${MONTHS_ES[month]} ${year}`}</h2>
+          <button className="cal__nav-btn" onClick={view === 'week' ? () => shiftWeek(1) : nextMonth}>›</button>
         </div>
         <div className="cal__controls">
           <button className="cal__ctrl-btn" onClick={goToday}>Hoy</button>
