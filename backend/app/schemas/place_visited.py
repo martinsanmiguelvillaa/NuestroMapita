@@ -10,6 +10,13 @@ class PlaceVisitedCreate(BaseModel):
     name: str
     address: Optional[str] = None
     visit_date: Optional[date] = None
+
+    @field_validator("visit_date", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "" or v is None:
+            return None
+        return v
     comment: Optional[str] = None
     rating: Optional[int] = None
     google_maps_url: Optional[str] = None
@@ -42,6 +49,13 @@ class PlaceVisitedUpdate(BaseModel):
     would_revisit: Optional[bool] = None
     latitude: Optional[Decimal] = None
     longitude: Optional[Decimal] = None
+
+    @field_validator("visit_date", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "" or v is None:
+            return None
+        return v
 
     @field_validator("rating")
     @classmethod
