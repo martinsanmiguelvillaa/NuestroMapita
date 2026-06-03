@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Integer, SmallInteger, String, Text, UniqueConstraint
 from app.database import Base
 
@@ -12,8 +12,8 @@ class EmotionalEntry(Base):
     emotion_key = Column(String(50), nullable=False)       # key de la emoción fija
     intensity = Column(SmallInteger, nullable=False)       # 1-5
     note = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         UniqueConstraint("user_key", "date", "emotion_key", name="uq_emotional_user_date_emotion"),

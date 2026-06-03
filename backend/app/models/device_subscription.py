@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, UniqueConstraint
 from app.database import Base
 
@@ -34,8 +34,8 @@ class DeviceSubscription(Base):
     # Campos específicos de calendario (NULL = activado por defecto — opt-out)
     calendar_notif_enabled  = Column(Boolean, nullable=True)
 
-    created_at  = Column(DateTime, default=datetime.utcnow)
-    updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at  = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at  = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (
         UniqueConstraint("device_id", "user_key", name="uq_device_subscription_device_user"),

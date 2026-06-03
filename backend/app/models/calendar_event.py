@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from app.database import Base
 
@@ -20,5 +20,5 @@ class CalendarEvent(Base):
     notif_minutes = Column(Integer, nullable=True)            # minutos antes del evento
     recurrence    = Column(Text, nullable=True)               # JSON: {freq,interval,days,end_date,occurrences}
     series_id     = Column(String(36), nullable=True)         # UUID agrupa serie recurrente
-    created_at    = Column(DateTime, default=datetime.utcnow)
-    updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at    = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at    = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

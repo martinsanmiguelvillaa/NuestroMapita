@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, UniqueConstraint
 from app.database import Base
 
@@ -16,8 +16,8 @@ class OutfitNotificationSubscription(Base):
     timezone = Column(String(60), nullable=False, default="America/Argentina/Buenos_Aires")
     enabled = Column(Boolean, nullable=False, default=True)
     device_label = Column(String(100), nullable=True)    # "Chrome en Mac", etc.
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     last_sent_at = Column(DateTime, nullable=True)
 
     __table_args__ = (

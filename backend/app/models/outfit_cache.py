@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from app.database import Base
 
@@ -10,4 +10,4 @@ class OutfitCache(Base):
     user_key = Column(String(20), nullable=False, unique=True)
     outfit_data = Column(Text, nullable=False)   # JSON del objeto outfit
     weather_data = Column(Text, nullable=False)  # JSON del objeto weather
-    generated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    generated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))

@@ -10,15 +10,20 @@ Una app privada y romántica para dos. Guarda los lugares que visitaron, los que
 |---------|----------------|
 | **Ya hicimos** | Registrar lugares visitados con fecha, comentario, rating, fotos y coordenadas |
 | **Por hacer** | Lista de planes pendientes con drag-and-drop para ordenar, reel/TikTok adjunto y sorteo aleatorio |
-| **Mapa** | Ver todos los lugares con pines, filtrar por tipo, buscar y convertir pendientes en visitados |
+| **Viajecitos** | Lista de viajes pendientes con drag-and-drop, sorteo aleatorio y conversión a visitados |
+| **Mapa** | Ver todos los lugares con pines, filtrar por tipo (visitados / por hacer / viajecitos), buscar y convertir pendientes en visitados |
 | **Cartitas** | Escribir y guardar mensajes románticos con foto y fecha |
 | **Recetas** | Guardar recetas propias con ingredientes, pasos, video y comentarios con rating |
 | **Cine** | Lista de películas y series (vistas / por ver / favoritas) con búsqueda automática vía TMDB |
 | **Recomendaciones** | Sistema de recomendación inteligente con OpenAI basado en sus gustos |
+| **Emocionario** | Registro diario de emociones con intensidad y nota; vista mensual con heatmap |
+| **Calendario** | Eventos compartidos con tipos personalizables, colores, recurrencia y notificaciones |
+| **Nombres** | Carga, puntuación (1–10) y ranking de nombres con lógica de consenso entre los dos |
+| **Clima en Outfits** | Recomendación de qué ponerse según el clima del día, con perfil propio para cada uno |
 | **Rating** | Sistema de alas de hada (1–5) compartido entre lugares, recetas y cine |
 | **Fotos** | Subida y gestión de fotos y videos por lugar, con foto de portada configurable |
 | **PWA** | Instalable como app en iOS y Android, con soporte para compartir desde otras apps |
-| **Notificaciones** | Push notifications cuando se agrega una cartita nueva |
+| **Notificaciones** | Push notifications para cartitas nuevas, eventos del calendario y outfits del día |
 
 ---
 
@@ -27,18 +32,21 @@ Una app privada y romántica para dos. Guarda los lugares que visitaron, los que
 | Capa | Tecnología |
 |------|-----------|
 | Frontend | React 18 + Vite |
+| Animaciones | Framer Motion |
 | Estilos | CSS propio (sin frameworks) |
+| Notificaciones UI | Sonner (toasts) |
 | Backend | Python 3.12 + FastAPI |
 | ORM | SQLAlchemy 2.0 |
 | Base de datos | MySQL 8 |
 | Migraciones | Alembic |
+| Tareas programadas | APScheduler (notificaciones de outfit y calendario) |
 | Fotos / Videos | Cloudinary |
 | Mapa | React Leaflet + OpenStreetMap |
 | Geocodificación | Nominatim (gratuito, sin API key) |
 | Películas | TMDB API (gratuito, opcional) |
 | Recomendaciones | OpenAI API (opcional) |
 | Notificaciones | Web Push API + VAPID |
-| Auth | JWT en HttpOnly cookie (SameSite=none, Secure) |
+| Auth | JWT en HttpOnly cookie + Bearer header (fallback iOS Safari) |
 | Contenedores | Docker Compose |
 
 ---
@@ -72,14 +80,15 @@ nuestro-mapita/
 │   │   ├── api/                 # Funciones para llamar al backend
 │   │   ├── components/          # Componentes por sección y UI compartida
 │   │   │   ├── cine/
+│   │   │   ├── layout/          # Layout, Navbar
 │   │   │   ├── letters/
 │   │   │   ├── map/
 │   │   │   ├── photos/
 │   │   │   ├── places/
 │   │   │   ├── recipes/
-│   │   │   └── ui/              # Modal, Toast, ConfirmDialog, SearchBar
+│   │   │   └── ui/              # Modal, SearchBar, ClipboardImportBanner
 │   │   ├── context/             # AuthContext, ToastContext, ConfirmContext
-│   │   ├── hooks/               # useDirtyForm, usePushNotifications, useClipboardImport
+│   │   ├── hooks/               # useDirtyForm, usePushNotifications, useOutfitNotifications, useDeviceRegistration, useClipboardImport, useSwipeNavigation
 │   │   ├── pages/               # Una page por sección
 │   │   ├── styles/              # CSS por sección + variables globales
 │   │   └── utils/               # cloudinary.js (transformaciones de URL)
@@ -106,8 +115,10 @@ Editar `.env`:
 
 ```env
 # Obligatorios
-APP_PASSWORD=la_contraseña_que_van_a_usar   # mínimo 8 caracteres
-SECRET_KEY=clave_larga_y_aleatoria           # mínimo 32 caracteres
+MYSQL_ROOT_PASSWORD=password_root_mysql        # contraseña del root de MySQL
+DB_PASSWORD=password_usuario_mysql             # contraseña del usuario MySQL (mapita)
+APP_PASSWORD=la_contraseña_que_van_a_usar      # mínimo 8 caracteres
+SECRET_KEY=clave_larga_y_aleatoria             # mínimo 32 caracteres
 # Generar con: python -c "import secrets; print(secrets.token_hex(32))"
 
 # Cloudinary (fotos y videos)
@@ -193,6 +204,8 @@ pytest
 
 | Variable | Descripción |
 |----------|-------------|
+| `MYSQL_ROOT_PASSWORD` | Contraseña del usuario root de MySQL (cualquier valor seguro) |
+| `DB_PASSWORD` | Contraseña del usuario `mapita` en MySQL |
 | `APP_PASSWORD` | Contraseña de acceso a la app (mín. 8 caracteres) |
 | `SECRET_KEY` | Clave para firmar los JWT (mín. 32 caracteres) |
 
@@ -203,8 +216,9 @@ pytest
 | `DB_HOST` | `db` | Host de MySQL |
 | `DB_PORT` | `3306` | Puerto |
 | `DB_USER` | `mapita` | Usuario |
-| `DB_PASSWORD` | — | Contraseña |
 | `DB_NAME` | `nuestro_mapita` | Nombre de la base |
+
+> `DB_PASSWORD` es obligatoria y se lista en la sección anterior.
 
 ### Cloudinary (fotos y videos)
 
@@ -225,6 +239,11 @@ Crear cuenta gratuita en [cloudinary.com](https://cloudinary.com). El free tier 
 | `VAPID_PUBLIC_KEY` | Notificaciones push (ver sección más abajo) | generadas localmente |
 | `VAPID_PRIVATE_KEY` | — | — |
 | `VAPID_CLAIMS_EMAIL` | Email de contacto para VAPID | cualquier email |
+| `OUTFITS_API_URL` | URL de la API externa de Clima en Outfits | provista por el servicio |
+| `OUTFITS_VAN_MAIL` | Email de Van en la API de Outfits | — |
+| `OUTFITS_VAN_PASSWORD` | Contraseña de Van en la API de Outfits | — |
+| `OUTFITS_MARTIN_MAIL` | Email de Martín en la API de Outfits | — |
+| `OUTFITS_MARTIN_PASSWORD` | Contraseña de Martín en la API de Outfits | — |
 | `ALLOWED_ORIGINS` | Orígenes permitidos por CORS | `http://localhost:5173` en dev, dominio de Vercel en prod |
 | `COOKIE_SECURE` | `True` en producción HTTPS, `False` en dev HTTP | — |
 
@@ -360,14 +379,68 @@ Todos los endpoints (excepto `/auth/login` y `/health`) requieren sesión activa
 | POST | `/recommendations/blocked` | Bloquear un título |
 | DELETE | `/recommendations/blocked/{id}` | Desbloquear |
 
+### Emocionario
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/emocionario?user_key=van&month=2026-06` | Entradas del mes por usuario |
+| POST | `/emocionario` | Registrar emoción del día |
+| PUT | `/emocionario/{id}` | Editar emoción |
+| DELETE | `/emocionario/{id}` | Eliminar emoción |
+
+### Calendario
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/calendario/events?month=2026-06` | Eventos del mes |
+| POST | `/calendario/events` | Crear evento (con recurrencia opcional) |
+| PUT | `/calendario/events/{id}` | Editar evento |
+| DELETE | `/calendario/events/{id}` | Eliminar evento (o toda la serie) |
+| GET | `/calendario/event-types` | Listar tipos de evento |
+| POST | `/calendario/event-types` | Crear tipo de evento |
+| PUT | `/calendario/event-types/{id}` | Editar tipo de evento |
+| DELETE | `/calendario/event-types/{id}` | Eliminar tipo de evento |
+
+### Nombres
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/names` | Listar nombres con sus ratings |
+| POST | `/names` | Agregar nombre |
+| DELETE | `/names/{id}` | Eliminar nombre |
+| POST | `/names/{id}/rate` | Puntuar nombre (1–10) por usuario |
+
+### Outfits
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/outfits/{user_key}` | Outfit del día con clima para el usuario |
+
+### Viajes
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/trips` | Listar viajes pendientes |
+| POST | `/trips` | Agregar viaje |
+| PUT | `/trips/{id}` | Editar viaje |
+| DELETE | `/trips/{id}` | Eliminar viaje |
+| POST | `/trips/reorder` | Reordenar (drag-and-drop) |
+| GET | `/trips/random` | Elegir uno al azar |
+| POST | `/trips/{id}/convert` | Pasar a visitado |
+| POST | `/trips/{id}/photos` | Subir fotos |
+
+### Notificaciones push
+| Método | Endpoint | Descripción |
+|--------|---------|-------------|
+| GET | `/push/vapid-public-key` | Clave pública VAPID |
+| POST | `/push/subscribe` | Registrar dispositivo (notificaciones globales) |
+| DELETE | `/push/unsubscribe` | Desuscribir dispositivo |
+| GET | `/outfit_notifications/{user_key}/{device_id}` | Estado de notificaciones de outfit |
+| POST | `/outfit_notifications/activate` | Activar notificaciones de outfit |
+| PUT | `/outfit_notifications/{user_key}/{device_id}/time` | Cambiar horario de envío |
+| DELETE | `/outfit_notifications/{user_key}/{device_id}` | Desactivar |
+| POST | `/outfit_notifications/send-now` | Enviar notificación de prueba |
+
 ### Mapa, Búsqueda y otros
 | Método | Endpoint | Descripción |
 |--------|---------|-------------|
-| GET | `/map/pins` | Todos los pines con coordenadas |
-| GET | `/search?q=texto` | Búsqueda global |
-| GET | `/push/vapid-public-key` | Clave pública VAPID |
-| POST | `/push/subscribe` | Registrar dispositivo |
-| DELETE | `/push/unsubscribe` | Desuscribir |
+| GET | `/map/pins` | Todos los pines con coordenadas y tipo |
+| GET | `/search?q=texto` | Búsqueda global (lugares, recetas, cine, cartitas) |
 | GET | `/health` | Health check |
 
 ---
@@ -377,12 +450,12 @@ Todos los endpoints (excepto `/auth/login` y `/health`) requieren sesión activa
 ### Tablas
 
 **places_visited** — Lugares visitados
-- `id`, `name`, `address`, `visit_date`, `comment`, `rating` (1–5)
-- `would_revisit` (bool nullable), `google_maps_url`
+- `id`, `name`, `address`, `visit_date` (nullable), `comment`, `rating` (1–5)
+- `would_revisit` (bool nullable), `google_maps_url`, `source` (wishlist/trip/direct)
 - `latitude`, `longitude`, `created_at`, `updated_at`
 
-**photos** — Fotos y videos de lugares (N:1)
-- `id`, `place_visited_id` / `place_wishlist_id` (FK con cascade delete)
+**photos** — Fotos y videos asociados a recursos (N:1)
+- `id`, `place_visited_id` / `place_wishlist_id` / `place_trip_id` / `letter_id` / `recipe_id` (FK con cascade delete)
 - `cloudinary_url`, `cloudinary_public_id`, `resource_type` (image/video)
 - `is_cover`, `position_x`, `position_y`, `sort_order`
 
@@ -391,34 +464,70 @@ Todos los endpoints (excepto `/auth/login` y `/health`) requieren sesión activa
 - `google_maps_url`, `social_url` (Reel/TikTok/IG)
 - `latitude`, `longitude`, `order_index`
 
+**place_trips** — Viajes pendientes
+- `id`, `name`, `description`, `address`
+- `google_maps_url`, `social_url`
+- `latitude`, `longitude`, `order_index`
+
 **letters** — Cartitas
 - `id`, `title`, `body`, `letter_date`
-- `photo_url`, `photo_public_id`
+- `photo_url`, `photo_public_id`, `created_at`, `updated_at`
 
 **recipes** — Recetas
 - `id`, `title`, `category` (salado/dulce)
-- `ingredients`, `steps`, `notes`, `video_url`, `image_url`
+- `ingredients`, `steps`, `notes`, `video_url`, `image_url`, `created_at`, `updated_at`
 
 **recipe_comments** — Comentarios de recetas (N:1)
-- `id`, `recipe_id`, `author`, `text`, `rating` (1–5 nullable)
+- `id`, `recipe_id`, `author`, `text`, `rating` (1–5 nullable), `created_at`
 
 **cine_items** — Películas y series
-- `id`, `title`, `type` (movie/series), `status` (to_watch/watched)
+- `id`, `title`, `type` (movie/series), `status` (to_watch/watching/watched)
 - `poster_url`, `synopsis`, `genres` (JSON), `platform`, `trailer_url`, `year`
-- `rating` (1–5), `is_favorite`, `external_source`, `external_id`
+- `rating` (1–5), `is_favorite`, `external_source`, `external_id`, `created_at`, `updated_at`
 
 **cine_comments** — Comentarios de cine (N:1)
-- `id`, `cine_item_id`, `author`, `text`
+- `id`, `cine_item_id`, `author`, `text`, `created_at`
 
-**recommendation_history** — Historial de recomendaciones
+**recommendation_history** — Historial de recomendaciones OpenAI
 - `id`, `request_type`, `request_moods`, `request_extra`
 - `main_title`, `recommendations` (JSON), `created_at`
 
 **blocked_recommendations** — Títulos que no se vuelven a sugerir
 - `id`, `title`, `created_at`
 
-**push_subscriptions** — Dispositivos suscritos a notificaciones
-- `id`, `endpoint`, `p256dh`, `auth`, `created_at`
+**emotional_entries** — Emocionario diario
+- `id`, `user_key` (van/martin), `date` (YYYY-MM-DD), `emotion_key`, `intensity` (1–5), `note`
+- `created_at`, `updated_at`
+- Unique constraint: `(user_key, date, emotion_key)`
+
+**calendar_events** — Eventos del calendario
+- `id`, `title`, `description`, `date` (YYYY-MM-DD), `start_time`, `end_time`, `all_day`
+- `type_id` (FK event_types), `participants` (martin/van/ambos), `created_by`
+- `notif_enabled`, `notif_minutes`, `recurrence` (JSON), `series_id` (UUID para series)
+- `created_at`, `updated_at`
+
+**event_types** — Tipos de evento del calendario
+- `id`, `name`, `color`, `created_by`, `created_at`, `updated_at`
+
+**names** — Nombres con ratings
+- `id`, `name`, `gender` (varón/mujer/unisex), `added_by`
+- `rating_van` (1–10 nullable), `rating_martin` (1–10 nullable)
+- `created_at`, `updated_at`
+
+**device_subscriptions** — Suscripciones push unificadas
+- `id`, `device_id` (UUID localStorage), `user_key` (van/martin/ambos)
+- `endpoint`, `p256dh`, `auth`, `device_label`, `timezone`, `enabled`
+- `outfit_notif_enabled`, `outfit_notif_time` (HH:MM), `outfit_last_sent_at`
+- `calendar_notif_enabled` (NULL = opt-in por defecto)
+- `created_at`, `updated_at`
+
+**outfit_cache** — Cache del outfit del día por usuario
+- `id`, `user_key`, `outfit_data` (JSON), `weather_data` (JSON), `generated_at`
+
+**outfit_notification_subscriptions** — Suscripciones de notificaciones de outfit (legacy)
+- `id`, `user_key`, `device_id`, `endpoint`, `p256dh`, `auth`
+- `notification_time` (HH:MM), `timezone`, `enabled`, `device_label`
+- `created_at`, `updated_at`, `last_sent_at`
 
 ### Migraciones
 

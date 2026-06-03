@@ -1,6 +1,6 @@
 import json
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import requests as http
 from fastapi import APIRouter, Depends, HTTPException
@@ -183,7 +183,7 @@ def get_cached_outfit(
     cache = db.query(OutfitCache).filter_by(user_key=user_key).first()
     if not cache:
         raise HTTPException(status_code=404, detail="Sin caché")
-    if datetime.utcnow() - cache.generated_at > timedelta(hours=12):
+    if datetime.now(timezone.utc).replace(tzinfo=None) - cache.generated_at > timedelta(hours=12):
         raise HTTPException(status_code=404, detail="Caché expirado")
     return {
         "outfit": json.loads(cache.outfit_data),

@@ -12,18 +12,18 @@ nuestro-mapita/
 │       ├── config.py         # Pydantic settings (variables de entorno)
 │       ├── database.py       # SQLAlchemy engine + session factory
 │       ├── dependencies.py   # JWT auth middleware (HttpOnly cookie)
-│       ├── models/           # ORM models (8 tablas)
+│       ├── models/           # ORM models (16 tablas)
 │       ├── schemas/          # Pydantic schemas (request/response)
-│       ├── routers/          # 11 módulos de endpoints
-│       └── services/         # Integraciones externas (Cloudinary, OpenAI, TMDB)
+│       ├── routers/          # 17 módulos de endpoints
+│       └── services/         # Integraciones externas (Cloudinary, OpenAI, TMDB, Push, Outfits, Schedulers)
 ├── frontend/         # React 18 + Vite
 │   └── src/
 │       ├── App.jsx           # Router + Providers (Auth, Toast, Confirm)
-│       ├── api/              # 13 módulos cliente Axios
-│       ├── components/       # ~20 componentes organizados por feature
+│       ├── api/              # 18 módulos cliente Axios
+│       ├── components/       # Componentes organizados por feature + layout + ui
 │       ├── context/          # AuthContext, ToastContext, ConfirmContext
 │       ├── hooks/            # Custom hooks
-│       ├── pages/            # 9 páginas (rutas)
+│       ├── pages/            # 14 páginas (rutas)
 │       └── styles/           # CSS por feature + variables.css
 └── docker-compose.yml        # MySQL + backend + frontend (Nginx)
 ```
@@ -75,8 +75,8 @@ alembic downgrade -1
 | Módulo | Prefijo | Descripción |
 |--------|---------|-------------|
 | auth | /auth | Login/logout |
-| places_visited | /places | CRUD lugares visitados |
-| places_wishlist | /wishlist | Lista de deseos con orden drag-drop |
+| places_visited | /places/visited | CRUD lugares visitados |
+| places_wishlist | /places/wishlist | Lista de deseos con orden drag-drop |
 | photos | /photos | Cloudinary upload/delete/crop |
 | letters | /letters | Cartitas con fotos |
 | recipes | /recipes | Recetas + comentarios |
@@ -85,6 +85,12 @@ alembic downgrade -1
 | push | /push | Web Push (VAPID) |
 | search | /search | Búsqueda global |
 | map | /map | Pins del mapa |
+| trips | /trips | Viajes pendientes con drag-drop |
+| outfits | /outfits | Outfit del día con clima |
+| names | /names | Nombres con puntuación entre los dos |
+| outfit_notifications | /outfit_notifications | Notificaciones push de outfits |
+| emotional | /emocionario | Registro diario de emociones |
+| calendar | /calendario | Eventos del calendario compartido |
 
 ### Frontend
 - **State global:** React Context (no Redux/Zustand)
@@ -100,8 +106,9 @@ alembic downgrade -1
 | Tabla | Descripción |
 |-------|-------------|
 | places_visited | Lugares visitados con rating y coordenadas |
-| places_wishlist | Lista de deseos con order_index para drag-drop |
-| photos | Imágenes/videos en Cloudinary (múltiples por lugar) |
+| places_wishlist | Lista de deseos (Por hacer) con order_index para drag-drop |
+| place_trips | Viajes pendientes con order_index para drag-drop |
+| photos | Imágenes/videos en Cloudinary (múltiples por lugar/receta/cartita) |
 | letters | Cartitas con cuerpo de texto y foto opcional |
 | recipes | Recetas con ingredientes, pasos, video e imagen |
 | recipe_comments | Comentarios de recetas con rating |
@@ -109,19 +116,25 @@ alembic downgrade -1
 | cine_comments | Comentarios de películas |
 | recommendation_history | Historial de sugerencias OpenAI |
 | blocked_recommendations | Títulos bloqueados para recomendaciones |
-| push_subscriptions | Suscripciones Web Push |
+| emotional_entries | Emocionario diario por usuario (van/martin) |
+| calendar_events | Eventos del calendario compartido con recurrencia |
+| event_types | Tipos de evento personalizables con color |
+| names | Nombres con puntuación 1–10 de cada uno |
+| device_subscriptions | Suscripciones push unificadas por dispositivo |
+| outfit_cache | Cache del outfit del día por usuario |
+| outfit_notification_subscriptions | Suscripciones legacy de notificaciones de outfit |
 
 ## Variables de entorno
 
 **Requeridas:**
 ```env
-APP_PASSWORD=          # Contraseña única de acceso
+MYSQL_ROOT_PASSWORD=   # Contraseña del root de MySQL
+DB_PASSWORD=           # Contraseña del usuario mapita en MySQL
+APP_PASSWORD=          # Contraseña única de acceso a la app (mín. 8 chars)
 SECRET_KEY=            # Clave secreta para JWT (mín. 32 chars)
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
-MYSQL_ROOT_PASSWORD=
-MYSQL_DATABASE=
 ```
 
 **Opcionales:**

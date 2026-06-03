@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, Integer, String
 from app.database import Base
 
@@ -10,5 +10,5 @@ class EventType(Base):
     name       = Column(String(100), nullable=False)
     color      = Column(String(20), nullable=False, default="#CFC4B8")
     created_by = Column(String(20), nullable=False)   # "van" | "martin"
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

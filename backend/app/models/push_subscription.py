@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime
 from app.database import Base
 
@@ -10,4 +10,4 @@ class PushSubscription(Base):
     endpoint = Column(String(500), unique=True, nullable=False)
     p256dh = Column(String(200), nullable=False)
     auth = Column(String(100), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

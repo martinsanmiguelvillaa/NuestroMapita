@@ -204,8 +204,7 @@ def start_scheduler() -> None:
     _scheduler = BackgroundScheduler(timezone="UTC")
     _scheduler.add_job(_check_and_send, "cron", second=0, id="calendar_notifications")
     _scheduler.start()
-    print("[cal-notif] Scheduler iniciado — job cada minuto.")
-    logger.info("Scheduler de notificaciones de calendario iniciado.")
+    logger.info("Scheduler de notificaciones de calendario iniciado — job cada minuto.")
 
 
 def stop_scheduler() -> None:

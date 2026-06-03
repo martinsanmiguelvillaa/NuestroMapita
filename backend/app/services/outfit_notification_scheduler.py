@@ -53,20 +53,20 @@ def _fetch_and_cache_outfit(user_key: str, db) -> bool:
         if cache:
             cache.outfit_data = json.dumps(outfit)
             cache.weather_data = json.dumps(weather)
-            cache.generated_at = datetime.utcnow()
+            cache.generated_at = datetime.now(dt_timezone.utc).replace(tzinfo=None)
         else:
             cache = OutfitCache(
                 user_key=user_key,
                 outfit_data=json.dumps(outfit),
                 weather_data=json.dumps(weather),
-                generated_at=datetime.utcnow(),
+                generated_at=datetime.now(dt_timezone.utc).replace(tzinfo=None),
             )
             db.add(cache)
         db.commit()
         return True
 
     except Exception as exc:
-        print(f"[outfit-notif] No se pudo cachear outfit para {user_key}: {exc}")
+        logger.warning("[outfit-notif] No se pudo cachear outfit para %s: %s", user_key, exc)
         return False
 
 
@@ -118,7 +118,7 @@ def _check_and_send() -> None:
             DeviceSubscription.user_key.in_(["van", "martin"]),
         ).all()
 
-        print(f"[outfit-notif] job tick UTC={now_utc.strftime('%H:%M')} subs_activas={len(subs)}")
+        logger.debug("[outfit-notif] job tick UTC=%s subs_activas=%d", now_utc.strftime('%H:%M'), len(subs))
 
         for sub in subs:
             try:
@@ -130,9 +130,9 @@ def _check_and_send() -> None:
                 now_local = now_utc.astimezone(tz)
                 current_hhmm = now_local.strftime("%H:%M")
 
-                print(
-                    f"[outfit-notif] user={sub.user_key} device={sub.device_id[:8]} "
-                    f"hora_local={current_hhmm} hora_config={sub.outfit_notif_time}"
+                logger.debug(
+                    "[outfit-notif] user=%s device=%s hora_local=%s hora_config=%s",
+                    sub.user_key, sub.device_id[:8], current_hhmm, sub.outfit_notif_time,
                 )
 
                 if current_hhmm != sub.outfit_notif_time:
@@ -155,19 +155,19 @@ def _check_and_send() -> None:
                 )
 
                 if success:
-                    sub.outfit_last_sent_at = datetime.utcnow()
+                    sub.outfit_last_sent_at = datetime.now(dt_timezone.utc).replace(tzinfo=None)
                     db.commit()
-                    print(f"[outfit-notif] ✓ enviado user={sub.user_key} device={sub.device_id[:8]}")
+                    logger.info("[outfit-notif] ✓ enviado user=%s device=%s", sub.user_key, sub.device_id[:8])
                 else:
                     sub.enabled = False
                     db.commit()
-                    print(f"[outfit-notif] ✗ suscripción expirada → deshabilitada user={sub.user_key} device={sub.device_id[:8]}")
+                    logger.warning("[outfit-notif] ✗ suscripción expirada → deshabilitada user=%s device=%s", sub.user_key, sub.device_id[:8])
 
             except Exception as exc:
-                print(f"[outfit-notif] ERROR suscripción id={sub.id}: {exc}")
+                logger.error("[outfit-notif] ERROR suscripción id=%s: %s", sub.id, exc)
 
     except Exception as exc:
-        print(f"[outfit-notif] ERROR general: {exc}")
+        logger.error("[outfit-notif] ERROR general: %s", exc)
     finally:
         db.close()
 
@@ -180,8 +180,7 @@ def start_scheduler() -> None:
     _scheduler = BackgroundScheduler(timezone="UTC")
     _scheduler.add_job(_check_and_send, "cron", second=0, id="outfit_notifications")
     _scheduler.start()
-    print("[outfit-notif] Scheduler iniciado — job cada minuto.")
-    logger.info("Scheduler de notificaciones de outfits iniciado.")
+    logger.info("Scheduler de notificaciones de outfits iniciado — job cada minuto.")
 
 
 def stop_scheduler() -> None:
