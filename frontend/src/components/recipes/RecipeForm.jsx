@@ -71,8 +71,6 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
     setError('');
 
     if (!form.title.trim()) return setError('El título es obligatorio');
-    if (!form.ingredients.trim()) return setError('Los ingredientes son obligatorios');
-    if (!form.steps.trim()) return setError('La preparación es obligatoria');
     if (form.video_url.trim() && !form.video_url.trim().startsWith('http')) {
       return setError('El link de video debe ser una URL válida (http...)');
     }
@@ -201,27 +199,25 @@ export default function RecipeForm({ initialData = null, onSaved, onClose, onCan
 
       {/* Ingredientes */}
       <div className="form-group">
-        <label className="form-label">Ingredientes * <span className="form-hint">(uno por línea)</span></label>
+        <label className="form-label">Ingredientes <span className="form-hint">(uno por línea, opcional)</span></label>
         <textarea
           className="form-textarea"
           value={form.ingredients}
           onChange={(e) => set('ingredients', e.target.value)}
           placeholder={"-Azucar\n-Flores\n-Y mucho colores\n..."}
           rows={6}
-          required
         />
       </div>
 
       {/* Preparación */}
       <div className="form-group">
-        <label className="form-label">Preparación *</label>
+        <label className="form-label">Preparación <span className="form-hint">(opcional)</span></label>
         <textarea
           className="form-textarea"
           value={form.steps}
           onChange={(e) => set('steps', e.target.value)}
           placeholder={"Tirar un poco de polvo de hadas\nDarle un besito a tu mujer porque se lo re merece\n..."}
           rows={8}
-          required
         />
       </div>
 
