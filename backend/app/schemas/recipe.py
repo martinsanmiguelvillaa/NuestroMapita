@@ -47,8 +47,8 @@ class RecipeCommentResponse(BaseModel):
 class RecipeCreate(BaseModel):
     title: str
     category: str
-    ingredients: str
-    steps: str
+    ingredients: Optional[str] = None
+    steps: Optional[str] = None
     video_url: Optional[str] = None
     notes: Optional[str] = None
 
@@ -68,17 +68,13 @@ class RecipeCreate(BaseModel):
 
     @field_validator("ingredients")
     @classmethod
-    def ingredients_not_empty(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Los ingredientes son obligatorios")
-        return v.strip()
+    def ingredients_strip(cls, v: Optional[str]) -> Optional[str]:
+        return v.strip() if v and v.strip() else None
 
     @field_validator("steps")
     @classmethod
-    def steps_not_empty(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("La preparación es obligatoria")
-        return v.strip()
+    def steps_strip(cls, v: Optional[str]) -> Optional[str]:
+        return v.strip() if v and v.strip() else None
 
     @field_validator("video_url")
     @classmethod
@@ -130,8 +126,8 @@ class RecipeResponse(BaseModel):
     category: str
     image_url: Optional[str]
     image_public_id: Optional[str]
-    ingredients: str
-    steps: str
+    ingredients: Optional[str]
+    steps: Optional[str]
     video_url: Optional[str]
     notes: Optional[str]
     created_at: datetime
