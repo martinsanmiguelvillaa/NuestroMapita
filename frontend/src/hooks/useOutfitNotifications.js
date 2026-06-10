@@ -135,8 +135,7 @@ export function useOutfitNotifications(userKey) {
       setNotifTime(time);
       setDeviceLabel(label);
       setStatus('active');
-    } catch (err) {
-      console.error('Error activando notificaciones de outfit:', err);
+    } catch {
       setError('No se pudieron activar las notificaciones. Intentá de nuevo.');
     } finally {
       setSaving(false);
@@ -155,7 +154,6 @@ export function useOutfitNotifications(userKey) {
       });
       setNotifTime(newTime);
     } catch (err) {
-      console.error('Error actualizando horario de notificación:', err);
       setError('No se pudo actualizar el horario. Intentá de nuevo.');
       throw err; // propagar para que el componente pueda cancelar la edición
     } finally {
@@ -185,8 +183,7 @@ export function useOutfitNotifications(userKey) {
       const deviceId = getOrCreateDeviceId();
       await testPushNotification(userKey, deviceId);
       setTestResult('ok');
-    } catch (err) {
-      console.error('Error en test push:', err);
+    } catch {
       setTestResult('error');
       setError('El test falló. Revisá que las claves VAPID estén configuradas en el backend.');
     } finally {

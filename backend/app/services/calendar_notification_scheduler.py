@@ -155,8 +155,6 @@ def _check_and_send() -> None:
         if not events:
             return
 
-        print(f"[cal-notif] tick local={current_hhmm} eventos_con_notif={len(events)}")
-
         for event in events:
             try:
                 if not _instances_today(event, today):
@@ -173,8 +171,6 @@ def _check_and_send() -> None:
                 if fire_hhmm != current_hhmm:
                     continue
 
-                print(f"[cal-notif] enviando '{event.title}' (id={event.id}) fire={fire_hhmm}")
-
                 send_calendar_push_to_all(
                     db=db,
                     title=f"📅 {event.title}",
@@ -185,13 +181,11 @@ def _check_and_send() -> None:
                     ),
                 )
 
-                print(f"[cal-notif] ✓ enviado '{event.title}'")
+            except Exception:
+                pass
 
-            except Exception as exc:
-                print(f"[cal-notif] ERROR evento id={event.id}: {exc}")
-
-    except Exception as exc:
-        print(f"[cal-notif] ERROR general: {exc}")
+    except Exception:
+        pass
     finally:
         db.close()
 
