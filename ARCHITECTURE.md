@@ -1,4 +1,4 @@
-# NuestroMapita — CLAUDE.md
+# NuestroMapita — Arquitectura
 
 App de memoria compartida para dos personas. Registra lugares visitados, recetas, películas, cartitas y más. Stack: FastAPI + React 18 + MySQL en Docker.
 
@@ -19,7 +19,7 @@ nuestro-mapita/
 ├── frontend/         # React 18 + Vite
 │   └── src/
 │       ├── App.jsx           # Router + Providers (Auth, Toast, Confirm)
-│       ├── api/              # 18 módulos cliente Axios
+│       ├── api/              # 18 módulos cliente (fetch nativo)
 │       ├── components/       # Componentes organizados por feature + layout + ui
 │       ├── context/          # AuthContext, ToastContext, ConfirmContext
 │       ├── hooks/            # Custom hooks
@@ -63,6 +63,13 @@ alembic upgrade head
 alembic downgrade -1
 ```
 
+### Tests del backend
+```bash
+cd backend
+pip install -r requirements-dev.txt
+pytest
+```
+
 ## Arquitectura
 
 ### Backend
@@ -98,7 +105,7 @@ alembic downgrade -1
   - `ToastContext` — `toast(message, type, duration)`
   - `ConfirmContext` — `confirm(title, message, onConfirm)`
 - **Routing:** React Router v6, todo protegido salvo `/login`
-- **HTTP:** Axios con `withCredentials: true` (cookies JWT)
+- **HTTP:** Fetch nativo con wrapper custom (`withCredentials` para cookies JWT)
 - **Mapas:** React Leaflet + OpenStreetMap (Nominatim para geocoding)
 - **Estilos:** CSS puro con custom properties en `styles/variables.css`, sin framework CSS
 
@@ -116,7 +123,7 @@ alembic downgrade -1
 | cine_comments | Comentarios de películas |
 | recommendation_history | Historial de sugerencias OpenAI |
 | blocked_recommendations | Títulos bloqueados para recomendaciones |
-| emotional_entries | Emocionario diario por usuario (van/martin) |
+| emotional_entries | Emocionario diario por usuario |
 | calendar_events | Eventos del calendario compartido con recurrencia |
 | event_types | Tipos de evento personalizables con color |
 | names | Nombres con puntuación 1–10 de cada uno |
@@ -143,7 +150,7 @@ TMDB_API_KEY=          # Búsqueda de películas
 OPENAI_API_KEY=        # Recomendaciones AI
 VAPID_PUBLIC_KEY=      # Web Push
 VAPID_PRIVATE_KEY=
-VAPID_EMAIL=
+VAPID_CLAIMS_EMAIL=
 ```
 
 ## Patrones de código
@@ -157,7 +164,7 @@ VAPID_EMAIL=
 ### Agregar una nueva página (frontend)
 1. Crear `frontend/src/pages/NuevaPagina.jsx`
 2. Agregar ruta en `App.jsx` dentro de `<ProtectedRoute>`
-3. Crear módulo API en `frontend/src/api/nuevo.js` usando el cliente Axios de `api/client.js`
+3. Crear módulo API en `frontend/src/api/nuevo.js` usando el cliente de `api/client.js`
 4. Agregar estilos en `frontend/src/styles/nueva-pagina.css`
 
 ### Usar el toast
@@ -197,5 +204,4 @@ El frontend tiene soporte PWA:
 - **Cloudinary es requerido** para cualquier feature que involucre imágenes. Sin credenciales, las subidas fallan.
 - **TMDB y OpenAI son opcionales** — el backend lo maneja gracefully si no están configurados.
 - **Cascade deletes activos:** Borrar un `place_visited` elimina todas sus `photos` en cascada (DB + Cloudinary).
-- **Estilos sin framework:** No usar Tailwind ni librerías CSS. Agregar clases en `variables.css` si hace falta un nuevo token de diseño.
-- **No hay tests automatizados** en el proyecto actualmente.
+- **Estilos sin framework:** CSS propio con custom properties en `variables.css`. No usar Tailwind ni librerías CSS.
