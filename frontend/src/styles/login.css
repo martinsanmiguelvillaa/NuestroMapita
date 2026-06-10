@@ -17,6 +17,20 @@
   margin-top: calc(-1 * var(--navbar-height));
   /* Evitar que el teclado virtual desplace el layout en iOS PWA */
   padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  position: relative;
+}
+
+.login-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 0;
+}
+
+.login-page .login-card {
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {
@@ -25,6 +39,10 @@
     margin-top: 0;
     margin-bottom: calc(-1 * (var(--mobile-nav-height) + env(safe-area-inset-bottom)));
     background-image: url('/backgrounds/fondo-principal-celu.png');
+  }
+
+  .login-page::before {
+    background: rgba(0, 0, 0, 0.4);
   }
 }
 
