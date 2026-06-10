@@ -13,20 +13,18 @@
   background-size: cover;
   background-position: top center;
   padding: var(--space-4);
+  /* Compensar el padding-top de #root reservado para el navbar */
+  margin-top: calc(-1 * var(--navbar-height));
   /* Evitar que el teclado virtual desplace el layout en iOS PWA */
   padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 
 @media (max-width: 768px) {
   .login-page {
+    /* En mobile #root no tiene padding-top, resetear el margin */
+    margin-top: 0;
     background-image: url('/backgrounds/fondo-principal-celu.png');
   }
-}
-
-/* Quitar el padding-top del root en la página de login */
-.login-page ~ #root,
-.login-root {
-  padding-top: 0;
 }
 
 .login-card {
