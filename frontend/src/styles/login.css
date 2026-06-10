@@ -21,8 +21,9 @@
 
 @media (max-width: 768px) {
   .login-page {
-    /* En mobile #root no tiene padding-top, resetear el margin */
+    /* En mobile #root no tiene padding-top pero sí padding-bottom para el navbar */
     margin-top: 0;
+    margin-bottom: calc(-1 * (var(--mobile-nav-height) + env(safe-area-inset-bottom)));
     background-image: url('/backgrounds/fondo-principal-celu.png');
   }
 }
