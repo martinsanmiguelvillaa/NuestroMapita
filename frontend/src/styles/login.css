@@ -24,7 +24,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-cream-overlay);
   z-index: 0;
 }
 
@@ -42,7 +42,7 @@
   }
 
   .login-page::before {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--color-cream-overlay);
   }
 }
 
