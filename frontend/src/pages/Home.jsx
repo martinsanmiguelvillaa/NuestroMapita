@@ -8,7 +8,7 @@
  * - Álbum de fotos recientes (polaroids)
  * - Acceso destacado a cartitas
  */
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -243,35 +243,19 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const videoRef = useRef(null);
   const animRef  = useRef(false);
   const [animating, setAnimating] = useState(false);
-  const [wiggling, setWiggling] = useState(false);
 
-  // iOS/Safari no soporta WebM con canal alfa: lo renderiza con fondo negro.
-  // En esos navegadores usamos un fallback CSS en vez del video.
-  const supportsAlphaVideo = useMemo(() => {
-    const ua = navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/.test(ua) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    const isSafari = /safari/i.test(ua) && !/chrome|chromium|crios|fxios|edg|android/i.test(ua);
-    return !isIOS && !isSafari;
-  }, []);
-
-  // Reproduce la animación de la nutria al pasar el mouse o tocarla
+  // Reproduce la animación de la nutria al pasar el mouse o tocarla.
+  // El <video> tiene dos fuentes: HEVC con alfa (.mov) para Safari/iOS
+  // y WebM con alfa para el resto de los navegadores.
   const playNutriaAnim = useCallback(() => {
-    if (animRef.current) return;
-    if (!supportsAlphaVideo) {
-      animRef.current = true;
-      setWiggling(true);
-      setTimeout(() => { animRef.current = false; setWiggling(false); }, 900);
-      return;
-    }
     const v = videoRef.current;
-    if (!v) return;
+    if (!v || animRef.current) return;
     animRef.current = true;
     v.currentTime = 0;
     v.play()
       .then(() => setAnimating(true)) // ocultar la imagen solo si arrancó de verdad
       .catch(() => { animRef.current = false; setAnimating(false); });
-  }, [supportsAlphaVideo]);
+  }, []);
 
   const stopNutriaAnim = useCallback(() => {
     animRef.current = false;
@@ -379,21 +363,23 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
           <img
             src="/icons/nutria-emocionario.png"
             alt=""
-            className={`emoc-fab__nutria${animating ? ' emoc-fab__nutria--hidden' : ''}${wiggling ? ' emoc-fab__nutria--wiggle' : ''}`}
+            className={`emoc-fab__nutria${animating ? ' emoc-fab__nutria--hidden' : ''}`}
           />
-          {supportsAlphaVideo && (
-            <video
-              ref={videoRef}
-              src="/icons/animacion-nutria.webm"
-              className={`emoc-fab__nutria-video${animating ? ' emoc-fab__nutria-video--visible' : ''}`}
-              muted
-              playsInline
-              preload="auto"
-              aria-hidden="true"
-              onEnded={stopNutriaAnim}
-              onError={stopNutriaAnim}
-            />
-          )}
+          <video
+            ref={videoRef}
+            className={`emoc-fab__nutria-video${animating ? ' emoc-fab__nutria-video--visible' : ''}`}
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            onEnded={stopNutriaAnim}
+            onError={stopNutriaAnim}
+          >
+            {/* Safari/iOS: HEVC con canal alfa */}
+            <source src="/icons/animacion-nutria.mov" type='video/quicktime; codecs="hvc1"' />
+            {/* Chrome/Firefox/Edge: WebM con canal alfa */}
+            <source src="/icons/animacion-nutria.webm" type="video/webm" />
+          </video>
         </span>
       </motion.button>
 
