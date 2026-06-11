@@ -12,6 +12,7 @@ const C = '/icons/config/';
 
 const links = [
   { to: '/',            label: 'Inicio',     iconImg: `${S}inicio.png` },
+  { to: '/calendario',  label: 'Calendario', iconImg: `${S}calendario.png` },
   { to: '/mapa',        label: 'Mapa',       iconImg: `${S}mapita.png` },
   { to: '/visitados',   label: 'Ya hicimos', iconImg: `${S}ya-hicimos.png` },
   { to: '/por-visitar', label: 'Por hacer',  iconImg: `${S}por-hacer.png` },
@@ -21,7 +22,6 @@ const links = [
   { to: '/cine',        label: 'Cine',       iconImg: `${S}cine.png` },
   { to: '/outfits',     label: 'Outfits',    iconImg: `${S}clima-en-outfits.png` },
   { to: '/nombres',     label: 'Nombres',    iconImg: `${S}nombres.png` },
-  { to: '/calendario',  label: 'Calendario', iconImg: `${S}calendario.png` },
 ];
 
 export default function Navbar() {

@@ -7,6 +7,7 @@
 export const SWIPE_ROUTES = [
   '/mapa',
   '/',
+  '/calendario',
   '/visitados',
   '/por-visitar',
   '/viajecitos',

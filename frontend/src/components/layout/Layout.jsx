@@ -34,8 +34,8 @@ const ROUTE_BG = {
 
 // Orden de navegación horizontal (Mapa queda a la izquierda de Inicio)
 const SWIPE_ROUTES = [
-  '/mapa', '/', '/visitados', '/por-visitar', '/viajecitos',
-  '/cartitas', '/recetas', '/cine', '/outfits', '/nombres', '/calendario',
+  '/mapa', '/', '/calendario', '/visitados', '/por-visitar', '/viajecitos',
+  '/cartitas', '/recetas', '/cine', '/outfits', '/nombres',
 ];
 
 // Selectores de elementos que manejan su propio gesto táctil

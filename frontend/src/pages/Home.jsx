@@ -497,18 +497,18 @@ export default function Home() {
 
   const navCards = [
     { to: '/mapa',        iconImg: `${S}mapita.png`,             name: 'Mapa',       desc: 'Ver todos en el mapa' },
+    { to: '/calendario',  iconImg: `${S}calendario.png`,         name: 'Calendario', desc: 'Nuestros planes' },
     { to: '/visitados',   iconImg: `${S}ya-hicimos.png`,         name: 'Ya hicimos', desc: `${stats.visited} lugar${stats.visited !== 1 ? 'es' : ''}` },
     { to: '/por-visitar', iconImg: `${S}por-hacer.png`,          name: 'Por hacer',  desc: `${stats.wishlist} pendiente${stats.wishlist !== 1 ? 's' : ''}` },
     { to: '/recetas',     iconImg: `${S}recetas.png`,            name: 'Recetas',    desc: 'Ver nuestras recetas' },
     { to: '/cine',        iconImg: `${S}cine.png`,               name: 'Cine',       desc: 'Películas y series' },
     { to: '/viajecitos',  iconImg: `${S}viajecitos.png`,         name: 'Viajecitos', desc: 'Nuestros próximos viajes' },
-    { to: '/outfits',     iconImg: `${S}clima-en-outfits.png`,   name: 'Outfits',    desc: 'Qué ponerse hoy' },
   ];
 
   const moreLinks = [
     { to: '/cartitas',    iconImg: `${S}cartitas.png`,              name: 'Cartitas' },
     { to: '/nombres',     iconImg: `${S}nombres.png`,               name: 'Nombres' },
-    { to: '/calendario',  iconImg: `${S}calendario.png`,            name: 'Calendario' },
+    { to: '/outfits',     iconImg: `${S}clima-en-outfits.png`,      name: 'Outfits' },
   ];
 
   const [showMore, setShowMore] = useState(false);
