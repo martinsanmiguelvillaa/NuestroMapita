@@ -20,5 +20,5 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Claude Code (herramienta de desarrollo)
-.claude/
+# Claude Code: skills versionadas a propósito, pero no la config local de cada máquina
+.claude/settings.local.json

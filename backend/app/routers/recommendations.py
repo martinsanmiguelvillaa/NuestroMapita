@@ -60,7 +60,8 @@ def generate(
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Error generando recomendación: {exc}") from exc
+        # No exponer detalles internos de la excepción al cliente
+        raise HTTPException(status_code=500, detail="Error generando recomendación.") from exc
 
     # Enrich with TMDB posters if API key is available
     if settings.TMDB_API_KEY:
