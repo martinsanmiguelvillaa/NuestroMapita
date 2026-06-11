@@ -527,6 +527,14 @@ export default function Calendario() {
 
 // ─── DayCell ──────────────────────────────────────────────────────────────────
 
+// Pick up to 2 emotions for the cell: one per user if both have entries
+function pickCellEmotions(emotions) {
+  const martin = emotions.filter(em => em.user_key !== 'van');
+  const van    = emotions.filter(em => em.user_key === 'van');
+  if (martin.length && van.length) return [martin[0], van[0]];
+  return emotions.slice(0, 2);
+}
+
 function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, typeMap, rangeOrder = [], onMouseDown, onMouseEnter, tall }) {
   if (!dateStr) return <div className="cal__cell cal__cell--empty" />;
   const dayNum = +dateStr.split('-')[2];
@@ -623,7 +631,7 @@ function DayCell({ dateStr, today, selected, isDragSelected, events, emotions, t
       )}
 
       <div className="cal__cell-emos">
-        {emotions.slice(0, 4).map((em, i) => {
+        {pickCellEmotions(emotions).map((em, i) => {
           const e = EMOTION_MAP[em.emotion_key];
           return e
             ? <img key={i} src={e.img} alt="" className="cal__cell-emo"
