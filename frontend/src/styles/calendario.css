@@ -214,7 +214,7 @@
 }
 
 .cal__month-grid {
-  grid-auto-rows: minmax(110px, auto);
+  grid-auto-rows: minmax(110px, 110px);
   flex: none;
 }
 
@@ -235,6 +235,27 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Fade gradient at the bottom hints that there may be more content — open the day to see all */
+.cal__cell::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, rgba(253, 246, 236, 0.90));
+  pointer-events: none;
+}
+.cal__cell--today::after {
+  background: linear-gradient(to bottom, transparent, rgba(255, 247, 232, 0.93));
+}
+.cal__cell--selected::after,
+.cal__cell--today.cal__cell--selected::after {
+  background: linear-gradient(to bottom, transparent, rgba(232, 196, 196, 0.82));
 }
 .cal__cell:hover { background: rgba(240, 228, 208, 0.92); }
 
@@ -1116,9 +1137,12 @@
     overflow: visible;
   }
 
-  .cal__month-grid,
+  .cal__month-grid {
+    grid-auto-rows: minmax(72px, 72px);
+    flex: none;
+  }
   .cal__week-grid {
-    grid-auto-rows: minmax(72px, auto);
+    grid-auto-rows: 1fr;
     flex: none;
   }
 
