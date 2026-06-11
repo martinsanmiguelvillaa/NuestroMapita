@@ -7,6 +7,7 @@
  * - ProtectedRoute: si no está autenticado, redirige a /login
  * - Layout: renderiza la navbar + la página actual (via <Outlet>)
  */
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ConfirmProvider } from './context/ConfirmContext';
@@ -14,17 +15,36 @@ import { Toaster } from 'sonner';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import MapPage from './pages/Map';
-import Visited from './pages/Visited';
-import Wishlist from './pages/Wishlist';
-import Letters from './pages/Letters';
-import Recipes from './pages/Recipes';
-import Cine from './pages/Cine';
-import Outfits from './pages/Outfits';
-import Trips from './pages/Trips';
-import Names from './pages/Names';
-import Calendario from './pages/Calendario';
-import ShareTarget from './pages/ShareTarget';
+
+/**
+ * Lazy loading con auto-recuperación: si un chunk falla al cargar
+ * (típicamente porque hubo un deploy y los archivos viejos ya no existen),
+ * recarga la página una única vez para tomar la versión nueva.
+ */
+function lazyPage(importFn) {
+  return lazy(() =>
+    importFn().catch(() => {
+      const key = 'chunk_reload';
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        window.location.reload();
+      }
+      return { default: () => null };
+    })
+  );
+}
+
+const MapPage     = lazyPage(() => import('./pages/Map'));
+const Visited     = lazyPage(() => import('./pages/Visited'));
+const Wishlist    = lazyPage(() => import('./pages/Wishlist'));
+const Letters     = lazyPage(() => import('./pages/Letters'));
+const Recipes     = lazyPage(() => import('./pages/Recipes'));
+const Cine        = lazyPage(() => import('./pages/Cine'));
+const Outfits     = lazyPage(() => import('./pages/Outfits'));
+const Trips       = lazyPage(() => import('./pages/Trips'));
+const Names       = lazyPage(() => import('./pages/Names'));
+const Calendario  = lazyPage(() => import('./pages/Calendario'));
+const ShareTarget = lazyPage(() => import('./pages/ShareTarget'));
 
 // Ruta protegida: si no hay sesión, manda al login
 function ProtectedRoute() {
@@ -38,6 +58,7 @@ export default function App() {
     <AuthProvider>
       <ConfirmProvider>
       <BrowserRouter>
+        <Suspense fallback={null}>
         <Routes>
           {/* Página de login (sin navbar) */}
           <Route path="/login" element={<Login />} />
@@ -67,6 +88,7 @@ export default function App() {
           {/* Cualquier ruta desconocida va al home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
         <Toaster
           position={window.matchMedia('(max-width: 768px)').matches ? 'top-center' : 'bottom-right'}
           richColors
