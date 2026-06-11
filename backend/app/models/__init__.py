@@ -10,5 +10,6 @@ from app.models.push_subscription import PushSubscription
 from app.models.outfit_notification import OutfitNotificationSubscription
 from app.models.outfit_cache import OutfitCache
 from app.models.emotional_entry import EmotionalEntry
+from app.models.notification import Notification
 
-__all__ = ["PlaceVisited", "Photo", "PlaceWishlist", "Letter", "Recipe", "RecipeComment", "CineItem", "CineComment", "RecommendationHistory", "BlockedRecommendation", "PushSubscription", "OutfitNotificationSubscription", "OutfitCache", "EmotionalEntry"]
+__all__ = ["PlaceVisited", "Photo", "PlaceWishlist", "Letter", "Recipe", "RecipeComment", "CineItem", "CineComment", "RecommendationHistory", "BlockedRecommendation", "PushSubscription", "OutfitNotificationSubscription", "OutfitCache", "EmotionalEntry", "Notification"]

@@ -5,6 +5,7 @@ import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { getOutfitNotificationStatus, updateOutfitNotificationSettings } from '../../api/outfitNotifications';
 import { getDeviceStatus, updateDeviceSettings } from '../../api/push';
 import { getOrCreateDeviceId } from '../../utils/deviceId';
+import NotificationBell from '../NotificationBell';
 import '../../styles/navbar.css';
 
 const S = '/icons/iconos-secciones/';
@@ -203,6 +204,9 @@ export default function Navbar() {
             ))}
           </ul>
         </div>
+
+        {/* Campanita de notificaciones in-app */}
+        <NotificationBell />
 
         {/* Config — fuera del ul para que iOS no recorte el touch */}
         <div className="navbar__config-wrap">
