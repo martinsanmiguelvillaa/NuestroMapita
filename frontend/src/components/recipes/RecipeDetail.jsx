@@ -43,7 +43,7 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
 }
 
 function RecipeDetailContent({ recipe, onEdit, onCommentChanged }) {
-  const ingredients = recipe.ingredients
+  const ingredients = (recipe.ingredients || '')
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean);
@@ -79,20 +79,24 @@ function RecipeDetailContent({ recipe, onEdit, onCommentChanged }) {
       </div>
 
       {/* Ingredientes */}
-      <section className="recipe-detail__section">
-        <h4 className="recipe-detail__section-title">Ingredientes</h4>
-        <ul className="recipe-detail__ingredients">
-          {ingredients.map((ing, i) => (
-            <li key={i}>{ing}</li>
-          ))}
-        </ul>
-      </section>
+      {ingredients.length > 0 && (
+        <section className="recipe-detail__section">
+          <h4 className="recipe-detail__section-title">Ingredientes</h4>
+          <ul className="recipe-detail__ingredients">
+            {ingredients.map((ing, i) => (
+              <li key={i}>{ing}</li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Preparación */}
-      <section className="recipe-detail__section">
-        <h4 className="recipe-detail__section-title">Preparación</h4>
-        <p className="recipe-detail__steps">{recipe.steps}</p>
-      </section>
+      {recipe.steps && (
+        <section className="recipe-detail__section">
+          <h4 className="recipe-detail__section-title">Preparación</h4>
+          <p className="recipe-detail__steps">{recipe.steps}</p>
+        </section>
+      )}
 
       {/* Notas */}
       {recipe.notes && (

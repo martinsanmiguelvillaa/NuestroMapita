@@ -5,7 +5,7 @@ import '../../styles/recipes.css';
  * Tarjeta compacta de receta para la grilla.
  */
 export default function RecipeCard({ recipe, onView, onEdit, onDelete, disabled = false }) {
-  const allIngredients = recipe.ingredients.split('\n').map((l) => l.trim()).filter(Boolean);
+  const allIngredients = (recipe.ingredients || '').split('\n').map((l) => l.trim()).filter(Boolean);
   const firstIngredients = allIngredients.slice(0, 3);
 
   const lastComment = recipe.comments?.[recipe.comments.length - 1];
