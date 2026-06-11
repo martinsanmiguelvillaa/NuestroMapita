@@ -593,6 +593,7 @@
 
 /* El float vive en el elemento interno para no interferir con el layoutId de Framer Motion */
 .emoc-fab__inner {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -605,6 +606,28 @@
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+  transition: opacity 0.25s ease;
+}
+
+.emoc-fab__nutria--hidden {
+  opacity: 0;
+}
+
+/* Video de la animación: superpuesto a la imagen estática, con crossfade */
+.emoc-fab__nutria-video {
+  position: absolute;
+  inset: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.emoc-fab__nutria-video--visible {
+  opacity: 1;
 }
 
 .emoc-fab--dragging {

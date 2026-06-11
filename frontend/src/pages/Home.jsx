@@ -240,6 +240,24 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const [overDrop, setOverDrop] = useState(false);
   const s      = useRef({ active: false, moved: false, startX: 0, startY: 0, originX: 0, originY: 0 });
   const posRef = useRef({ x: 0, y: 0 });
+  const videoRef = useRef(null);
+  const animRef  = useRef(false);
+  const [animating, setAnimating] = useState(false);
+
+  // Reproduce la animación de la nutria al pasar el mouse o tocarla
+  const playNutriaAnim = useCallback(() => {
+    const v = videoRef.current;
+    if (!v || animRef.current) return;
+    animRef.current = true;
+    setAnimating(true);
+    v.currentTime = 0;
+    v.play().catch(() => { animRef.current = false; setAnimating(false); });
+  }, []);
+
+  const stopNutriaAnim = useCallback(() => {
+    animRef.current = false;
+    setAnimating(false);
+  }, []);
 
   useEffect(() => {
     const homeTop = btnRef.current?.closest('.home')?.getBoundingClientRect().top ?? 0;
@@ -262,10 +280,11 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
 
   const onPointerDown = useCallback((e) => {
     e.preventDefault();
+    if (e.pointerType !== 'mouse') playNutriaAnim(); // en táctil no hay hover
     btnRef.current.setPointerCapture(e.pointerId);
     s.current = { active: true, moved: false, startX: e.clientX, startY: e.clientY,
                   originX: posRef.current.x, originY: posRef.current.y };
-  }, []);
+  }, [playNutriaAnim]);
 
   const onPointerMove = useCallback((e) => {
     if (!s.current.active) return;
@@ -325,6 +344,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse') playNutriaAnim(); }}
         onPointerLeave={() => setJustDragged(false)}
         aria-label="Registrar emoción"
       >
@@ -337,7 +357,22 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
           >×</button>
         )}
         <span className="emoc-fab__inner">
-          <img src="/icons/nutria-emocionario.png" alt="" className="emoc-fab__nutria" />
+          <img
+            src="/icons/nutria-emocionario.png"
+            alt=""
+            className={`emoc-fab__nutria${animating ? ' emoc-fab__nutria--hidden' : ''}`}
+          />
+          <video
+            ref={videoRef}
+            src="/icons/animacion-nutria.webm"
+            className={`emoc-fab__nutria-video${animating ? ' emoc-fab__nutria-video--visible' : ''}`}
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            onEnded={stopNutriaAnim}
+            onError={stopNutriaAnim}
+          />
         </span>
       </motion.button>
 
