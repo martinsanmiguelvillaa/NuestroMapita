@@ -17,6 +17,7 @@ from app.database import SessionLocal
 from app.models.device_subscription import DeviceSubscription
 from app.services.push_service import send_push_to_endpoint
 from app.config import settings
+from app.models.outfit_cache import OutfitCache 
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def _fetch_and_cache_outfit(user_key: str, db) -> bool:
         if not resp.ok:
             return False
 
-        from app.models.outfit_cache import OutfitCache
+        
 
         data = resp.json()
         outfit = data.get("outfit") or data.get("outfit_recommendation") or data
