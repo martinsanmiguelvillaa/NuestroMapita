@@ -1128,22 +1128,25 @@
 @media (max-width: 768px) {
   .cal {
     padding: var(--space-3) var(--space-2) var(--space-2);
-    height: auto;
-    min-height: calc(100vh - var(--navbar-height) - var(--mobile-nav-height));
-    overflow-y: auto;
+    height: calc(100vh - var(--navbar-height) - var(--mobile-nav-height));
+    height: calc(100dvh - var(--navbar-height) - var(--mobile-nav-height));
+    min-height: 0;
+    overflow: hidden;
   }
 
   .cal__grid-wrap {
-    overflow: visible;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
-  .cal__month-grid {
-    grid-auto-rows: minmax(72px, 72px);
-    flex: none;
-  }
+  /* Las filas reparten el alto disponible en partes iguales: el grid llena
+     la pantalla y todas las celdas mantienen la misma altura entre sí */
+  .cal__month-grid,
   .cal__week-grid {
+    flex: 1;
+    min-height: 0;
     grid-auto-rows: 1fr;
-    flex: none;
   }
 
   .cal__header {
@@ -1187,7 +1190,8 @@
 
   .cal__body {
     flex-direction: column;
-    flex: none;
+    flex: 1;
+    min-height: 0;
   }
 
   .cal__cell {
@@ -1195,7 +1199,7 @@
   }
 
   .cal__cell--tall {
-    min-height: 80px;
+    min-height: 0;
   }
 
   .cal__cell-num {
