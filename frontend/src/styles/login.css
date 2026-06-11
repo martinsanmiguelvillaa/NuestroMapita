@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('/backgrounds/fondo-principal.jpeg');
+  background-image: url('/backgrounds/fondo-principal.webp');
   background-size: cover;
   background-position: top center;
   padding: var(--space-4);
@@ -38,7 +38,7 @@
     /* En mobile #root no tiene padding-top pero sí padding-bottom para el navbar */
     margin-top: 0;
     margin-bottom: calc(-1 * (var(--mobile-nav-height) + env(safe-area-inset-bottom)));
-    background-image: url('/backgrounds/fondo-principal-celu.png');
+    background-image: url('/backgrounds/fondo-principal-celu.webp');
   }
 
   .login-page::before {

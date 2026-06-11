@@ -384,7 +384,7 @@ export default function Calendario() {
               >{label}</button>
             ))}
           </div>
-          <button className="cal__ctrl-btn" style={{whiteSpace:'nowrap'}} onClick={() => setEmoToday(true)}><img src="/icons/nutria-emocionario.png" alt="" style={{width:'1.4em',height:'1.4em',objectFit:'contain',verticalAlign:'middle',display:'inline'}} /> Emocionario</button>
+          <button className="cal__ctrl-btn" style={{whiteSpace:'nowrap'}} onClick={() => setEmoToday(true)}><img src="/icons/nutria-emocionario.webp" alt="" style={{width:'1.4em',height:'1.4em',objectFit:'contain',verticalAlign:'middle',display:'inline'}} /> Emocionario</button>
         </div>
       </div>
 
@@ -716,7 +716,7 @@ function DayPanel({ dateStr, events, emotions, typeMap, onClose, onAddEvent, onE
                       {e && <img src={e.img} alt="" className="cal__emo-row-img" />}
                       <div className="cal__emo-row-info">
                         <span className="cal__emo-row-who">
-                          <img src={em.user_key === 'van' ? '/icons/icono-van.png' : '/icons/icono-martin.png'} alt="" className="cal__emo-row-who-icon" />
+                          <img src={em.user_key === 'van' ? '/icons/icono-van.webp' : '/icons/icono-martin.webp'} alt="" className="cal__emo-row-who-icon" />
                           {em.user_key === 'van' ? 'Van' : 'Martín'}
                         </span>
                         <span className="cal__emo-row-name">

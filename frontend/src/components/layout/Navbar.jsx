@@ -11,17 +11,17 @@ const S = '/icons/iconos-secciones/';
 const C = '/icons/config/';
 
 const links = [
-  { to: '/',            label: 'Inicio',     iconImg: `${S}inicio.png` },
-  { to: '/calendario',  label: 'Calendario', iconImg: `${S}calendario.png` },
-  { to: '/mapa',        label: 'Mapa',       iconImg: `${S}mapita.png` },
-  { to: '/visitados',   label: 'Ya hicimos', iconImg: `${S}ya-hicimos.png` },
-  { to: '/por-visitar', label: 'Por hacer',  iconImg: `${S}por-hacer.png` },
-  { to: '/viajecitos',  label: 'Viajecitos', iconImg: `${S}viajecitos.png` },
-  { to: '/cartitas',    label: 'Cartitas',   iconImg: `${S}cartitas.png` },
-  { to: '/recetas',     label: 'Recetas',    iconImg: `${S}recetas.png` },
-  { to: '/cine',        label: 'Cine',       iconImg: `${S}cine.png` },
-  { to: '/outfits',     label: 'Outfits',    iconImg: `${S}clima-en-outfits.png` },
-  { to: '/nombres',     label: 'Nombres',    iconImg: `${S}nombres.png` },
+  { to: '/',            label: 'Inicio',     iconImg: `${S}inicio.webp` },
+  { to: '/mapa',        label: 'Mapa',       iconImg: `${S}mapita.webp` },
+  { to: '/calendario',  label: 'Calendario', iconImg: `${S}calendario.webp` },
+  { to: '/visitados',   label: 'Ya hicimos', iconImg: `${S}ya-hicimos.webp` },
+  { to: '/por-visitar', label: 'Por hacer',  iconImg: `${S}por-hacer.webp` },
+  { to: '/viajecitos',  label: 'Viajecitos', iconImg: `${S}viajecitos.webp` },
+  { to: '/cartitas',    label: 'Cartitas',   iconImg: `${S}cartitas.webp` },
+  { to: '/recetas',     label: 'Recetas',    iconImg: `${S}recetas.webp` },
+  { to: '/cine',        label: 'Cine',       iconImg: `${S}cine.webp` },
+  { to: '/outfits',     label: 'Outfits',    iconImg: `${S}clima-en-outfits.webp` },
+  { to: '/nombres',     label: 'Nombres',    iconImg: `${S}nombres.webp` },
 ];
 
 export default function Navbar() {
@@ -212,7 +212,7 @@ export default function Navbar() {
             title="Configuración"
           >
             <span className="navbar__link-icon">
-              <img src={`${S}configuracion.png`} alt="" className="navbar__link-icon-img" />
+              <img src={`${S}configuracion.webp`} alt="" className="navbar__link-icon-img" />
             </span>
             <span>Config</span>
           </button>
@@ -224,7 +224,7 @@ export default function Navbar() {
                 {/* Todas las notificaciones — solo si hay alguna configurada */}
                 {(supported && permission !== 'denied' && (subscribed || hasOutfitSubs)) && (
                   <button className="navbar__config-item" onClick={toggleAll}>
-                    <img src={anyNotifActive ? `${C}notificaciones.png` : `${C}notificacion-desactivada.png`} alt="" className="navbar__config-icon" />
+                    <img src={anyNotifActive ? `${C}notificaciones.webp` : `${C}notificacion-desactivada.webp`} alt="" className="navbar__config-icon" />
                     <span>{anyNotifActive ? 'Silenciar todas las notificaciones' : 'Activar todas las notificaciones'}</span>
                   </button>
                 )}
@@ -235,7 +235,7 @@ export default function Navbar() {
                     className="navbar__config-item"
                     onClick={subscribed ? unsubscribe : subscribe}
                   >
-                    <img src={`${C}cartitas.png`} alt="" className="navbar__config-icon" />
+                    <img src={`${C}cartitas.webp`} alt="" className="navbar__config-icon" />
                     <span>{subscribed ? 'Desactivar notificaciones de cartitas' : 'Activar notificaciones de cartitas'}</span>
                   </button>
                 )}
@@ -247,7 +247,7 @@ export default function Navbar() {
                     onClick={toggleCalendar}
                     disabled={togglingCalendar}
                   >
-                    <img src={`${C}calendario.png`} alt="" className="navbar__config-icon" />
+                    <img src={`${C}calendario.webp`} alt="" className="navbar__config-icon" />
                     <span>{calendarNotif.enabled ? 'Desactivar notificaciones de calendario' : 'Activar notificaciones de calendario'}</span>
                   </button>
                 )}
@@ -259,7 +259,7 @@ export default function Navbar() {
                     onClick={() => toggleOutfit('van')}
                     disabled={togglingOutfit.van}
                   >
-                    <img src={`${C}outfit-van.png`} alt="" className="navbar__config-icon" />
+                    <img src={`${C}outfit-van.webp`} alt="" className="navbar__config-icon" />
                     <span>{outfitNotif.van.enabled ? 'Desactivar outfit de Van' : 'Activar outfit de Van'}</span>
                   </button>
                 )}
@@ -269,7 +269,7 @@ export default function Navbar() {
                     onClick={() => toggleOutfit('martin')}
                     disabled={togglingOutfit.martin}
                   >
-                    <img src={`${C}outfit-martin.png`} alt="" className="navbar__config-icon" />
+                    <img src={`${C}outfit-martin.webp`} alt="" className="navbar__config-icon" />
                     <span>{outfitNotif.martin.enabled ? 'Desactivar outfit de Martín' : 'Activar outfit de Martín'}</span>
                   </button>
                 )}

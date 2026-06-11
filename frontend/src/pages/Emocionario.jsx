@@ -5,21 +5,21 @@ import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/emocionario.css';
 
 export const EMOTIONS = [
-  { key: 'feliz',       labelM: 'Feliz',        labelF: 'Feliz',        img: '/icons/emocionario/feliz.png' },
-  { key: 'enamorado',   labelM: 'Enamorado',    labelF: 'Enamorada',    img: '/icons/emocionario/enamorada.png' },
-  { key: 'tranquilo',   labelM: 'Tranquilo',    labelF: 'Tranquila',    img: '/icons/emocionario/tranquila.png' },
-  { key: 'emocionado',  labelM: 'Emocionado',   labelF: 'Emocionada',   img: '/icons/emocionario/emocionada.png' },
-  { key: 'agradecido',  labelM: 'Agradecido',   labelF: 'Agradecida',   img: '/icons/emocionario/agradecida.png' },
-  { key: 'nostalgico',  labelM: 'Nostálgico',   labelF: 'Nostálgica',   img: '/icons/emocionario/nostalgica.png' },
-  { key: 'ansioso',     labelM: 'Ansioso',      labelF: 'Ansiosa',      img: '/icons/emocionario/ansiosa.png' },
-  { key: 'triste',      labelM: 'Triste',       labelF: 'Triste',       img: '/icons/emocionario/triste.png' },
-  { key: 'cansado',     labelM: 'Cansado',      labelF: 'Cansada',      img: '/icons/emocionario/cansada.png' },
-  { key: 'estresado',   labelM: 'Estresado',    labelF: 'Estresada',    img: '/icons/emocionario/estresada.png' },
-  { key: 'irritado',    labelM: 'Irritado',     labelF: 'Irritada',     img: '/icons/emocionario/irritada.png' },
-  { key: 'solo',        labelM: 'Solo',         labelF: 'Sola',         img: '/icons/emocionario/sola.png' },
-  { key: 'confundido',  labelM: 'Confundido',   labelF: 'Confundida',   img: '/icons/emocionario/confundida.png' },
-  { key: 'asustado',    labelM: 'Asustado',     labelF: 'Asustada',     img: '/icons/emocionario/asustada.png' },
-  { key: 'orgulloso',   labelM: 'Orgulloso',    labelF: 'Orgullosa',    img: '/icons/emocionario/orgullosa.png' },
+  { key: 'feliz',       labelM: 'Feliz',        labelF: 'Feliz',        img: '/icons/emocionario/feliz.webp' },
+  { key: 'enamorado',   labelM: 'Enamorado',    labelF: 'Enamorada',    img: '/icons/emocionario/enamorada.webp' },
+  { key: 'tranquilo',   labelM: 'Tranquilo',    labelF: 'Tranquila',    img: '/icons/emocionario/tranquila.webp' },
+  { key: 'emocionado',  labelM: 'Emocionado',   labelF: 'Emocionada',   img: '/icons/emocionario/emocionada.webp' },
+  { key: 'agradecido',  labelM: 'Agradecido',   labelF: 'Agradecida',   img: '/icons/emocionario/agradecida.webp' },
+  { key: 'nostalgico',  labelM: 'Nostálgico',   labelF: 'Nostálgica',   img: '/icons/emocionario/nostalgica.webp' },
+  { key: 'ansioso',     labelM: 'Ansioso',      labelF: 'Ansiosa',      img: '/icons/emocionario/ansiosa.webp' },
+  { key: 'triste',      labelM: 'Triste',       labelF: 'Triste',       img: '/icons/emocionario/triste.webp' },
+  { key: 'cansado',     labelM: 'Cansado',      labelF: 'Cansada',      img: '/icons/emocionario/cansada.webp' },
+  { key: 'estresado',   labelM: 'Estresado',    labelF: 'Estresada',    img: '/icons/emocionario/estresada.webp' },
+  { key: 'irritado',    labelM: 'Irritado',     labelF: 'Irritada',     img: '/icons/emocionario/irritada.webp' },
+  { key: 'solo',        labelM: 'Solo',         labelF: 'Sola',         img: '/icons/emocionario/sola.webp' },
+  { key: 'confundido',  labelM: 'Confundido',   labelF: 'Confundida',   img: '/icons/emocionario/confundida.webp' },
+  { key: 'asustado',    labelM: 'Asustado',     labelF: 'Asustada',     img: '/icons/emocionario/asustada.webp' },
+  { key: 'orgulloso',   labelM: 'Orgulloso',    labelF: 'Orgullosa',    img: '/icons/emocionario/orgullosa.webp' },
 ];
 
 function emotionLabel(em, userKey) {
@@ -29,8 +29,8 @@ function emotionLabel(em, userKey) {
 const EMOTION_MAP = Object.fromEntries(EMOTIONS.map((e) => [e.key, e]));
 
 const USERS = [
-  { key: 'van',    label: 'Van',    avatar: '/icons/icono-van.png' },
-  { key: 'martin', label: 'Martín', avatar: '/icons/icono-martin.png' },
+  { key: 'van',    label: 'Van',    avatar: '/icons/icono-van.webp' },
+  { key: 'martin', label: 'Martín', avatar: '/icons/icono-martin.webp' },
 ];
 
 const INTENSITY_LABELS = ['', 'Leve', 'Suave', 'Medio', 'Intenso', 'Muy intenso'];

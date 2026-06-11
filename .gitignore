@@ -22,3 +22,4 @@ Thumbs.db
 
 # Claude Code: skills versionadas a propósito, pero no la config local de cada máquina
 .claude/settings.local.json
+.vercel

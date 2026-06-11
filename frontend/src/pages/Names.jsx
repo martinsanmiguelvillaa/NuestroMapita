@@ -96,7 +96,7 @@ function RatingInput({ value, onChange, saving }) {
           title={`${n}/10`}
         >
           <img
-            src={n <= active ? '/icons/alas-puntuacion-seleccionado.png' : '/icons/alas-puntuacion-no-seleccionado.png'}
+            src={n <= active ? '/icons/alas-puntuacion-seleccionado.webp' : '/icons/alas-puntuacion-no-seleccionado.webp'}
             alt=""
           />
         </button>
@@ -415,8 +415,8 @@ function PuntuarTab({ names, activeProfile, onProfileChange, onRated }) {
         </p>
         <div className="profile-cards">
           {[
-            { id: 'van',    label: 'Van',    icon: '/icons/icono-van.png' },
-            { id: 'martin', label: 'Martín', icon: '/icons/icono-martin.png' },
+            { id: 'van',    label: 'Van',    icon: '/icons/icono-van.webp' },
+            { id: 'martin', label: 'Martín', icon: '/icons/icono-martin.webp' },
           ].map(({ id, label, icon }) => (
             <button key={id} className="profile-card" onClick={() => onProfileChange(id)}>
               <img src={icon} alt={label} className="profile-card__icon" />

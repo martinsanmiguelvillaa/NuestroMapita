@@ -361,7 +361,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         )}
         <span className="emoc-fab__inner">
           <img
-            src="/icons/nutria-emocionario.png"
+            src="/icons/nutria-emocionario.webp"
             alt=""
             className={`emoc-fab__nutria${animating ? ' emoc-fab__nutria--hidden' : ''}`}
           />
@@ -496,19 +496,19 @@ export default function Home() {
   const S = '/icons/iconos-secciones/';
 
   const navCards = [
-    { to: '/mapa',        iconImg: `${S}mapita.png`,             name: 'Mapa',       desc: 'Ver todos en el mapa' },
-    { to: '/calendario',  iconImg: `${S}calendario.png`,         name: 'Calendario', desc: 'Nuestros planes' },
-    { to: '/visitados',   iconImg: `${S}ya-hicimos.png`,         name: 'Ya hicimos', desc: `${stats.visited} lugar${stats.visited !== 1 ? 'es' : ''}` },
-    { to: '/por-visitar', iconImg: `${S}por-hacer.png`,          name: 'Por hacer',  desc: `${stats.wishlist} pendiente${stats.wishlist !== 1 ? 's' : ''}` },
-    { to: '/recetas',     iconImg: `${S}recetas.png`,            name: 'Recetas',    desc: 'Ver nuestras recetas' },
-    { to: '/cine',        iconImg: `${S}cine.png`,               name: 'Cine',       desc: 'Películas y series' },
-    { to: '/viajecitos',  iconImg: `${S}viajecitos.png`,         name: 'Viajecitos', desc: 'Nuestros próximos viajes' },
+    { to: '/mapa',        iconImg: `${S}mapita.webp`,             name: 'Mapa',       desc: 'Ver todos en el mapa' },
+    { to: '/calendario',  iconImg: `${S}calendario.webp`,         name: 'Calendario', desc: 'Nuestros planes' },
+    { to: '/visitados',   iconImg: `${S}ya-hicimos.webp`,         name: 'Ya hicimos', desc: `${stats.visited} lugar${stats.visited !== 1 ? 'es' : ''}` },
+    { to: '/por-visitar', iconImg: `${S}por-hacer.webp`,          name: 'Por hacer',  desc: `${stats.wishlist} pendiente${stats.wishlist !== 1 ? 's' : ''}` },
+    { to: '/recetas',     iconImg: `${S}recetas.webp`,            name: 'Recetas',    desc: 'Ver nuestras recetas' },
+    { to: '/cine',        iconImg: `${S}cine.webp`,               name: 'Cine',       desc: 'Películas y series' },
+    { to: '/viajecitos',  iconImg: `${S}viajecitos.webp`,         name: 'Viajecitos', desc: 'Nuestros próximos viajes' },
   ];
 
   const moreLinks = [
-    { to: '/cartitas',    iconImg: `${S}cartitas.png`,              name: 'Cartitas' },
-    { to: '/nombres',     iconImg: `${S}nombres.png`,               name: 'Nombres' },
-    { to: '/outfits',     iconImg: `${S}clima-en-outfits.png`,      name: 'Outfits' },
+    { to: '/cartitas',    iconImg: `${S}cartitas.webp`,              name: 'Cartitas' },
+    { to: '/nombres',     iconImg: `${S}nombres.webp`,               name: 'Nombres' },
+    { to: '/outfits',     iconImg: `${S}clima-en-outfits.webp`,      name: 'Outfits' },
   ];
 
   const [showMore, setShowMore] = useState(false);
