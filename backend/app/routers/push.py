@@ -61,14 +61,17 @@ class SettingsRequest(BaseModel):
     outfit_notif_enabled: Optional[bool] = None
     outfit_notif_time: Optional[str] = None
     calendar_notif_enabled: Optional[bool] = None
+    # Horas de silencio (null explícito = borrar)
+    quiet_start: Optional[str] = None
+    quiet_end: Optional[str] = None
 
-    @field_validator("outfit_notif_time")
+    @field_validator("outfit_notif_time", "quiet_start", "quiet_end")
     @classmethod
     def validate_time(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
         if not re.match(r"^\d{2}:\d{2}$", v):
-            raise ValueError("outfit_notif_time debe tener formato HH:MM")
+            raise ValueError("La hora debe tener formato HH:MM")
         hh, mm = int(v[:2]), int(v[3:])
         if not (0 <= hh <= 23 and 0 <= mm <= 59):
             raise ValueError("Hora inválida")
@@ -163,6 +166,8 @@ def get_device_status(
         "outfit_notif_enabled": sub.outfit_notif_enabled,
         "outfit_notif_time": sub.outfit_notif_time,
         "calendar_notif_enabled": sub.calendar_notif_enabled,
+        "quiet_start": sub.quiet_start,
+        "quiet_end": sub.quiet_end,
         "device_label": sub.device_label,
     }
 
@@ -173,18 +178,38 @@ def update_settings(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Actualiza configuración de un dispositivo (enabled, outfit_notif_enabled, outfit_notif_time)."""
+    """Actualiza configuración de un dispositivo (enabled, outfits, calendario, quiet hours)."""
     sub = _get_sub(db, body.device_id, body.user_key)
-    if not sub:
-        raise HTTPException(status_code=404, detail="Suscripción no encontrada")
-    if body.enabled is not None:
-        sub.enabled = body.enabled
-    if body.outfit_notif_enabled is not None:
-        sub.outfit_notif_enabled = body.outfit_notif_enabled
-    if body.outfit_notif_time is not None:
-        sub.outfit_notif_time = body.outfit_notif_time
-    if body.calendar_notif_enabled is not None:
-        sub.calendar_notif_enabled = body.calendar_notif_enabled
+
+    per_sub_touched = any(
+        getattr(body, f) is not None
+        for f in ("enabled", "outfit_notif_enabled", "outfit_notif_time", "calendar_notif_enabled")
+    )
+    if per_sub_touched:
+        if not sub:
+            raise HTTPException(status_code=404, detail="Suscripción no encontrada")
+        if body.enabled is not None:
+            sub.enabled = body.enabled
+        if body.outfit_notif_enabled is not None:
+            sub.outfit_notif_enabled = body.outfit_notif_enabled
+        if body.outfit_notif_time is not None:
+            sub.outfit_notif_time = body.outfit_notif_time
+        if body.calendar_notif_enabled is not None:
+            sub.calendar_notif_enabled = body.calendar_notif_enabled
+
+    # Quiet hours: aplican a TODAS las filas del dispositivo (van/martin/ambos)
+    # para que el silencio sea coherente. null explícito = borrar.
+    quiet_fields = {"quiet_start", "quiet_end"} & body.model_fields_set
+    if quiet_fields:
+        rows = db.query(DeviceSubscription).filter_by(device_id=body.device_id).all()
+        if not rows:
+            raise HTTPException(status_code=404, detail="Suscripción no encontrada")
+        for row in rows:
+            if "quiet_start" in quiet_fields:
+                row.quiet_start = body.quiet_start
+            if "quiet_end" in quiet_fields:
+                row.quiet_end = body.quiet_end
+
     db.commit()
     return {"ok": True}
 

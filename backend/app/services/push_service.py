@@ -4,6 +4,9 @@ Envía notificaciones a todas las suscripciones guardadas en device_subscription
 """
 import json
 import logging
+from datetime import datetime, timezone as dt_timezone
+from zoneinfo import ZoneInfo
+
 from pywebpush import webpush, WebPushException
 from sqlalchemy.orm import Session
 
@@ -11,6 +14,27 @@ from app.config import settings
 from app.models.device_subscription import DeviceSubscription
 
 logger = logging.getLogger(__name__)
+
+_DEFAULT_TZ = "America/Argentina/Buenos_Aires"
+
+
+def in_quiet_hours(sub: DeviceSubscription) -> bool:
+    """True si el dispositivo está en sus horas de silencio (hora local).
+
+    Soporta rangos que cruzan medianoche (ej. 23:00 → 08:00).
+    Sin quiet_start/quiet_end configurados, nunca silencia.
+    """
+    if not sub.quiet_start or not sub.quiet_end or sub.quiet_start == sub.quiet_end:
+        return False
+    try:
+        tz = ZoneInfo(sub.timezone or _DEFAULT_TZ)
+    except Exception:
+        tz = ZoneInfo(_DEFAULT_TZ)
+    now_hhmm = datetime.now(dt_timezone.utc).astimezone(tz).strftime("%H:%M")
+    if sub.quiet_start < sub.quiet_end:
+        return sub.quiet_start <= now_hhmm < sub.quiet_end
+    # Rango que cruza medianoche
+    return now_hhmm >= sub.quiet_start or now_hhmm < sub.quiet_end
 
 
 def send_push_to_endpoint(
@@ -86,10 +110,11 @@ def _send_to_subs(db: Session, subs: list, title: str, body: str, url: str) -> N
         db.commit()
 
 
-def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None:
+def send_push_to_all(db: Session, title: str, body: str, url: str = "/", priority: str = "normal") -> None:
     """
     Envía a todos los dispositivos habilitados (master switch).
     Para cartitas y otros eventos globales sin preferencia por feature.
+    Respeta las horas de silencio, salvo priority="high".
     """
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
         return
@@ -98,14 +123,18 @@ def send_push_to_all(db: Session, title: str, body: str, url: str = "/") -> None
         DeviceSubscription.enabled == True  # noqa: E712
     ).all()
 
+    if priority != "high":
+        subs = [s for s in subs if not in_quiet_hours(s)]
+
     _send_to_subs(db, subs, title, body, url)
 
 
-def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/calendario") -> None:
+def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/calendario", priority: str = "normal") -> None:
     """
     Envía a dispositivos con notificaciones de calendario habilitadas.
     NULL en calendar_notif_enabled = opt-out no realizado = enviar.
     False = el usuario eligió no recibir notificaciones de calendario en este dispositivo.
+    Respeta las horas de silencio, salvo priority="high".
     """
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
         return
@@ -114,5 +143,8 @@ def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/c
         DeviceSubscription.enabled == True,                    # noqa: E712
         DeviceSubscription.calendar_notif_enabled != False,   # NULL o True
     ).all()
+
+    if priority != "high":
+        subs = [s for s in subs if not in_quiet_hours(s)]
 
     _send_to_subs(db, subs, title, body, url)

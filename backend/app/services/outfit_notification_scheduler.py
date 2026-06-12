@@ -15,7 +15,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.database import SessionLocal
 from app.models.device_subscription import DeviceSubscription
-from app.services.push_service import send_push_to_endpoint
+from app.services.push_service import send_push_to_endpoint, in_quiet_hours
 from app.services.notification_service import create_notification
 from app.config import settings
 from app.models.outfit_cache import OutfitCache 
@@ -155,6 +155,23 @@ def _check_and_send() -> None:
                 title = "Tu outfit de hoy 💌"
                 body = "Ya está lista tu recomendación. Tocá para verla."
                 url = f"/outfits?user={sub.user_key}"
+
+                # Horas de silencio: queda en la campanita pero no suena el push
+                if in_quiet_hours(sub):
+                    try:
+                        create_notification(
+                            db,
+                            user_key=sub.user_key,
+                            type="outfit_daily",
+                            title=title,
+                            body=body,
+                            url=url,
+                            dedupe_key=f"outfit:{sub.user_key}:{now_local.date().isoformat()}",
+                        )
+                    except Exception:
+                        db.rollback()
+                    logger.info("[outfit-notif] 🌙 silenciado por quiet hours user=%s device=%s", sub.user_key, sub.device_id[:8])
+                    continue
 
                 success = send_push_to_endpoint(
                     endpoint=sub.endpoint,

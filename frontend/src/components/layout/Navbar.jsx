@@ -45,6 +45,9 @@ export default function Navbar() {
   const [calendarNotif, setCalendarNotif] = useState(null); // { registered, enabled }
   const [togglingCalendar, setTogglingCalendar] = useState(false);
 
+  // Horas de silencio de este dispositivo ('' = sin configurar)
+  const [quiet, setQuiet] = useState({ start: '', end: '' });
+
   useEffect(() => {
     if (!configOpen) return;
     const deviceId = getOrCreateDeviceId();
@@ -54,6 +57,10 @@ export default function Navbar() {
       getDeviceStatus(deviceId, 'ambos').catch(() => null),
     ]).then(([van, martin, deviceStatus]) => {
       setOutfitNotif({ van, martin });
+      setQuiet({
+        start: deviceStatus?.quiet_start ?? '',
+        end: deviceStatus?.quiet_end ?? '',
+      });
       if (deviceStatus?.exists) {
         // NULL en calendar_notif_enabled = opt-out no realizado = activado
         setCalendarNotif({
@@ -129,6 +136,29 @@ export default function Navbar() {
     } finally {
       setTogglingCalendar(false);
     }
+  };
+
+  const changeQuiet = async (field, value) => {
+    setQuiet((prev) => ({ ...prev, [field]: value }));
+    try {
+      await updateDeviceSettings({
+        device_id: getOrCreateDeviceId(),
+        user_key: 'ambos',
+        [field === 'start' ? 'quiet_start' : 'quiet_end']: value || null,
+      });
+    } catch { /* se reintenta al volver a abrir el menú */ }
+  };
+
+  const clearQuiet = async () => {
+    setQuiet({ start: '', end: '' });
+    try {
+      await updateDeviceSettings({
+        device_id: getOrCreateDeviceId(),
+        user_key: 'ambos',
+        quiet_start: null,
+        quiet_end: null,
+      });
+    } catch { /* idem */ }
   };
 
   const anyNotifActive = subscribed || outfitNotif.van?.enabled || outfitNotif.martin?.enabled;
@@ -276,6 +306,36 @@ export default function Navbar() {
                     <img src={`${C}outfit-martin.webp`} alt="" className="navbar__config-icon" />
                     <span>{outfitNotif.martin.enabled ? 'Desactivar outfit de Martín' : 'Activar outfit de Martín'}</span>
                   </button>
+                )}
+
+                {/* Horas de silencio: sin push en este rango, pero queda en la campanita */}
+                {(calendarNotif?.registered || hasOutfitSubs) && (
+                  <div className="navbar__config-quiet">
+                    <div className="navbar__config-quiet-label">
+                      <span>🌙</span>
+                      <span>Horas de silencio</span>
+                      {quiet.start && quiet.end && (
+                        <button className="navbar__config-quiet-clear" onClick={clearQuiet} title="Quitar horas de silencio">
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    <div className="navbar__config-quiet-inputs">
+                      <input
+                        type="time"
+                        value={quiet.start}
+                        onChange={(e) => changeQuiet('start', e.target.value)}
+                        aria-label="Inicio del silencio"
+                      />
+                      <span>a</span>
+                      <input
+                        type="time"
+                        value={quiet.end}
+                        onChange={(e) => changeQuiet('end', e.target.value)}
+                        aria-label="Fin del silencio"
+                      />
+                    </div>
+                  </div>
                 )}
 
                 <button

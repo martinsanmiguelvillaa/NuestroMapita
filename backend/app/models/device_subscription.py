@@ -34,6 +34,12 @@ class DeviceSubscription(Base):
     # Campos específicos de calendario (NULL = activado por defecto — opt-out)
     calendar_notif_enabled  = Column(Boolean, nullable=True)
 
+    # Horas de silencio: en ese rango (hora local del dispositivo) no se envían
+    # pushes, pero las notificaciones quedan igual en el historial in-app.
+    # NULL en cualquiera de los dos = sin horas de silencio.
+    quiet_start = Column(String(5), nullable=True)   # "HH:MM"
+    quiet_end   = Column(String(5), nullable=True)   # "HH:MM"
+
     created_at  = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at  = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
