@@ -140,6 +140,15 @@ def _check_and_send() -> None:
                 if current_hhmm != sub.outfit_notif_time:
                     continue
 
+                # Anti doble envío: si ya se envió hoy (hora local del
+                # dispositivo), saltear. Cubre jobs duplicados por redeploy.
+                if sub.outfit_last_sent_at is not None:
+                    last_local = sub.outfit_last_sent_at.replace(
+                        tzinfo=dt_timezone.utc
+                    ).astimezone(tz)
+                    if last_local.date() == now_local.date():
+                        continue
+
                 # Pre-generar y cachear el outfit antes de notificar
                 _fetch_and_cache_outfit(sub.user_key, db)
 

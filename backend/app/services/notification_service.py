@@ -56,3 +56,28 @@ def create_notification(
         db.commit()
         db.refresh(notif)
     return notif
+
+
+def clear_source_notifications(
+    db: Session,
+    *,
+    source_type: str,
+    source_id: int,
+    commit: bool = True,
+) -> None:
+    """Limpia las notificaciones de un recurso que cambió o se borró.
+
+    - Borra las no-leídas (quedaron obsoletas).
+    - Libera las dedupe_key de las restantes: si el recurso vuelve a
+      corresponder hoy (ej. evento movido a más tarde), puede re-emitirse.
+    """
+    base = db.query(Notification).filter(
+        Notification.source_type == source_type,
+        Notification.source_id == source_id,
+    )
+    base.filter(Notification.read_at.is_(None)).delete(synchronize_session=False)
+    base.filter(Notification.dedupe_key.isnot(None)).update(
+        {Notification.dedupe_key: None}, synchronize_session=False
+    )
+    if commit:
+        db.commit()

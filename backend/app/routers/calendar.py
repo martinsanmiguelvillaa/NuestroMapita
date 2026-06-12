@@ -19,6 +19,22 @@ from app.schemas.calendar import (
     CalendarEventCreate, CalendarEventUpdate, CalendarEventResponse,
     EventTypeCreate, EventTypeUpdate, EventTypeResponse,
 )
+from app.services.notification_service import clear_source_notifications
+
+# Campos que, al cambiar, dejan obsoletas las notificaciones ya emitidas
+NOTIF_RELEVANT_FIELDS = {"date", "start_time", "notif_enabled", "notif_minutes", "recurrence"}
+
+
+def _clear_event_notifications(db: Session, event_ids: list[int]) -> None:
+    """Limpia notificaciones de eventos editados/borrados. Nunca rompe el request."""
+    try:
+        for event_id in event_ids:
+            clear_source_notifications(
+                db, source_type="calendar_event", source_id=event_id, commit=False
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
 
 router = APIRouter(prefix="/calendario", tags=["Nuestro Calendario"])
 
@@ -275,10 +291,19 @@ def update_event(
     event = db.query(CalendarEvent).filter_by(id=event_id).first()
     if not event:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
-    for field, value in data.model_dump(exclude_unset=True).items():
+    updates = data.model_dump(exclude_unset=True)
+    notif_changed = any(
+        field in NOTIF_RELEVANT_FIELDS and getattr(event, field) != value
+        for field, value in updates.items()
+    )
+    for field, value in updates.items():
         setattr(event, field, value)
     db.commit()
     db.refresh(event)
+    # Si cambió fecha/hora/recordatorio, las notifs viejas quedan obsoletas
+    # y se libera la dedupe_key para permitir re-emisión hoy mismo.
+    if notif_changed:
+        _clear_event_notifications(db, [event.id])
     return event
 
 
@@ -296,8 +321,12 @@ def delete_event(
 
     if delete_series:
         if event.series_id:
+            series_ids = [
+                e.id for e in db.query(CalendarEvent).filter_by(series_id=event.series_id).all()
+            ]
             db.query(CalendarEvent).filter_by(series_id=event.series_id).delete()
         else:
+            series_ids = [event.id]
             db.delete(event)
     elif event.recurrence and instance_date:
         # Excluir solo esta instancia agregando la fecha a exdates
@@ -307,8 +336,12 @@ def delete_event(
             exdates.append(instance_date)
         rule["exdates"] = exdates
         event.recurrence = json.dumps(rule)
+        series_ids = [event.id]
     else:
+        series_ids = [event.id]
         db.delete(event)
 
     db.commit()
+    # Limpiar notificaciones no-leídas de los eventos afectados
+    _clear_event_notifications(db, series_ids)
     return {"ok": True}

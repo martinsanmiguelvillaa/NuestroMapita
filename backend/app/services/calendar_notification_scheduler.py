@@ -172,21 +172,13 @@ def _check_and_send() -> None:
                 if fire_hhmm != current_hhmm:
                     continue
 
-                send_calendar_push_to_all(
-                    db=db,
-                    title=f"📅 {event.title}",
-                    body=(
-                        f"En {event.notif_minutes} min"
-                        if event.notif_minutes > 1
-                        else "Ahora"
-                    ),
-                )
-
-                # Registrar también en el historial in-app (campanita).
+                # Registrar primero en el historial (campanita). La dedupe_key
+                # hace el envío idempotente: si ya existe (job duplicado por
+                # redeploy, o ya enviado hoy), NO se manda el push de nuevo.
                 # El body usa la hora del evento (no "en X min") para que
                 # siga teniendo sentido al leerlo más tarde.
                 try:
-                    create_notification(
+                    notif = create_notification(
                         db,
                         user_key="ambos",
                         type="calendar_reminder",
@@ -200,6 +192,20 @@ def _check_and_send() -> None:
                 except Exception:
                     logger.warning("[calendar-notif] no se pudo registrar en historial (event=%s)", event.id)
                     db.rollback()
+                    notif = True  # si falla el historial, el push sale igual
+
+                if notif is None:
+                    continue  # dedupe: ya se notificó esta instancia hoy
+
+                send_calendar_push_to_all(
+                    db=db,
+                    title=f"📅 {event.title}",
+                    body=(
+                        f"En {event.notif_minutes} min"
+                        if event.notif_minutes > 1
+                        else "Ahora"
+                    ),
+                )
 
             except Exception:
                 pass
