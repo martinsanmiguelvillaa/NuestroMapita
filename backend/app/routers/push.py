@@ -25,6 +25,7 @@ from app.dependencies import get_current_user
 from app.models.device_subscription import DeviceSubscription
 from app.config import settings
 from app.services.push_service import send_push_to_endpoint
+from app.services.notification_service import reset_outfit_daily_state
 
 router = APIRouter(prefix="/push", tags=["Push"])
 
@@ -193,6 +194,9 @@ def update_settings(
         if body.outfit_notif_enabled is not None:
             sub.outfit_notif_enabled = body.outfit_notif_enabled
         if body.outfit_notif_time is not None:
+            if body.outfit_notif_time != sub.outfit_notif_time:
+                # Cambió la hora: habilitar re-envío hoy (push + campanita)
+                reset_outfit_daily_state(db, sub, commit=False)
             sub.outfit_notif_time = body.outfit_notif_time
         if body.calendar_notif_enabled is not None:
             sub.calendar_notif_enabled = body.calendar_notif_enabled

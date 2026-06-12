@@ -9,6 +9,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.device_subscription import DeviceSubscription
 from app.services.outfit_notification_scheduler import send_now
+from app.services.notification_service import reset_outfit_daily_state
 from app.config import settings
 from app.schemas.outfit_notification import (
     OutfitNotificationSubscribeRequest,
@@ -41,6 +42,9 @@ def subscribe(
         sub.endpoint = body.subscription.endpoint
         sub.p256dh = body.subscription.keys.p256dh
         sub.auth = body.subscription.keys.auth
+        if body.notification_time != sub.outfit_notif_time:
+            # Cambió la hora: habilitar re-envío hoy (push + campanita)
+            reset_outfit_daily_state(db, sub, commit=False)
         sub.outfit_notif_time = body.notification_time
         sub.timezone = body.timezone
         sub.enabled = True
@@ -104,6 +108,9 @@ def update_settings(
         raise HTTPException(status_code=404, detail="Suscripción no encontrada")
 
     if body.notification_time is not None:
+        if body.notification_time != sub.outfit_notif_time:
+            # Cambió la hora: habilitar re-envío hoy (push + campanita)
+            reset_outfit_daily_state(db, sub, commit=False)
         sub.outfit_notif_time = body.notification_time
     if body.enabled is not None:
         sub.outfit_notif_enabled = body.enabled
