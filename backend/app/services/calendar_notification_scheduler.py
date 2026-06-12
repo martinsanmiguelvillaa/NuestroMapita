@@ -14,6 +14,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app.database import SessionLocal
 from app.models.calendar_event import CalendarEvent
 from app.services.push_service import send_calendar_push_to_all
+from app.services.notification_service import create_notification
 
 logger = logging.getLogger(__name__)
 
@@ -180,6 +181,25 @@ def _check_and_send() -> None:
                         else "Ahora"
                     ),
                 )
+
+                # Registrar también en el historial in-app (campanita).
+                # El body usa la hora del evento (no "en X min") para que
+                # siga teniendo sentido al leerlo más tarde.
+                try:
+                    create_notification(
+                        db,
+                        user_key="ambos",
+                        type="calendar_reminder",
+                        title=f"📅 {event.title}",
+                        body=f"Hoy a las {event.start_time}",
+                        url="/calendario",
+                        source_type="calendar_event",
+                        source_id=event.id,
+                        dedupe_key=f"calendar:{event.id}:{today.isoformat()}",
+                    )
+                except Exception:
+                    logger.warning("[calendar-notif] no se pudo registrar en historial (event=%s)", event.id)
+                    db.rollback()
 
             except Exception:
                 pass

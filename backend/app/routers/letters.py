@@ -9,6 +9,7 @@ from app.schemas.letter import LetterCreate, LetterUpdate, LetterResponse
 from app.services.cloudinary_service import upload_image, delete_image
 from app.services.upload_validation import read_valid_image_upload
 from app.services.push_service import send_push_to_all
+from app.services.notification_service import create_notification
 
 router = APIRouter(prefix="/letters", tags=["Cartitas"])
 
@@ -32,6 +33,20 @@ def create_letter(
     db.add(letter)
     db.commit()
     db.refresh(letter)
+    # Registrar en el historial in-app (campanita); nunca debe frenar la creación
+    try:
+        create_notification(
+            db,
+            user_key="ambos",
+            type="cartita_new",
+            title="💌 Nueva cartita",
+            body=letter.title,
+            url="/cartitas",
+            source_type="letter",
+            source_id=letter.id,
+        )
+    except Exception:
+        db.rollback()
     # Enviar push en background para no bloquear la respuesta al cliente
     background_tasks.add_task(send_push_to_all, db, title="💌 Nueva cartita", body=letter.title, url="/cartitas")
     return letter

@@ -16,6 +16,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app.database import SessionLocal
 from app.models.device_subscription import DeviceSubscription
 from app.services.push_service import send_push_to_endpoint
+from app.services.notification_service import create_notification
 from app.config import settings
 from app.models.outfit_cache import OutfitCache 
 
@@ -159,6 +160,22 @@ def _check_and_send() -> None:
                     sub.outfit_last_sent_at = datetime.now(dt_timezone.utc).replace(tzinfo=None)
                     db.commit()
                     logger.info("[outfit-notif] ✓ enviado user=%s device=%s", sub.user_key, sub.device_id[:8])
+
+                    # Registrar en el historial in-app. La dedupe_key por
+                    # usuario+día evita duplicados si tiene varios dispositivos.
+                    try:
+                        create_notification(
+                            db,
+                            user_key=sub.user_key,
+                            type="outfit_daily",
+                            title=title,
+                            body=body,
+                            url=url,
+                            dedupe_key=f"outfit:{sub.user_key}:{now_local.date().isoformat()}",
+                        )
+                    except Exception:
+                        logger.warning("[outfit-notif] no se pudo registrar en historial user=%s", sub.user_key)
+                        db.rollback()
                 else:
                     sub.enabled = False
                     db.commit()
