@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { flushSync } from 'react-dom';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { toast } from 'sonner';
 import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
@@ -433,9 +432,9 @@ export default function Emocionario() {
   const [entries,        setEntries]       = useState([]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
-  const [showPoniVideo,  setShowPoniVideo] = useState(false);
   const [showFormModal,  setShowFormModal] = useState(false);
-  const poniVideoRef = useRef(null);
+  const poniVideoRef   = useRef(null);
+  const poniOverlayRef = useRef(null);
 
   // En mobile, retrasar el renderizado del contenido 500ms para que se vea el fondo
   const [ready, setReady] = useState(() => window.innerWidth > 768);
@@ -492,21 +491,21 @@ export default function Emocionario() {
   }, []);
 
   const handlePoniSaved = useCallback(() => {
-    if (!poniVideoRef.current) return;
+    if (!poniVideoRef.current || !poniOverlayRef.current) return;
+    poniOverlayRef.current.classList.add('poni-video-overlay--visible');
     poniVideoRef.current.currentTime = 0;
-    flushSync(() => setShowPoniVideo(true)); // overlay visible antes de play()
     poniVideoRef.current.play().catch(() => {});
   }, []);
 
   return (
     <div className="emoc-page">
-      <div className={`poni-video-overlay${showPoniVideo ? ' poni-video-overlay--visible' : ''}`}>
+      <div ref={poniOverlayRef} className="poni-video-overlay">
         <video
           ref={poniVideoRef}
           src="/video-quiero-un-poni.mp4"
           playsInline
           preload="auto"
-          onEnded={() => setShowPoniVideo(false)}
+          onEnded={() => poniOverlayRef.current?.classList.remove('poni-video-overlay--visible')}
         />
       </div>
       {!ready ? null : <div className="emoc-page__inner">
