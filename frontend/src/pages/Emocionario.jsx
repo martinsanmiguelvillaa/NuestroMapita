@@ -504,7 +504,7 @@ function PoniNotificationToggle() {
   if (!hasSubscription) {
     return (
       <div className="poni-notif-toggle">
-        <p className="poni-notif-toggle__title">🐴 Notificaciones de poni</p>
+        <p className="poni-notif-toggle__title"><img src="/icons/config/poni.png" alt="" className="poni-notif-toggle__icon" /> Notificaciones de poni</p>
         <p className="poni-notif-toggle__desc">
           Para recibir notificaciones de poni, primero activá las notificaciones en la sección de Outfits.
         </p>
@@ -518,7 +518,7 @@ function PoniNotificationToggle() {
       const deviceId = getOrCreateDeviceId();
       await updateDeviceSettings({ device_id: deviceId, user_key: resolvedKey, poni_notif_enabled: !enabled });
       setEnabled(!enabled);
-      toast.success(enabled ? 'Notificaciones de poni desactivadas' : '🐴 Notificaciones de poni activadas');
+      toast.success(enabled ? 'Notificaciones de poni desactivadas' : 'Notificaciones de poni activadas');
     } catch {
       toast.error('No se pudo cambiar');
     } finally {
@@ -528,7 +528,7 @@ function PoniNotificationToggle() {
 
   return (
     <div className="poni-notif-toggle">
-      <p className="poni-notif-toggle__title">🐴 Notificaciones de poni</p>
+      <p className="poni-notif-toggle__title"><img src="/icons/config/poni.png" alt="" className="poni-notif-toggle__icon" /> Notificaciones de poni</p>
       <p className="poni-notif-toggle__desc">
         Recibí una notificación cada vez que alguien toque el botón "quiero un poni".
       </p>

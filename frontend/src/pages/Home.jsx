@@ -334,7 +334,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         if (sendingPoni) return;
         setSendingPoni(true);
         sendPoniPush()
-          .then(() => toast('🐴 ¡Quiero un poni!'))
+          .then(() => toast('¡Quiero un poni!'))
           .catch(() => toast.error('No se pudo enviar'))
           .finally(() => setSendingPoni(false));
       } else {

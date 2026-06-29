@@ -345,7 +345,7 @@ export default function Navbar() {
                     onClick={togglePoni}
                     disabled={togglingPoni}
                   >
-                    <span className="navbar__config-icon-emoji">🐴</span>
+                    <img src={`${C}poni.png`} alt="" className="navbar__config-icon" />
                     <span>{poniNotif.enabled ? 'Desactivar notificaciones de poni' : 'Activar notificaciones de poni'}</span>
                   </button>
                 )}
