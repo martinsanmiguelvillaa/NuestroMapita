@@ -26,6 +26,8 @@ import '../styles/photos.css';
 // resetea en cada recarga de página (el módulo se re-ejecuta desde cero).
 let fabDismissedSession = false;
 let poniModeSession = false;
+// Escuchar a nivel de módulo para que funcione aunque el FAB no esté montado
+window.addEventListener('poni-mode-changed', () => { poniModeSession = true; });
 
 // ── Polaroid de video con autoplay por visibilidad ─────────────────
 function VideoPolaroid({ photo }) {
@@ -248,12 +250,13 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const [poniMode, setPoniMode] = useState(poniModeSession);
   const [sendingPoni, setSendingPoni] = useState(false);
 
-  // Escuchar activación de poni mode desde Emocionario (misma sesión)
+  // Sincronizar con la variable de módulo (puede haberse activado antes de montar)
   useEffect(() => {
-    const onCustom = () => { poniModeSession = true; setPoniMode(true); };
+    if (poniModeSession && !poniMode) setPoniMode(true);
+    const onCustom = () => setPoniMode(true);
     window.addEventListener('poni-mode-changed', onCustom);
     return () => window.removeEventListener('poni-mode-changed', onCustom);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reproduce la animación de la nutria al pasar el mouse o tocarla.
   // El <video> tiene dos fuentes: HEVC con alfa (.mov) para Safari/iOS
