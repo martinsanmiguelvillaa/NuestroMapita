@@ -234,23 +234,53 @@ function OutfitNotificationCard({ userKey }) {
 
 // ── Toggle de notificación "quiero un poni" ─────────────────────────
 function PoniNotificationToggle({ userKey }) {
-  const [enabled, setEnabled] = useState(null);
+  const [enabled, setEnabled] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(null); // null=loading
   const [saving, setSaving] = useState(false);
+  const [resolvedKey, setResolvedKey] = useState(userKey);
 
   useEffect(() => {
     const deviceId = getOrCreateDeviceId();
+    // Intentar con el userKey actual; si no existe, probar "ambos"
     getDeviceStatus(deviceId, userKey)
-      .then((s) => setEnabled(s.exists ? !!s.poni_notif_enabled : null))
-      .catch(() => setEnabled(null));
+      .then((s) => {
+        if (s.exists) {
+          setHasSubscription(true);
+          setEnabled(!!s.poni_notif_enabled);
+          setResolvedKey(userKey);
+        } else {
+          return getDeviceStatus(deviceId, 'ambos').then((s2) => {
+            if (s2.exists) {
+              setHasSubscription(true);
+              setEnabled(!!s2.poni_notif_enabled);
+              setResolvedKey('ambos');
+            } else {
+              setHasSubscription(false);
+            }
+          });
+        }
+      })
+      .catch(() => setHasSubscription(false));
   }, [userKey]);
 
-  if (enabled === null) return null; // no hay suscripción o aún cargando
+  if (hasSubscription === null) return null; // cargando
+
+  if (!hasSubscription) {
+    return (
+      <div className="outfit-notif-card" style={{ marginTop: '1rem' }}>
+        <p className="outfit-notif-card__title">🐴 Quiero un poni</p>
+        <p className="outfit-notif-card__desc">
+          Para recibir notificaciones de poni, primero activá las notificaciones de outfit en este dispositivo.
+        </p>
+      </div>
+    );
+  }
 
   const toggle = async () => {
     setSaving(true);
     try {
       const deviceId = getOrCreateDeviceId();
-      await updateDeviceSettings({ device_id: deviceId, user_key: userKey, poni_notif_enabled: !enabled });
+      await updateDeviceSettings({ device_id: deviceId, user_key: resolvedKey, poni_notif_enabled: !enabled });
       setEnabled(!enabled);
       toast.success(enabled ? 'Poni desactivado' : '🐴 Poni activado');
     } catch {
