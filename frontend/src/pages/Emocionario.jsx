@@ -84,7 +84,7 @@ export function EmotionForm({ onSaved, onClose, prefill, onDirtyChange, onPoniSa
     e.preventDefault();
     if (emotionKeys.size === 0) return;
     const hasPoni = !isEditing && emotionKeys.has('quiero-un-poni');
-    if (hasPoni) onPoniSaved?.();
+    if (hasPoni) { alert('DEBUG: hasPoni=true, onPoniSaved=' + typeof onPoniSaved); onPoniSaved?.(); }
     setSaving(true);
     try {
       if (isEditing) {
