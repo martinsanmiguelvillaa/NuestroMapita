@@ -136,7 +136,7 @@ _PONI_MESSAGES = [
     "¡Quiero un poni!",
     "Amooor, quiero un poni",
     "Me das un poni?",
-    "Ya dije que quiero un poni",
+    "Ya dije que quiero un poni?",
     "Adoptamos un poni?",
     "Y MI PONI????",
     "PONI PONI PONI",
