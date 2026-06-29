@@ -76,7 +76,7 @@ def send_push_to_endpoint(
         return True  # Error transitorio — no deshabilitar
 
 
-def _send_to_subs(db: Session, subs: list, title: str, body: str, url: str) -> None:
+def _send_to_subs(db: Session, subs: list, title: str, body: str, url: str, icon: str | None = None) -> None:
     """Envía a una lista de suscripciones ya filtradas, deduplicando por endpoint."""
     seen: dict[str, DeviceSubscription] = {}
     for sub in subs:
@@ -84,6 +84,9 @@ def _send_to_subs(db: Session, subs: list, title: str, body: str, url: str) -> N
             seen[sub.endpoint] = sub
 
     dead_endpoints: list[str] = []
+    payload = {"title": title, "body": body, "url": url}
+    if icon:
+        payload["icon"] = icon
 
     for endpoint, sub in seen.items():
         try:
@@ -92,7 +95,7 @@ def _send_to_subs(db: Session, subs: list, title: str, body: str, url: str) -> N
                     "endpoint": endpoint,
                     "keys": {"p256dh": sub.p256dh, "auth": sub.auth},
                 },
-                data=json.dumps({"title": title, "body": body, "url": url}),
+                data=json.dumps(payload),
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
                 vapid_claims={"sub": f"mailto:{settings.VAPID_CLAIMS_EMAIL}"},
             )
@@ -140,11 +143,7 @@ def send_poni_push_to_all(db: Session) -> None:
         return
 
     messages = [
-        "🐴 ¡Alguien quiere un poni!",
-        "🦄 ¡Quiero un poni, por favor!",
-        "🐎 ¡Poni poni poni!",
-        "🎠 ¡Un poni para mí!",
-        "🐴 ¡Dale, quiero un poni ya!",
+        
     ]
 
     subs = db.query(DeviceSubscription).filter(
@@ -154,7 +153,7 @@ def send_poni_push_to_all(db: Session) -> None:
 
     subs = [s for s in subs if not in_quiet_hours(s)]
 
-    _send_to_subs(db, subs, "🐴 Quiero un poni", random.choice(messages), "/")
+    _send_to_subs(db, subs, "Quiero un poni", random.choice(messages), "/", icon="/icons/config/poni.png")
 
 
 def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/calendario", priority: str = "normal") -> None:

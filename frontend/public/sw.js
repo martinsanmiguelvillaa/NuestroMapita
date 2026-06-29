@@ -14,18 +14,20 @@ self.addEventListener('push', (e) => {
   let title = 'Nuestro Mapita';
   let body = 'Tenés algo nuevo.';
   let url = '/';
+  let icon = '/icons/icon-192.png';
   try {
     const payload = e.data.json();
     title = payload.title || title;
     body  = payload.body  || body;
     url   = payload.url   || url;
+    if (payload.icon) icon = payload.icon;
   } catch {
     // Payload no es JSON válido — usamos defaults
   }
   e.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: '/icons/icon-192.png',
+      icon,
       badge: '/icons/icon-192.png',
       data: { url },
     })
