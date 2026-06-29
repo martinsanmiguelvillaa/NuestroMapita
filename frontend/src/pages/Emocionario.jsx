@@ -49,17 +49,34 @@ function monthKey(year, month) {
 // Formulario rápido
 // ─────────────────────────────────────────────
 function playPoniVideo() {
+  const fadeOut = (el) => {
+    el.style.transition = 'opacity 0.4s ease-out';
+    el.style.opacity = '0';
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
+  };
+
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:transparent;display:flex;align-items:center;justify-content:center;pointer-events:none;';
+  overlay.style.cssText =
+    'position:fixed;inset:0;z-index:9999;background:transparent;display:flex;' +
+    'align-items:center;justify-content:center;pointer-events:none;' +
+    'opacity:0;transition:opacity 0.3s ease-in;';
   const video = document.createElement('video');
   video.src = '/video-quiero-un-poni.webm';
   video.playsInline = true;
-  video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-  video.onended = () => overlay.remove();
+  video.style.cssText =
+    'width:100%;height:100%;object-fit:contain;' +
+    'transform:scale(0.8);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);';
+  video.onended = () => fadeOut(overlay);
   video.onerror = () => overlay.remove();
-  overlay.onclick = () => overlay.remove();
+  overlay.onclick = () => fadeOut(overlay);
   overlay.appendChild(video);
   document.body.appendChild(overlay);
+
+  // Forzar reflow para que la transición de entrada funcione
+  overlay.getBoundingClientRect();
+  overlay.style.opacity = '1';
+  video.style.transform = 'scale(1)';
+
   video.play().catch(() => overlay.remove());
 }
 
