@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { toast } from 'sonner';
 import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
@@ -84,6 +85,8 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (emotionKeys.size === 0) return;
+    const hasPoni = !isEditing && emotionKeys.has('quiero-un-poni');
+    if (hasPoni) flushSync(() => setShowPoniVideo(true));
     setSaving(true);
     try {
       if (isEditing) {
@@ -106,7 +109,6 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
         }
         const count = emotionKeys.size;
         toast.success(count === 1 ? 'Emoción guardada' : `${count} emociones guardadas`);
-        if (emotionKeys.has('quiero-un-poni')) setShowPoniVideo(true);
         setEmotionKeys(new Set());
         setNote('');
       }
