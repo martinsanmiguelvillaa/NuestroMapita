@@ -132,29 +132,38 @@ def send_push_to_all(db: Session, title: str, body: str, url: str = "/", priorit
     _send_to_subs(db, subs, title, body, url)
 
 
+_PONI_MESSAGES = [
+    "¡Quiero un poni!",
+    "Amooor, quiero un poni",
+    "Me das un poni?",
+    "Ya dije que quiero un poni",
+    "Adoptamos un poni?",
+    "Y MI PONI????",
+    "PONI PONI PONI",
+    "AMOOOOOOOOR QUIERO PONIIIIIIIIII",
+    "Quizas tambien un panda... o un unicornio...",
+    "Vamos a tener un poni no?",
+    "Tenemos un poni?",
+]
+_poni_bag: list[str] = []
+
+
+def _next_poni_message() -> str:
+    """Devuelve un mensaje aleatorio sin repetir hasta agotar todos."""
+    import random
+    if not _poni_bag:
+        _poni_bag.extend(_PONI_MESSAGES)
+        random.shuffle(_poni_bag)
+    return _poni_bag.pop()
+
+
 def send_poni_push_to_all(db: Session) -> None:
     """
     Envía '¡Quiero un poni!' a dispositivos con poni_notif_enabled=True.
     Deshabilitado por defecto (NULL/False = no enviar). Respeta quiet hours.
     """
-    import random
-
     if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
         return
-
-    messages = [
-        "¡Quiero un poni!",
-        "Amooor, quiero un poni",
-        "Me das un poni?",
-        "Ya dije que quiero un poni",
-        "Adoptamos un poni?",
-        "Y MI PONI????",
-        "PONI PONI PONI",
-        "AMOOOOOOOOR QUIERO PONIIIIIIIIII",
-        "Quizas tambien un panda... o un unicornio..."
-        "Vamos a tener un poni no?",
-        "Tenemos un poni?"
-    ]
 
     subs = db.query(DeviceSubscription).filter(
         DeviceSubscription.enabled == True,          # noqa: E712
@@ -163,7 +172,7 @@ def send_poni_push_to_all(db: Session) -> None:
 
     subs = [s for s in subs if not in_quiet_hours(s)]
 
-    _send_to_subs(db, subs, "Quiero un poni", random.choice(messages), "/", icon="/icons/config/poni.png")
+    _send_to_subs(db, subs, "Quiero un poni", _next_poni_message(), "/", icon="/icons/config/poni.png")
 
 
 def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/calendario", priority: str = "normal") -> None:
