@@ -48,7 +48,7 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 // Formulario rápido
 // ─────────────────────────────────────────────
-export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
+export function EmotionForm({ onSaved, prefill, onDirtyChange, onPoniSaved }) {
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
   const [emotionKeys, setEmotionKeys] = useState(() =>
@@ -57,8 +57,6 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
   const [intensity, setIntensity]     = useState(prefill?.entry?.intensity ?? 3);
   const [note, setNote]               = useState(prefill?.entry?.note ?? '');
   const [saving, setSaving]           = useState(false);
-  const [showPoniVideo, setShowPoniVideo] = useState(false);
-  const poniVideoRef = useRef(null);
   const isEditing = !!prefill?.entry?.id;
 
   const onSavedRef = useRef(onSaved);
@@ -86,11 +84,7 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
     e.preventDefault();
     if (emotionKeys.size === 0) return;
     const hasPoni = !isEditing && emotionKeys.has('quiero-un-poni');
-    if (hasPoni && poniVideoRef.current) {
-      poniVideoRef.current.currentTime = 0;
-      poniVideoRef.current.play();
-      setShowPoniVideo(true);
-    }
+    if (hasPoni) onPoniSaved?.();
     setSaving(true);
     try {
       if (isEditing) {
@@ -135,15 +129,6 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
     : 'Guardar emoción';
 
   return (
-    <>
-    <div className={`poni-video-overlay${showPoniVideo ? ' poni-video-overlay--visible' : ''}`}>
-      <video
-        ref={poniVideoRef}
-        src="/video-quiero-un-poni.mp4"
-        playsInline
-        onEnded={() => setShowPoniVideo(false)}
-      />
-    </div>
     <form className="emoc-form" onSubmit={handleSubmit}>
       <h2 className="emoc-form__title">{isEditing ? 'Editar emoción' : '¿Qué sentiste?'}</h2>
 
@@ -207,7 +192,6 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
         {submitLabel}
       </button>
     </form>
-    </>
   );
 }
 
@@ -447,6 +431,8 @@ export default function Emocionario() {
   const [entries,        setEntries]       = useState([]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
+  const [showPoniVideo,  setShowPoniVideo] = useState(false);
+  const poniVideoRef = useRef(null);
 
   // En mobile, retrasar el renderizado del contenido 500ms para que se vea el fondo
   const [ready, setReady] = useState(() => window.innerWidth > 768);
@@ -502,15 +488,31 @@ export default function Emocionario() {
     setEntries((prev) => prev.filter((e) => e.id !== deletedId));
   }, []);
 
+  const handlePoniSaved = useCallback(() => {
+    if (!poniVideoRef.current) return;
+    poniVideoRef.current.currentTime = 0;
+    poniVideoRef.current.play().catch(() => {});
+    setShowPoniVideo(true);
+  }, []);
+
   return (
     <div className="emoc-page">
+      <div className={`poni-video-overlay${showPoniVideo ? ' poni-video-overlay--visible' : ''}`}>
+        <video
+          ref={poniVideoRef}
+          src="/video-quiero-un-poni.mp4"
+          playsInline
+          preload="auto"
+          onEnded={() => setShowPoniVideo(false)}
+        />
+      </div>
       {!ready ? null : <div className="emoc-page__inner">
         <header className="emoc-header">
           <h1 className="emoc-header__title">Emocionario</h1>
           <p className="emoc-header__sub">Un diario de cómo se sienten, día a día</p>
         </header>
 
-        <EmotionForm onSaved={handleEntrySaved} />
+        <EmotionForm onSaved={handleEntrySaved} onPoniSaved={handlePoniSaved} />
 
         <section className="emoc-section">
           <h2 className="emoc-section__title">Calendario emocional</h2>
