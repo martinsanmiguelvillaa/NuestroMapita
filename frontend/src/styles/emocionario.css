@@ -10,6 +10,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.poni-video-overlay--visible {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .poni-video-overlay video {

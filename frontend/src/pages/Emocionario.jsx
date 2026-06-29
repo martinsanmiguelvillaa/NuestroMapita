@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { flushSync } from 'react-dom';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { toast } from 'sonner';
 import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
@@ -59,6 +58,7 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
   const [note, setNote]               = useState(prefill?.entry?.note ?? '');
   const [saving, setSaving]           = useState(false);
   const [showPoniVideo, setShowPoniVideo] = useState(false);
+  const poniVideoRef = useRef(null);
   const isEditing = !!prefill?.entry?.id;
 
   const onSavedRef = useRef(onSaved);
@@ -86,7 +86,11 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
     e.preventDefault();
     if (emotionKeys.size === 0) return;
     const hasPoni = !isEditing && emotionKeys.has('quiero-un-poni');
-    if (hasPoni) flushSync(() => setShowPoniVideo(true));
+    if (hasPoni && poniVideoRef.current) {
+      poniVideoRef.current.currentTime = 0;
+      poniVideoRef.current.play();
+      setShowPoniVideo(true);
+    }
     setSaving(true);
     try {
       if (isEditing) {
@@ -132,16 +136,14 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
 
   return (
     <>
-    {showPoniVideo && (
-      <div className="poni-video-overlay">
-        <video
-          src="/video-quiero-un-poni.mp4"
-          autoPlay
-          playsInline
-          onEnded={() => setShowPoniVideo(false)}
-        />
-      </div>
-    )}
+    <div className={`poni-video-overlay${showPoniVideo ? ' poni-video-overlay--visible' : ''}`}>
+      <video
+        ref={poniVideoRef}
+        src="/video-quiero-un-poni.mp4"
+        playsInline
+        onEnded={() => setShowPoniVideo(false)}
+      />
+    </div>
     <form className="emoc-form" onSubmit={handleSubmit}>
       <h2 className="emoc-form__title">{isEditing ? 'Editar emoción' : '¿Qué sentiste?'}</h2>
 
