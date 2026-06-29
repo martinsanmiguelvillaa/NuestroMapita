@@ -48,7 +48,22 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 // Formulario rápido
 // ─────────────────────────────────────────────
-export function EmotionForm({ onSaved, onClose, prefill, onDirtyChange, onPoniSaved }) {
+function playPoniVideo() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;';
+  const video = document.createElement('video');
+  video.src = '/video-quiero-un-poni.mp4';
+  video.playsInline = true;
+  video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+  video.onended = () => overlay.remove();
+  video.onerror = () => overlay.remove();
+  overlay.onclick = () => overlay.remove();
+  overlay.appendChild(video);
+  document.body.appendChild(overlay);
+  video.play().catch(() => overlay.remove());
+}
+
+export function EmotionForm({ onSaved, onClose, prefill, onDirtyChange }) {
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
   const [emotionKeys, setEmotionKeys] = useState(() =>
@@ -84,7 +99,7 @@ export function EmotionForm({ onSaved, onClose, prefill, onDirtyChange, onPoniSa
     e.preventDefault();
     if (emotionKeys.size === 0) return;
     const hasPoni = !isEditing && emotionKeys.has('quiero-un-poni');
-    if (hasPoni) onPoniSaved?.();
+    if (hasPoni) playPoniVideo();
     setSaving(true);
     try {
       if (isEditing) {
@@ -488,20 +503,6 @@ export default function Emocionario() {
     setEntries((prev) => prev.filter((e) => e.id !== deletedId));
   }, []);
 
-  const handlePoniSaved = useCallback(() => {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;';
-    const video = document.createElement('video');
-    video.src = '/video-quiero-un-poni.mp4';
-    video.playsInline = true;
-    video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-    video.onended = () => overlay.remove();
-    video.onerror = () => overlay.remove();
-    overlay.onclick = () => overlay.remove();
-    overlay.appendChild(video);
-    document.body.appendChild(overlay);
-    video.play().catch(() => overlay.remove());
-  }, []);
 
   return (
     <div className="emoc-page">
@@ -529,8 +530,7 @@ export default function Emocionario() {
                 <EmotionForm
                   onSaved={handleEntrySaved}
                   onClose={() => setShowFormModal(false)}
-                  onPoniSaved={handlePoniSaved}
-                />
+                                  />
               </div>
             </div>
           </div>
