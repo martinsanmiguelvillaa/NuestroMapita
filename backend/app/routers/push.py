@@ -24,7 +24,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.device_subscription import DeviceSubscription
 from app.config import settings
-from app.services.push_service import send_push_to_endpoint
+from app.services.push_service import send_push_to_endpoint, send_poni_push_to_all
 from app.services.notification_service import reset_outfit_daily_state
 
 router = APIRouter(prefix="/push", tags=["Push"])
@@ -62,6 +62,7 @@ class SettingsRequest(BaseModel):
     outfit_notif_enabled: Optional[bool] = None
     outfit_notif_time: Optional[str] = None
     calendar_notif_enabled: Optional[bool] = None
+    poni_notif_enabled: Optional[bool] = None
     # Horas de silencio (null explícito = borrar)
     quiet_start: Optional[str] = None
     quiet_end: Optional[str] = None
@@ -167,6 +168,7 @@ def get_device_status(
         "outfit_notif_enabled": sub.outfit_notif_enabled,
         "outfit_notif_time": sub.outfit_notif_time,
         "calendar_notif_enabled": sub.calendar_notif_enabled,
+        "poni_notif_enabled": sub.poni_notif_enabled,
         "quiet_start": sub.quiet_start,
         "quiet_end": sub.quiet_end,
         "device_label": sub.device_label,
@@ -184,7 +186,7 @@ def update_settings(
 
     per_sub_touched = any(
         getattr(body, f) is not None
-        for f in ("enabled", "outfit_notif_enabled", "outfit_notif_time", "calendar_notif_enabled")
+        for f in ("enabled", "outfit_notif_enabled", "outfit_notif_time", "calendar_notif_enabled", "poni_notif_enabled")
     )
     if per_sub_touched:
         if not sub:
@@ -200,6 +202,8 @@ def update_settings(
             sub.outfit_notif_time = body.outfit_notif_time
         if body.calendar_notif_enabled is not None:
             sub.calendar_notif_enabled = body.calendar_notif_enabled
+        if body.poni_notif_enabled is not None:
+            sub.poni_notif_enabled = body.poni_notif_enabled
 
     # Quiet hours: aplican a TODAS las filas del dispositivo (van/martin/ambos)
     # para que el silencio sea coherente. null explícito = borrar.
@@ -247,6 +251,21 @@ def test_push(
         sub.enabled = False
         db.commit()
         raise HTTPException(status_code=400, detail="Suscripción expirada o inválida — fue deshabilitada")
+    return {"ok": True}
+
+
+@router.post("/quiero-un-poni", status_code=200)
+def quiero_un_poni(
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Envía push '¡Quiero un poni!' a todos los dispositivos con poni_notif habilitado."""
+    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
+        raise HTTPException(
+            status_code=503,
+            detail="VAPID no configurado.",
+        )
+    send_poni_push_to_all(db)
     return {"ok": True}
 
 

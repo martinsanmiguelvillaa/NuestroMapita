@@ -125,7 +125,11 @@ export function EmotionForm({ onSaved, onClose, prefill, onDirtyChange }) {
     e.preventDefault();
     if (emotionKeys.size === 0) return;
     const hasPoni = !isEditing && emotionKeys.has('quiero-un-poni');
-    if (hasPoni) playPoniVideo();
+    if (hasPoni) {
+      playPoniVideo();
+      localStorage.setItem('poni_mode', '1');
+      window.dispatchEvent(new Event('poni-mode-changed'));
+    }
     setSaving(true);
     try {
       if (isEditing) {

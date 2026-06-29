@@ -34,6 +34,9 @@ class DeviceSubscription(Base):
     # Campos específicos de calendario (NULL = activado por defecto — opt-out)
     calendar_notif_enabled  = Column(Boolean, nullable=True)
 
+    # "Quiero un poni" — deshabilitado por defecto (NULL/False = no enviar)
+    poni_notif_enabled      = Column(Boolean, nullable=True)
+
     # Horas de silencio: en ese rango (hora local del dispositivo) no se envían
     # pushes, pero las notificaciones quedan igual en el historial in-app.
     # NULL en cualquiera de los dos = sin horas de silencio.

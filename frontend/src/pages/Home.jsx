@@ -17,6 +17,7 @@ import { getLetters } from '../api/letters';
 import { polaroidUrl, fullUrl } from '../utils/cloudinary';
 import { toast } from 'sonner';
 import { EmotionForm } from './Emocionario';
+import { sendPoniPush } from '../api/push';
 import '../styles/home.css';
 import '../styles/photos.css';
 
@@ -243,6 +244,23 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const videoRef = useRef(null);
   const animRef  = useRef(false);
   const [animating, setAnimating] = useState(false);
+  const [poniMode, setPoniMode] = useState(() => localStorage.getItem('poni_mode') === '1');
+  const [sendingPoni, setSendingPoni] = useState(false);
+
+  // Escuchar cambios de poni_mode desde otras partes (ej. Emocionario)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'poni_mode') setPoniMode(e.newValue === '1');
+    };
+    window.addEventListener('storage', onStorage);
+    // También escuchar evento custom para misma pestaña
+    const onCustom = () => setPoniMode(localStorage.getItem('poni_mode') === '1');
+    window.addEventListener('poni-mode-changed', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('poni-mode-changed', onCustom);
+    };
+  }, []);
 
   // Reproduce la animación de la nutria al pasar el mouse o tocarla.
   // El <video> tiene dos fuentes: HEVC con alfa (.mov) para Safari/iOS
@@ -283,11 +301,11 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
 
   const onPointerDown = useCallback((e) => {
     e.preventDefault();
-    if (e.pointerType !== 'mouse') playNutriaAnim(); // en táctil no hay hover
+    if (e.pointerType !== 'mouse' && !poniMode) playNutriaAnim(); // en táctil no hay hover
     btnRef.current.setPointerCapture(e.pointerId);
     s.current = { active: true, moved: false, startX: e.clientX, startY: e.clientY,
                   originX: posRef.current.x, originY: posRef.current.y };
-  }, [playNutriaAnim]);
+  }, [playNutriaAnim, poniMode]);
 
   const onPointerMove = useCallback((e) => {
     if (!s.current.active) return;
@@ -312,7 +330,16 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
     setDragging(false);
     setOverDrop(false);
     if (!s.current.moved) {
-      onOpen();
+      if (poniMode) {
+        if (sendingPoni) return;
+        setSendingPoni(true);
+        sendPoniPush()
+          .then(() => toast('🐴 ¡Quiero un poni!'))
+          .catch(() => toast.error('No se pudo enviar'))
+          .finally(() => setSendingPoni(false));
+      } else {
+        onOpen();
+      }
     } else {
       const dz = dropZoneRef.current;
       if (dz) {
@@ -324,7 +351,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
       }
       setJustDragged(true);
     }
-  }, [onOpen, onDismiss]);
+  }, [onOpen, onDismiss, poniMode, sendingPoni]);
 
   if (!pos) return null;
 
@@ -347,7 +374,7 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onPointerEnter={(e) => { if (e.pointerType === 'mouse') playNutriaAnim(); }}
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse' && !poniMode) playNutriaAnim(); }}
         onPointerLeave={() => setJustDragged(false)}
         aria-label="Registrar emoción"
       >
@@ -360,26 +387,34 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
           >×</button>
         )}
         <span className="emoc-fab__inner">
-          <img
-            src="/icons/nutria-emocionario.webp"
-            alt=""
-            className={`emoc-fab__nutria${animating ? ' emoc-fab__nutria--hidden' : ''}`}
-          />
-          <video
-            ref={videoRef}
-            className={`emoc-fab__nutria-video${animating ? ' emoc-fab__nutria-video--visible' : ''}`}
-            muted
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-            onEnded={stopNutriaAnim}
-            onError={stopNutriaAnim}
-          >
-            {/* Safari/iOS: HEVC con canal alfa */}
-            <source src="/icons/animacion-nutria.mov" type='video/quicktime; codecs="hvc1"' />
-            {/* Chrome/Firefox/Edge: WebM con canal alfa */}
-            <source src="/icons/animacion-nutria.webm" type="video/webm" />
-          </video>
+          {poniMode ? (
+            <img
+              src="/icons/emocionario/quiero-un-poni.png"
+              alt="Quiero un poni"
+              className={`emoc-fab__nutria emoc-fab__poni${sendingPoni ? ' emoc-fab__poni--sending' : ''}`}
+            />
+          ) : (
+            <>
+              <img
+                src="/icons/nutria-emocionario.webp"
+                alt=""
+                className={`emoc-fab__nutria${animating ? ' emoc-fab__nutria--hidden' : ''}`}
+              />
+              <video
+                ref={videoRef}
+                className={`emoc-fab__nutria-video${animating ? ' emoc-fab__nutria-video--visible' : ''}`}
+                muted
+                playsInline
+                preload="auto"
+                aria-hidden="true"
+                onEnded={stopNutriaAnim}
+                onError={stopNutriaAnim}
+              >
+                <source src="/icons/animacion-nutria.mov" type='video/quicktime; codecs="hvc1"' />
+                <source src="/icons/animacion-nutria.webm" type="video/webm" />
+              </video>
+            </>
+          )}
         </span>
       </motion.button>
 

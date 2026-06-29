@@ -11,6 +11,8 @@ import {
 import { toast } from 'sonner';
 import { useConfirm } from '../context/ConfirmContext';
 import { useOutfitNotifications } from '../hooks/useOutfitNotifications';
+import { getDeviceStatus, updateDeviceSettings } from '../api/push';
+import { getOrCreateDeviceId } from '../utils/deviceId';
 import '../styles/outfits.css';
 
 const SELECTED_USER_KEY = 'outfits_selected_user';
@@ -229,6 +231,54 @@ function OutfitNotificationCard({ userKey }) {
     </div>
   );
 }
+
+// ── Toggle de notificación "quiero un poni" ─────────────────────────
+function PoniNotificationToggle({ userKey }) {
+  const [enabled, setEnabled] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const deviceId = getOrCreateDeviceId();
+    getDeviceStatus(deviceId, userKey)
+      .then((s) => setEnabled(s.exists ? !!s.poni_notif_enabled : null))
+      .catch(() => setEnabled(null));
+  }, [userKey]);
+
+  if (enabled === null) return null; // no hay suscripción o aún cargando
+
+  const toggle = async () => {
+    setSaving(true);
+    try {
+      const deviceId = getOrCreateDeviceId();
+      await updateDeviceSettings({ device_id: deviceId, user_key: userKey, poni_notif_enabled: !enabled });
+      setEnabled(!enabled);
+      toast.success(enabled ? 'Poni desactivado' : '🐴 Poni activado');
+    } catch {
+      toast.error('No se pudo cambiar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="outfit-notif-card" style={{ marginTop: '1rem' }}>
+      <div className="outfit-notif-card__header">
+        <p className="outfit-notif-card__title">🐴 Quiero un poni</p>
+      </div>
+      <p className="outfit-notif-card__desc">
+        Recibir notificaciones cuando alguien toque el botón "quiero un poni".
+      </p>
+      <button
+        className={`btn ${enabled ? 'btn-ghost' : 'btn-primary'} btn-sm`}
+        disabled={saving}
+        onClick={toggle}
+      >
+        {saving ? 'Guardando...' : enabled ? 'Desactivar' : 'Activar'}
+      </button>
+    </div>
+  );
+}
+
 
 // ── Página principal ───────────────────────────────────────────────
 export default function Outfits() {
@@ -512,6 +562,7 @@ export default function Outfits() {
 
             {/* Notificaciones */}
             <OutfitNotificationCard key={selectedUser} userKey={selectedUser} />
+            <PoniNotificationToggle key={`poni-${selectedUser}`} userKey={selectedUser} />
           </>
         )}
       </div>

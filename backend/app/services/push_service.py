@@ -129,6 +129,34 @@ def send_push_to_all(db: Session, title: str, body: str, url: str = "/", priorit
     _send_to_subs(db, subs, title, body, url)
 
 
+def send_poni_push_to_all(db: Session) -> None:
+    """
+    Envía '¡Quiero un poni!' a dispositivos con poni_notif_enabled=True.
+    Deshabilitado por defecto (NULL/False = no enviar). Respeta quiet hours.
+    """
+    import random
+
+    if not settings.VAPID_PRIVATE_KEY or not settings.VAPID_CLAIMS_EMAIL:
+        return
+
+    messages = [
+        "🐴 ¡Alguien quiere un poni!",
+        "🦄 ¡Quiero un poni, por favor!",
+        "🐎 ¡Poni poni poni!",
+        "🎠 ¡Un poni para mí!",
+        "🐴 ¡Dale, quiero un poni ya!",
+    ]
+
+    subs = db.query(DeviceSubscription).filter(
+        DeviceSubscription.enabled == True,          # noqa: E712
+        DeviceSubscription.poni_notif_enabled == True,  # noqa: E712
+    ).all()
+
+    subs = [s for s in subs if not in_quiet_hours(s)]
+
+    _send_to_subs(db, subs, "🐴 Quiero un poni", random.choice(messages), "/")
+
+
 def send_calendar_push_to_all(db: Session, title: str, body: str, url: str = "/calendario", priority: str = "normal") -> None:
     """
     Envía a dispositivos con notificaciones de calendario habilitadas.

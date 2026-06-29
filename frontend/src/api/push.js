@@ -44,6 +44,11 @@ export async function updateDeviceSettings({ device_id, user_key = 'ambos', ...f
   });
 }
 
+/** Envía push "quiero un poni" a todos los dispositivos con poni habilitado. */
+export async function sendPoniPush() {
+  await apiFetch('/push/quiero-un-poni', { method: 'POST' });
+}
+
 // ── Legacy (backward compat) ──────────────────────────────────────────────────
 
 export async function subscribePush(subscription) {
