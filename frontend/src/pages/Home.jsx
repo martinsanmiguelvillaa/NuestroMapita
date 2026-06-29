@@ -25,6 +25,7 @@ import '../styles/photos.css';
 // Persiste al cambiar de pestaña y volver (mismo módulo), pero se
 // resetea en cada recarga de página (el módulo se re-ejecuta desde cero).
 let fabDismissedSession = false;
+let poniModeSession = false;
 
 // ── Polaroid de video con autoplay por visibilidad ─────────────────
 function VideoPolaroid({ photo }) {
@@ -244,22 +245,14 @@ function FloatingEmocButton({ onOpen, onDismiss }) {
   const videoRef = useRef(null);
   const animRef  = useRef(false);
   const [animating, setAnimating] = useState(false);
-  const [poniMode, setPoniMode] = useState(() => localStorage.getItem('poni_mode') === '1');
+  const [poniMode, setPoniMode] = useState(poniModeSession);
   const [sendingPoni, setSendingPoni] = useState(false);
 
-  // Escuchar cambios de poni_mode desde otras partes (ej. Emocionario)
+  // Escuchar activación de poni mode desde Emocionario (misma sesión)
   useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key === 'poni_mode') setPoniMode(e.newValue === '1');
-    };
-    window.addEventListener('storage', onStorage);
-    // También escuchar evento custom para misma pestaña
-    const onCustom = () => setPoniMode(localStorage.getItem('poni_mode') === '1');
+    const onCustom = () => { poniModeSession = true; setPoniMode(true); };
     window.addEventListener('poni-mode-changed', onCustom);
-    return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('poni-mode-changed', onCustom);
-    };
+    return () => window.removeEventListener('poni-mode-changed', onCustom);
   }, []);
 
   // Reproduce la animación de la nutria al pasar el mouse o tocarla.
