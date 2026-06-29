@@ -50,7 +50,7 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 function playPoniVideo() {
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:transparent;display:flex;align-items:center;justify-content:center;pointer-events:none;';
   const video = document.createElement('video');
   video.src = '/video-quiero-un-poni.webm';
   video.playsInline = true;
