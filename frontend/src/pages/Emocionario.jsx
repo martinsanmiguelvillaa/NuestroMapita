@@ -57,6 +57,7 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
   const [intensity, setIntensity]     = useState(prefill?.entry?.intensity ?? 3);
   const [note, setNote]               = useState(prefill?.entry?.note ?? '');
   const [saving, setSaving]           = useState(false);
+  const [showPoniVideo, setShowPoniVideo] = useState(false);
   const isEditing = !!prefill?.entry?.id;
 
   const onSavedRef = useRef(onSaved);
@@ -105,6 +106,7 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
         }
         const count = emotionKeys.size;
         toast.success(count === 1 ? 'Emoción guardada' : `${count} emociones guardadas`);
+        if (emotionKeys.has('quiero-un-poni')) setShowPoniVideo(true);
         setEmotionKeys(new Set());
         setNote('');
       }
@@ -127,6 +129,17 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
     : 'Guardar emoción';
 
   return (
+    <>
+    {showPoniVideo && (
+      <div className="poni-video-overlay">
+        <video
+          src="/video-quiero-un-poni.mp4"
+          autoPlay
+          playsInline
+          onEnded={() => setShowPoniVideo(false)}
+        />
+      </div>
+    )}
     <form className="emoc-form" onSubmit={handleSubmit}>
       <h2 className="emoc-form__title">{isEditing ? 'Editar emoción' : '¿Qué sentiste?'}</h2>
 
@@ -190,6 +203,7 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange }) {
         {submitLabel}
       </button>
     </form>
+    </>
   );
 }
 
