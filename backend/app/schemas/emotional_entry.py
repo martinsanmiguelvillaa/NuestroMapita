@@ -4,6 +4,7 @@ import re
 from datetime import date as date_type
 
 VALID_EMOTIONS = {
+    "quiero-un-poni",
     "feliz", "enamorado", "tranquilo", "emocionado", "agradecido",
     "nostalgico", "ansioso", "triste", "cansado", "estresado",
     "irritado", "solo", "confundido", "asustado", "orgulloso",

@@ -5,6 +5,7 @@ import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/emocionario.css';
 
 export const EMOTIONS = [
+  { key: 'quiero-un-poni', labelM: 'Quiero un poni', labelF: 'Quiero un poni', img: '/icons/emocionario/quiero-un-poni.png' },
   { key: 'feliz',       labelM: 'Feliz',        labelF: 'Feliz',        img: '/icons/emocionario/feliz.webp' },
   { key: 'enamorado',   labelM: 'Enamorado',    labelF: 'Enamorada',    img: '/icons/emocionario/enamorada.webp' },
   { key: 'tranquilo',   labelM: 'Tranquilo',    labelF: 'Tranquila',    img: '/icons/emocionario/tranquila.webp' },
