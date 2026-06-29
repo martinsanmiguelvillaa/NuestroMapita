@@ -49,7 +49,7 @@ function monthKey(year, month) {
 // ─────────────────────────────────────────────
 // Formulario rápido
 // ─────────────────────────────────────────────
-export function EmotionForm({ onSaved, prefill, onDirtyChange, onPoniSaved }) {
+export function EmotionForm({ onSaved, onClose, prefill, onDirtyChange, onPoniSaved }) {
   const [userKey, setUserKey]         = useState(prefill?.userKey ?? 'van');
   const [date, setDate]               = useState(prefill?.entry?.date ?? todayISO());
   const [emotionKeys, setEmotionKeys] = useState(() =>
@@ -110,6 +110,7 @@ export function EmotionForm({ onSaved, prefill, onDirtyChange, onPoniSaved }) {
         toast.success(count === 1 ? 'Emoción guardada' : `${count} emociones guardadas`);
         setEmotionKeys(new Set());
         setNote('');
+        onClose?.();
       }
       await onSavedRef.current();
     } catch {
@@ -433,6 +434,7 @@ export default function Emocionario() {
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
   const [showPoniVideo,  setShowPoniVideo] = useState(false);
+  const [showFormModal,  setShowFormModal] = useState(false);
   const poniVideoRef = useRef(null);
 
   // En mobile, retrasar el renderizado del contenido 500ms para que se vea el fondo
@@ -513,7 +515,30 @@ export default function Emocionario() {
           <p className="emoc-header__sub">Un diario de cómo se sienten, día a día</p>
         </header>
 
-        <EmotionForm onSaved={handleEntrySaved} onPoniSaved={handlePoniSaved} />
+        {/* Desktop: formulario inline | Mobile: botón + modal */}
+        <div className="emoc-form-desktop">
+          <EmotionForm onSaved={handleEntrySaved} onPoniSaved={handlePoniSaved} />
+        </div>
+        <button className="emoc-add-btn" onClick={() => setShowFormModal(true)}>
+          + Agregar emoción
+        </button>
+        {showFormModal && (
+          <div className="emoc-modal-backdrop" onClick={() => setShowFormModal(false)}>
+            <div className="emoc-modal emoc-modal--form" onClick={(e) => e.stopPropagation()}>
+              <div className="emoc-modal__header">
+                <span className="emoc-modal__date">¿Qué sentiste?</span>
+                <button className="emoc-modal__close" onClick={() => setShowFormModal(false)}>✕</button>
+              </div>
+              <div className="emoc-modal__scroll">
+                <EmotionForm
+                  onSaved={handleEntrySaved}
+                  onClose={() => setShowFormModal(false)}
+                  onPoniSaved={handlePoniSaved}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <section className="emoc-section">
           <h2 className="emoc-section__title">Calendario emocional</h2>

@@ -81,6 +81,48 @@
   margin: 0;
 }
 
+/* ── Botón mobile para abrir formulario ── */
+.emoc-add-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .emoc-form-desktop {
+    display: none;
+  }
+
+  .emoc-add-btn {
+    display: block;
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-primary, #a0522d);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: var(--space-4);
+  }
+
+  .emoc-modal--form {
+    max-height: calc(100vh - var(--navbar-height, 64px) - var(--space-8));
+  }
+
+  .emoc-modal__scroll {
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .emoc-modal--form .emoc-form {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+}
+
 /* ── Formulario ── */
 .emoc-form {
   background: var(--color-white);
