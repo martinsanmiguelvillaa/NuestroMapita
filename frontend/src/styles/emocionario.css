@@ -2,6 +2,26 @@
    EMOCIONARIO — Diario emocional compartido
    ============================================ */
 
+/* --- Toggle de notificaciones de poni --- */
+.poni-notif-toggle {
+  margin: 2rem auto;
+  max-width: 420px;
+  padding: 1rem 1.2rem;
+  background: var(--color-surface, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #e5e0db);
+  text-align: center;
+}
+.poni-notif-toggle__title {
+  font-weight: 600;
+  margin: 0 0 0.3rem;
+}
+.poni-notif-toggle__desc {
+  font-size: 0.85rem;
+  color: var(--color-text-dim, #888);
+  margin: 0 0 0.8rem;
+}
+
 .poni-video-overlay {
   position: fixed;
   inset: 0;

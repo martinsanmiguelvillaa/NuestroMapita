@@ -45,6 +45,10 @@ export default function Navbar() {
   const [calendarNotif, setCalendarNotif] = useState(null); // { registered, enabled }
   const [togglingCalendar, setTogglingCalendar] = useState(false);
 
+  // Estado del toggle de poni para este dispositivo
+  const [poniNotif, setPoniNotif] = useState(null); // null=no cargado, { registered, enabled, userKey }
+  const [togglingPoni, setTogglingPoni] = useState(false);
+
   // Horas de silencio de este dispositivo ('' = sin configurar)
   const [quiet, setQuiet] = useState({ start: '', end: '' });
 
@@ -62,13 +66,23 @@ export default function Navbar() {
         end: deviceStatus?.quiet_end ?? '',
       });
       if (deviceStatus?.exists) {
-        // NULL en calendar_notif_enabled = opt-out no realizado = activado
         setCalendarNotif({
           registered: true,
           enabled: deviceStatus.calendar_notif_enabled !== false,
         });
       } else {
         setCalendarNotif({ registered: false, enabled: false });
+      }
+      // Buscar poni_notif_enabled en cualquier suscripción existente
+      const poniSub = [
+        van   && { ...van,   userKey: 'van' },
+        martin && { ...martin, userKey: 'martin' },
+        deviceStatus && { ...deviceStatus, userKey: 'ambos' },
+      ].find(s => s?.exists);
+      if (poniSub) {
+        setPoniNotif({ registered: true, enabled: !!poniSub.poni_notif_enabled, userKey: poniSub.userKey });
+      } else {
+        setPoniNotif({ registered: false, enabled: false, userKey: 'ambos' });
       }
     });
   }, [configOpen]);
@@ -135,6 +149,22 @@ export default function Navbar() {
       setCalendarNotif(prev => ({ ...prev, enabled: newEnabled }));
     } finally {
       setTogglingCalendar(false);
+    }
+  };
+
+  const togglePoni = async () => {
+    if (!poniNotif?.registered) return;
+    setTogglingPoni(true);
+    const newEnabled = !poniNotif.enabled;
+    try {
+      await updateDeviceSettings({
+        device_id: getOrCreateDeviceId(),
+        user_key: poniNotif.userKey,
+        poni_notif_enabled: newEnabled,
+      });
+      setPoniNotif(prev => ({ ...prev, enabled: newEnabled }));
+    } finally {
+      setTogglingPoni(false);
     }
   };
 
@@ -305,6 +335,18 @@ export default function Navbar() {
                   >
                     <img src={`${C}outfit-martin.webp`} alt="" className="navbar__config-icon" />
                     <span>{outfitNotif.martin.enabled ? 'Desactivar outfit de Martín' : 'Activar outfit de Martín'}</span>
+                  </button>
+                )}
+
+                {/* Notificaciones de poni */}
+                {poniNotif?.registered && (
+                  <button
+                    className="navbar__config-item"
+                    onClick={togglePoni}
+                    disabled={togglingPoni}
+                  >
+                    <span className="navbar__config-icon-emoji">🐴</span>
+                    <span>{poniNotif.enabled ? 'Desactivar notificaciones de poni' : 'Activar notificaciones de poni'}</span>
                   </button>
                 )}
 

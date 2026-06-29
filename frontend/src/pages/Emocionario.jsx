@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
+import { getDeviceStatus, updateDeviceSettings } from '../api/push';
+import { getOrCreateDeviceId } from '../utils/deviceId';
 import { toast } from 'sonner';
 import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
 import '../styles/emocionario.css';
@@ -470,6 +472,77 @@ function EmotionCalendar({ entries, year, month, onPrev, onNext, onDayClick, loa
 // ─────────────────────────────────────────────
 // Página principal — fuente de verdad única
 // ─────────────────────────────────────────────
+// ── Toggle de notificación "quiero un poni" ─────────────────────────
+function PoniNotificationToggle() {
+  const [enabled, setEnabled] = useState(false);
+  const [hasSubscription, setHasSubscription] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [resolvedKey, setResolvedKey] = useState('ambos');
+
+  useEffect(() => {
+    const deviceId = getOrCreateDeviceId();
+    // Buscar suscripción: probar van, martin, ambos
+    const tryKeys = ['van', 'martin', 'ambos'];
+    (async () => {
+      for (const key of tryKeys) {
+        try {
+          const s = await getDeviceStatus(deviceId, key);
+          if (s.exists) {
+            setHasSubscription(true);
+            setEnabled(!!s.poni_notif_enabled);
+            setResolvedKey(key);
+            return;
+          }
+        } catch { /* seguir intentando */ }
+      }
+      setHasSubscription(false);
+    })();
+  }, []);
+
+  if (hasSubscription === null) return null;
+
+  if (!hasSubscription) {
+    return (
+      <div className="poni-notif-toggle">
+        <p className="poni-notif-toggle__title">🐴 Notificaciones de poni</p>
+        <p className="poni-notif-toggle__desc">
+          Para recibir notificaciones de poni, primero activá las notificaciones en la sección de Outfits.
+        </p>
+      </div>
+    );
+  }
+
+  const toggle = async () => {
+    setSaving(true);
+    try {
+      const deviceId = getOrCreateDeviceId();
+      await updateDeviceSettings({ device_id: deviceId, user_key: resolvedKey, poni_notif_enabled: !enabled });
+      setEnabled(!enabled);
+      toast.success(enabled ? 'Notificaciones de poni desactivadas' : '🐴 Notificaciones de poni activadas');
+    } catch {
+      toast.error('No se pudo cambiar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="poni-notif-toggle">
+      <p className="poni-notif-toggle__title">🐴 Notificaciones de poni</p>
+      <p className="poni-notif-toggle__desc">
+        Recibí una notificación cada vez que alguien toque el botón "quiero un poni".
+      </p>
+      <button
+        className={`btn ${enabled ? 'btn-ghost' : 'btn-primary'} btn-sm`}
+        disabled={saving}
+        onClick={toggle}
+      >
+        {saving ? 'Guardando...' : enabled ? 'Desactivar' : 'Activar'}
+      </button>
+    </div>
+  );
+}
+
 export default function Emocionario() {
   const now = new Date();
 
@@ -578,6 +651,8 @@ export default function Emocionario() {
             loading={loadingEntries}
           />
         </section>
+
+        <PoniNotificationToggle />
 
         {selectedDay && (
           <DayModal
