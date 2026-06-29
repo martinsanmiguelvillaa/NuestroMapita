@@ -52,7 +52,7 @@ function playPoniVideo() {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;';
   const video = document.createElement('video');
-  video.src = '/video-quiero-un-poni.mp4';
+  video.src = '/video-quiero-un-poni.webm';
   video.playsInline = true;
   video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
   video.onended = () => overlay.remove();
