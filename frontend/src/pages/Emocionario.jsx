@@ -61,8 +61,17 @@ function playPoniVideo() {
     'align-items:center;justify-content:center;pointer-events:none;' +
     'opacity:0;transition:opacity 0.3s ease-in;';
   const video = document.createElement('video');
-  video.src = '/video-quiero-un-poni.webm';
   video.playsInline = true;
+  // Safari/iOS: HEVC con canal alfa
+  const srcMov = document.createElement('source');
+  srcMov.src = '/video-quiero-un-poni.mov';
+  srcMov.type = 'video/quicktime; codecs="hvc1"';
+  video.appendChild(srcMov);
+  // Chrome/Firefox/Edge: WebM con canal alfa
+  const srcWebm = document.createElement('source');
+  srcWebm.src = '/video-quiero-un-poni.webm';
+  srcWebm.type = 'video/webm';
+  video.appendChild(srcWebm);
   video.style.cssText =
     'width:100%;height:100%;object-fit:contain;' +
     'transform:scale(0.8);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);';
