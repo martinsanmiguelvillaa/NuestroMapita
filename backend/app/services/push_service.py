@@ -144,7 +144,16 @@ def send_poni_push_to_all(db: Session) -> None:
 
     messages = [
         "¡Quiero un poni!",
-        "Amooor, quiero un poni"
+        "Amooor, quiero un poni",
+        "Me das un poni?",
+        "Ya dije que quiero un poni",
+        "Adoptamos un poni?",
+        "Y MI PONI????",
+        "PONI PONI PONI",
+        "AMOOOOOOOOR QUIERO PONIIIIIIIIII",
+        "Quizas tambien un panda... o un unicornio..."
+        "Vamos a tener un poni no?",
+        "Tenemos un poni?"
     ]
 
     subs = db.query(DeviceSubscription).filter(
