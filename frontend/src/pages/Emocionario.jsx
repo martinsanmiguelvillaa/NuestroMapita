@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { upsertEmotionalEntry, updateEmotionalEntry, getEmotionalEntries, deleteEmotionalEntry } from '../api/emotional';
 import { toast } from 'sonner';
 import { scheduleDeletion, cancelDeletion } from '../utils/pendingDeletions';
@@ -491,8 +492,8 @@ export default function Emocionario() {
   const handlePoniSaved = useCallback(() => {
     if (!poniVideoRef.current) return;
     poniVideoRef.current.currentTime = 0;
+    flushSync(() => setShowPoniVideo(true)); // overlay visible antes de play()
     poniVideoRef.current.play().catch(() => {});
-    setShowPoniVideo(true);
   }, []);
 
   return (
