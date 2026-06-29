@@ -433,8 +433,6 @@ export default function Emocionario() {
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [selectedDay,    setSelectedDay]   = useState(null);
   const [showFormModal,  setShowFormModal] = useState(false);
-  const poniVideoRef   = useRef(null);
-  const poniOverlayRef = useRef(null);
 
   // En mobile, retrasar el renderizado del contenido 500ms para que se vea el fondo
   const [ready, setReady] = useState(() => window.innerWidth > 768);
@@ -491,23 +489,22 @@ export default function Emocionario() {
   }, []);
 
   const handlePoniSaved = useCallback(() => {
-    if (!poniVideoRef.current || !poniOverlayRef.current) return;
-    poniOverlayRef.current.classList.add('poni-video-overlay--visible');
-    poniVideoRef.current.currentTime = 0;
-    poniVideoRef.current.play().catch(() => {});
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;';
+    const video = document.createElement('video');
+    video.src = '/video-quiero-un-poni.mp4';
+    video.playsInline = true;
+    video.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+    video.onended = () => overlay.remove();
+    video.onerror = () => overlay.remove();
+    overlay.onclick = () => overlay.remove();
+    overlay.appendChild(video);
+    document.body.appendChild(overlay);
+    video.play().catch(() => overlay.remove());
   }, []);
 
   return (
     <div className="emoc-page">
-      <div ref={poniOverlayRef} className="poni-video-overlay">
-        <video
-          ref={poniVideoRef}
-          src="/video-quiero-un-poni.mp4"
-          playsInline
-          preload="auto"
-          onEnded={() => poniOverlayRef.current?.classList.remove('poni-video-overlay--visible')}
-        />
-      </div>
       {!ready ? null : <div className="emoc-page__inner">
         <header className="emoc-header">
           <h1 className="emoc-header__title">Emocionario</h1>
