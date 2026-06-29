@@ -143,7 +143,8 @@ def send_poni_push_to_all(db: Session) -> None:
         return
 
     messages = [
-        
+        "¡Quiero un poni!",
+        "Amooor, quiero un poni"
     ]
 
     subs = db.query(DeviceSubscription).filter(
