@@ -481,7 +481,8 @@ video::-webkit-media-controls-start-playback-button {
 .lightbox__action-btn:hover {
   background: var(--color-white-28);
 }
-.lightbox__action-btn--danger:hover {
+.lightbox__action-btn--danger:hover,
+.lightbox__action-btn--delete:hover {
   background: var(--color-cover-danger);
   border-color: var(--color-cover-danger-border);
 }

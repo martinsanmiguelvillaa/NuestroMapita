@@ -30,6 +30,9 @@ async function uploadWithTimeout(url, files, timeoutMs = 180000) {
   }
 }
 
+export const uploadLoosePhotos = (files) =>
+  uploadWithTimeout('/photos/loose', files);
+
 export const uploadPhotos = (placeId, files) =>
   uploadWithTimeout(`/places/visited/${placeId}/photos`, files);
 

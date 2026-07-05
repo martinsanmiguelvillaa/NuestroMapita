@@ -39,11 +39,21 @@ def get_recent_photos(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Devuelve las fotos más recientes de lugares visitados para la galería del home."""
+    """Devuelve las fotos más recientes (de lugares visitados + sueltas) para la galería del home."""
+    from sqlalchemy import or_
+
     photos = (
         db.query(Photo)
         .options(joinedload(Photo.place_visited))
-        .filter(Photo.place_visited_id.isnot(None))
+        .filter(
+            or_(
+                Photo.place_visited_id.isnot(None),
+                # Fotos sueltas: sin ningún FK asociado
+                (Photo.place_visited_id.is_(None)
+                 & Photo.place_wishlist_id.is_(None)
+                 & Photo.place_trip_id.is_(None)),
+            )
+        )
         .order_by(Photo.created_at.desc())
         .limit(limit)
         .all()
@@ -56,9 +66,63 @@ def get_recent_photos(
             "position_x": p.position_x,
             "position_y": p.position_y,
             "place_name": p.place_visited.name if p.place_visited else "",
+            "is_loose": p.place_visited_id is None and p.place_wishlist_id is None and p.place_trip_id is None,
         }
         for p in photos
     ]
+
+
+@router.post("/photos/loose", response_model=List[PhotoResponse], status_code=201)
+async def upload_loose_photos(
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    """Sube fotos sueltas a la galería (sin asociar a ningún lugar)."""
+    if not files:
+        raise HTTPException(status_code=400, detail="Tenés que subir al menos una imagen")
+    if len(files) > MAX_PLACE_PHOTOS_PER_REQUEST:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Podés subir hasta {MAX_PLACE_PHOTOS_PER_REQUEST} fotos por vez",
+        )
+
+    media_contents = []
+    for file in files:
+        media_contents.append(await read_valid_media_upload(file))
+
+    created = []
+    uploaded = []
+    try:
+        for content, resource_type in media_contents:
+            if resource_type == "video":
+                result = upload_video(content, folder="nuestro-mapita/galeria")
+            else:
+                result = upload_image(content, folder="nuestro-mapita/galeria")
+            uploaded.append((result["public_id"], resource_type))
+
+            photo = Photo(
+                cloudinary_url=result["url"],
+                cloudinary_public_id=result["public_id"],
+                resource_type=resource_type,
+            )
+            db.add(photo)
+            db.flush()
+            created.append(photo)
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        for public_id, rtype in uploaded:
+            try:
+                delete_media(public_id, resource_type=rtype)
+            except Exception as e:
+                logger.warning("No se pudo eliminar media de Cloudinary en rollback: public_id=%s error=%s", public_id, e)
+        raise
+
+    for p in created:
+        db.refresh(p)
+    return created
 
 
 @router.post("/places/visited/{place_id}/photos", response_model=List[PhotoResponse], status_code=201)

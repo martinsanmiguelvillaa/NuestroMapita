@@ -302,6 +302,44 @@
   margin: 0 auto;
 }
 
+.home__gallery-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.home__gallery-header .home__section-title {
+  flex: 1;
+}
+
+.home__gallery-upload-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-beige-mid);
+  background: var(--color-white);
+  color: var(--color-text-light);
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.home__gallery-upload-btn:hover {
+  border-color: var(--color-rose);
+  color: var(--color-brown);
+  background: var(--color-rose-light);
+}
+
+.home__gallery-upload-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .home__polaroids {
   display: flex;
   flex-wrap: wrap;
