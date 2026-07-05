@@ -12,6 +12,8 @@ class Recipe(Base):
     category = Column(String(10), nullable=False)   # 'salado' | 'dulce'
     image_url = Column(String(500), nullable=True)
     image_public_id = Column(String(200), nullable=True)
+    image_position_x = Column(Integer, nullable=False, server_default="50")
+    image_position_y = Column(Integer, nullable=False, server_default="50")
     ingredients = Column(Text, nullable=True)        # Una línea por ingrediente
     steps = Column(Text, nullable=True)              # Preparación completa
     video_url = Column(String(500), nullable=True)

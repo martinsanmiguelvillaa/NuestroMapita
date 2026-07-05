@@ -30,6 +30,12 @@ export async function uploadRecipePhoto(recipeId, file) {
 export const deleteRecipePhoto = (recipeId) =>
   apiFetch(`${BASE}/${recipeId}/photo`, { method: 'DELETE' });
 
+export const updateRecipePhotoPosition = (recipeId, x, y) =>
+  apiFetch(`${BASE}/${recipeId}/photo/position`, {
+    method: 'PATCH',
+    body: JSON.stringify({ x, y }),
+  });
+
 export const addComment = (recipeId, data) =>
   apiFetch(`${BASE}/${recipeId}/comments`, { method: 'POST', body: JSON.stringify(data) });
 

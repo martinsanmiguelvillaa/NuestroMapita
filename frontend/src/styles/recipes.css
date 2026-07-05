@@ -100,13 +100,33 @@
   border-color: var(--color-beige-mid);
 }
 
-/* Imagen de portada */
-.recipe-card__image {
+/* Imagen de portada con reencuadre */
+.recipe-cover {
+  position: relative;
+  overflow: hidden;
+}
+
+.recipe-cover__img {
   width: 100%;
-  height: 180px;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
+
+.recipe-cover--card {
+  height: 180px;
+}
+
+.recipe-cover--detail {
+  max-height: 260px;
+  border-radius: var(--radius-md);
+}
+
+.recipe-cover--adjusting .recipe-cover__img {
+  cursor: grab;
+}
+
+.recipe-cover:hover .cover-photo__adjust-btn { opacity: 1; }
 
 /* Placeholder cuando no hay imagen */
 .recipe-card__placeholder {

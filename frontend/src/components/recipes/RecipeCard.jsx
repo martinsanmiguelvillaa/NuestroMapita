@@ -1,10 +1,11 @@
 import StarRating from '../places/StarRating';
+import RecipeCoverImage from './RecipeCoverImage';
 import '../../styles/recipes.css';
 
 /**
  * Tarjeta compacta de receta para la grilla.
  */
-export default function RecipeCard({ recipe, onView, onEdit, onDelete, disabled = false }) {
+export default function RecipeCard({ recipe, onView, onEdit, onDelete, onRecipeChanged, disabled = false }) {
   const allIngredients = (recipe.ingredients || '').split('\n').map((l) => l.trim()).filter(Boolean);
   const firstIngredients = allIngredients.slice(0, 3);
 
@@ -14,10 +15,10 @@ export default function RecipeCard({ recipe, onView, onEdit, onDelete, disabled 
     <div className="recipe-card fade-in" onClick={onView} style={{ cursor: 'pointer' }}>
       {/* Imagen o placeholder */}
       {recipe.image_url ? (
-        <img
-          src={recipe.image_url}
-          alt={recipe.title}
-          className="recipe-card__image"
+        <RecipeCoverImage
+          recipe={recipe}
+          className="recipe-cover--card"
+          onPositionSaved={onRecipeChanged}
         />
       ) : (
         <div className={`recipe-card__placeholder recipe-card__placeholder--${recipe.category}`}>

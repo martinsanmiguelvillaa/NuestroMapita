@@ -140,6 +140,22 @@ async def upload_recipe_photo(
     return _get_or_404(recipe_id, db)
 
 
+@router.patch("/{recipe_id}/photo/position", response_model=RecipeResponse)
+def update_recipe_photo_position(
+    recipe_id: int,
+    data: dict,
+    db: Session = Depends(get_db),
+    _: bool = Depends(get_current_user),
+):
+    recipe = _get_or_404(recipe_id, db)
+    x = max(0, min(100, int(data.get("x", 50))))
+    y = max(0, min(100, int(data.get("y", 50))))
+    recipe.image_position_x = x
+    recipe.image_position_y = y
+    db.commit()
+    return _get_or_404(recipe_id, db)
+
+
 @router.delete("/{recipe_id}/photo", status_code=204)
 def delete_recipe_photo(
     recipe_id: int,

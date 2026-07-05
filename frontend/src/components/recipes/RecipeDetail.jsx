@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Modal from '../ui/Modal';
 import StarRating from '../places/StarRating';
+import RecipeCoverImage from './RecipeCoverImage';
 import { getRecipe, addComment, deleteComment } from '../../api/recipes';
 import { useConfirm } from '../../context/ConfirmContext';
 import { toast } from 'sonner';
@@ -52,7 +53,11 @@ function RecipeDetailContent({ recipe, onEdit, onCommentChanged }) {
     <div className="recipe-detail">
       {/* Imagen */}
       {recipe.image_url && (
-        <img src={recipe.image_url} alt={recipe.title} className="recipe-detail__image" />
+        <RecipeCoverImage
+          recipe={recipe}
+          className="recipe-cover--detail"
+          onPositionSaved={onCommentChanged}
+        />
       )}
 
       {/* Meta */}

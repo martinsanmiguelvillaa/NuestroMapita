@@ -126,6 +126,8 @@ class RecipeResponse(BaseModel):
     category: str
     image_url: Optional[str]
     image_public_id: Optional[str]
+    image_position_x: int = 50
+    image_position_y: int = 50
     ingredients: Optional[str]
     steps: Optional[str]
     video_url: Optional[str]

@@ -148,6 +148,7 @@ export default function Recipes() {
               onView={() => setDetailId(recipe.id)}
               onEdit={() => openEdit(recipe)}
               onDelete={() => handleDelete(recipe)}
+              onRecipeChanged={() => load()}
             />
           ))}
         </div>
