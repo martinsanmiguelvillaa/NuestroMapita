@@ -35,17 +35,17 @@ def get_stats(
 
 @router.get("/photos/recent")
 def get_recent_photos(
-    limit: int = Query(16, ge=1, le=50),
+    limit: int = Query(20, ge=1, le=50),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Devuelve fotos aleatorias (de lugares visitados + sueltas) para la galería del home."""
+    """Devuelve fotos paginadas (de lugares visitados + sueltas) para la galería del home."""
     from sqlalchemy import or_
-    from sqlalchemy.sql.expression import func as sqlfunc
 
-    # Paso 1: traer solo IDs con ORDER BY RANDOM (más liviano que cargar objetos completos)
-    id_query = (
-        db.query(Photo.id)
+    photos = (
+        db.query(Photo)
+        .options(joinedload(Photo.place_visited))
         .filter(
             or_(
                 Photo.place_visited_id.isnot(None),
@@ -54,19 +54,9 @@ def get_recent_photos(
                  & Photo.place_trip_id.is_(None)),
             )
         )
-        .order_by(sqlfunc.random())
+        .order_by(Photo.created_at.desc())
+        .offset(offset)
         .limit(limit)
-    )
-    photo_ids = [row[0] for row in id_query]
-
-    if not photo_ids:
-        return []
-
-    # Paso 2: cargar objetos completos con join solo para los IDs seleccionados
-    photos = (
-        db.query(Photo)
-        .options(joinedload(Photo.place_visited))
-        .filter(Photo.id.in_(photo_ids))
         .all()
     )
     return [

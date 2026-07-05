@@ -502,12 +502,15 @@ function EmocQuickModal({ onClose }) {
 export default function Home() {
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0, trips: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
-  const [galleryExpanded, setGalleryExpanded] = useState(false);
   const [previewLetters, setPreviewLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const fileInputRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const PAGE_SIZE = 20;
   const [showEmocModal, setShowEmocModal] = useState(false);
   const [fabDismissed, setFabDismissed]   = useState(fabDismissedSession);
   const openEmoc   = useCallback(() => setShowEmocModal(true), []);
@@ -518,7 +521,7 @@ export default function Home() {
     try {
       const [stats, photos, letters] = await Promise.all([
         getStats(),
-        getRecentPhotos(16),
+        getRecentPhotos(PAGE_SIZE, 0),
         getLetters({ limit: 3 }),
       ]);
 
@@ -531,7 +534,9 @@ export default function Home() {
 
       setPreviewLetters(letters);
 
-      setRecentPhotos(photos.map((p) => ({ ...p, placeName: p.place_name })));
+      const mapped = photos.map((p) => ({ ...p, placeName: p.place_name }));
+      setRecentPhotos(mapped);
+      setHasMore(photos.length >= PAGE_SIZE);
     } catch (err) {
       toast.error('No se pudo cargar el inicio');
     } finally {
@@ -541,6 +546,37 @@ export default function Home() {
 
   useEffect(() => { load(); }, []);
 
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const photos = await getRecentPhotos(PAGE_SIZE, recentPhotos.length);
+      const mapped = photos.map((p) => ({ ...p, placeName: p.place_name }));
+      setRecentPhotos((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const newPhotos = mapped.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...newPhotos];
+      });
+      setHasMore(photos.length >= PAGE_SIZE);
+    } catch {
+      // silenciar error de carga parcial
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, recentPhotos.length]);
+
+  // IntersectionObserver para scroll infinito
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: '400px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
   const handleLooseUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     e.target.value = '';
@@ -549,7 +585,10 @@ export default function Home() {
     try {
       await uploadLoosePhotos(files);
       toast.success('Fotos agregadas');
-      load();
+      // Recargar desde cero para que aparezcan arriba
+      const photos = await getRecentPhotos(PAGE_SIZE, 0);
+      setRecentPhotos(photos.map((p) => ({ ...p, placeName: p.place_name })));
+      setHasMore(photos.length >= PAGE_SIZE);
     } catch (err) {
       toast.error('No se pudieron subir: ' + err.message);
     } finally {
@@ -700,7 +739,7 @@ export default function Home() {
       </section>
 
       {/* Galería */}
-      {recentPhotos.length > 0 && (
+      {!loading && (
         <section className="home__recent">
           <div className="home__gallery-header" style={{ marginTop: '40px' }}>
             <h2 className="home__section-title" style={{ marginTop: 0 }}>Galería</h2>
@@ -720,57 +759,37 @@ export default function Home() {
               onChange={handleLooseUpload}
             />
           </div>
-          <div className="home__polaroids">
-            {(galleryExpanded ? recentPhotos : recentPhotos.slice(0, 8)).map((photo, i) => (
-              <div key={photo.id} className="polaroid" onClick={() => setLightboxIndex(i)}>
-                {photo.resource_type === 'video'
-                  ? <VideoPolaroid photo={photo} />
-                  : <img src={polaroidUrl(photo.cloudinary_url)} alt={photo.placeName} className="polaroid__img" loading="lazy" />
-                }
-                <p className="polaroid__caption">{photo.placeName}</p>
+          {recentPhotos.length > 0 ? (
+            <>
+              <div className="home__polaroids">
+                {recentPhotos.map((photo, i) => (
+                  <div key={photo.id} className="polaroid" onClick={() => setLightboxIndex(i)}>
+                    {photo.resource_type === 'video'
+                      ? <VideoPolaroid photo={photo} />
+                      : <img src={polaroidUrl(photo.cloudinary_url)} alt={photo.placeName} className="polaroid__img" loading="lazy" />
+                    }
+                    <p className="polaroid__caption">{photo.placeName}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          {!galleryExpanded && recentPhotos.length > 8 && (
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              <button className="btn btn-ghost" onClick={() => setGalleryExpanded(true)}>
-                Ver más fotos ({recentPhotos.length - 8} más)
-              </button>
+              {hasMore && (
+                <div ref={sentinelRef} className="home__gallery-sentinel">
+                  {loadingMore && <span className="home__gallery-loading">Cargando...</span>}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="empty-state">
+              <p>Todavía no hay fotos.</p>
             </div>
           )}
-        </section>
-      )}
-
-      {!loading && recentPhotos.length === 0 && (
-        <section className="home__recent">
-          <div className="home__gallery-header" style={{ marginTop: '40px' }}>
-            <h2 className="home__section-title" style={{ marginTop: 0 }}>Galería</h2>
-            <button
-              className="home__gallery-upload-btn"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-            >
-              {uploading ? '...' : '+'}
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*"
-              multiple
-              hidden
-              onChange={handleLooseUpload}
-            />
-          </div>
-          <div className="empty-state">
-            <p>Todavía no hay fotos.</p>
-          </div>
         </section>
       )}
 
       {/* Lightbox — portal para escapar del stacking context del motion.div de Layout */}
       {lightboxIndex !== null && createPortal(
         <HomeLightbox
-          photos={galleryExpanded ? recentPhotos : recentPhotos.slice(0, 8)}
+          photos={recentPhotos}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onDelete={handleDeleteLoose}
