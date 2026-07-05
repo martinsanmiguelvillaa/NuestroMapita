@@ -90,11 +90,26 @@
   text-align: center;
 }
 
+.home__stat--link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.home__stat--link:hover .home__stat-number {
+  transform: scale(1.1);
+}
+
+.home__stat--link:hover .home__stat-label {
+  color: var(--color-brown);
+}
+
 .home__stat-number {
   font-family: var(--font-heading);
   font-size: var(--text-3xl);
   color: var(--color-brown);
   line-height: 1;
+  transition: transform var(--transition-fast);
 }
 
 .home__stat-label {

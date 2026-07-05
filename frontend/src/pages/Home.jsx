@@ -648,18 +648,18 @@ export default function Home() {
       {/* Stats */}
       {!loading && (
         <div className="home__stats">
-          <div className="home__stat">
+          <Link to="/visitados" className="home__stat home__stat--link">
             <div className="home__stat-number">{stats.visited}</div>
             <div className="home__stat-label">ya hicimos</div>
-          </div>
-          <div className="home__stat">
+          </Link>
+          <Link to="/por-visitar" className="home__stat home__stat--link">
             <div className="home__stat-number">{stats.wishlist}</div>
             <div className="home__stat-label">por hacer</div>
-          </div>
-          <div className="home__stat">
+          </Link>
+          <Link to="/viajecitos" className="home__stat home__stat--link">
             <div className="home__stat-number">{stats.trips}</div>
             <div className="home__stat-label">viajecitos</div>
-          </div>
+          </Link>
         </div>
       )}
 
