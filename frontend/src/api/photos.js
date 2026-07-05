@@ -1,7 +1,10 @@
 import apiFetch from './client';
 
-export const getRecentPhotos = (limit = 20, offset = 0) =>
-  apiFetch(`/photos/recent?limit=${limit}&offset=${offset}`);
+export const getRecentPhotos = (limit = 20, offset = 0, seed) => {
+  let url = `/photos/recent?limit=${limit}&offset=${offset}`;
+  if (seed != null) url += `&seed=${seed}`;
+  return apiFetch(url);
+};
 
 export const getStats = () => apiFetch('/photos/stats');
 

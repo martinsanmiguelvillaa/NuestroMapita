@@ -37,13 +37,14 @@ def get_stats(
 def get_recent_photos(
     limit: int = Query(20, ge=1, le=50),
     offset: int = Query(0, ge=0),
+    seed: float = Query(None, ge=0, le=1),
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Devuelve fotos paginadas (de lugares visitados + sueltas) para la galería del home."""
-    from sqlalchemy import or_
+    """Devuelve fotos paginadas en orden aleatorio determinista (seed) para scroll infinito."""
+    from sqlalchemy import or_, text
 
-    photos = (
+    base = (
         db.query(Photo)
         .options(joinedload(Photo.place_visited))
         .filter(
@@ -54,11 +55,14 @@ def get_recent_photos(
                  & Photo.place_trip_id.is_(None)),
             )
         )
-        .order_by(Photo.created_at.desc())
-        .offset(offset)
-        .limit(limit)
-        .all()
     )
+
+    if seed is not None:
+        base = base.order_by(text(f"RAND({seed})"))
+    else:
+        base = base.order_by(Photo.created_at.desc())
+
+    photos = base.offset(offset).limit(limit).all()
     return [
         {
             "id": p.id,

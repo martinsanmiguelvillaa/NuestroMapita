@@ -510,6 +510,7 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const fileInputRef = useRef(null);
   const sentinelRef = useRef(null);
+  const seedRef = useRef(Math.round(Math.random() * 1e6) / 1e6);
   const PAGE_SIZE = 20;
   const [showEmocModal, setShowEmocModal] = useState(false);
   const [fabDismissed, setFabDismissed]   = useState(fabDismissedSession);
@@ -521,7 +522,7 @@ export default function Home() {
     try {
       const [stats, photos, letters] = await Promise.all([
         getStats(),
-        getRecentPhotos(PAGE_SIZE, 0),
+        getRecentPhotos(PAGE_SIZE, 0, seedRef.current),
         getLetters({ limit: 3 }),
       ]);
 
@@ -550,7 +551,7 @@ export default function Home() {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
-      const photos = await getRecentPhotos(PAGE_SIZE, recentPhotos.length);
+      const photos = await getRecentPhotos(PAGE_SIZE, recentPhotos.length, seedRef.current);
       const mapped = photos.map((p) => ({ ...p, placeName: p.place_name }));
       setRecentPhotos((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
@@ -585,8 +586,9 @@ export default function Home() {
     try {
       await uploadLoosePhotos(files);
       toast.success('Fotos agregadas');
-      // Recargar desde cero para que aparezcan arriba
-      const photos = await getRecentPhotos(PAGE_SIZE, 0);
+      // Nuevo seed para que las nuevas fotos aparezcan mezcladas
+      seedRef.current = Math.round(Math.random() * 1e6) / 1e6;
+      const photos = await getRecentPhotos(PAGE_SIZE, 0, seedRef.current);
       setRecentPhotos(photos.map((p) => ({ ...p, placeName: p.place_name })));
       setHasMore(photos.length >= PAGE_SIZE);
     } catch (err) {
