@@ -547,6 +547,27 @@ export default function Home() {
 
   useEffect(() => { load(); }, []);
 
+  const handleLooseUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      await uploadLoosePhotos(files);
+      toast.success('Fotos agregadas');
+      load();
+    } catch (err) {
+      toast.error('No se pudieron subir: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteLoose = (photoId) => {
+    setRecentPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    toast.success('Foto eliminada');
+  };
+
   const S = '/icons/iconos-secciones/';
 
   const navCards = [
@@ -594,7 +615,7 @@ export default function Home() {
         <div className="home__stats">
           <div className="home__stat">
             <div className="home__stat-number">{stats.visited}</div>
-            <div className="home__stat-label">visitados</div>
+            <div className="home__stat-label">ya hicimos</div>
           </div>
           <div className="home__stat">
             <div className="home__stat-number">{stats.wishlist}</div>
@@ -687,7 +708,24 @@ export default function Home() {
       {/* Galería */}
       {recentPhotos.length > 0 && (
         <section className="home__recent">
-          <h2 className="home__section-title" style={{ marginTop: '40px' }}>Galería</h2>
+          <div className="home__gallery-header" style={{ marginTop: '40px' }}>
+            <h2 className="home__section-title" style={{ marginTop: 0 }}>Galería</h2>
+            <button
+              className="home__gallery-upload-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? '...' : '+'}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              hidden
+              onChange={handleLooseUpload}
+            />
+          </div>
           <div className="home__polaroids">
             {(galleryExpanded ? recentPhotos : recentPhotos.slice(0, 8)).map((photo, i) => (
               <div key={photo.id} className="polaroid" onClick={() => setLightboxIndex(i)}>
@@ -711,12 +749,26 @@ export default function Home() {
 
       {!loading && recentPhotos.length === 0 && (
         <section className="home__recent">
-          <h2 className="home__section-title" style={{ marginTop: '40px' }}>Recuerdos</h2>
+          <div className="home__gallery-header" style={{ marginTop: '40px' }}>
+            <h2 className="home__section-title" style={{ marginTop: 0 }}>Galería</h2>
+            <button
+              className="home__gallery-upload-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? '...' : '+'}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              hidden
+              onChange={handleLooseUpload}
+            />
+          </div>
           <div className="empty-state">
             <p>Todavía no hay fotos.</p>
-            <Link to="/visitados" className="btn btn-rose">
-              Agregar el primer lugar
-            </Link>
           </div>
         </section>
       )}
@@ -727,6 +779,7 @@ export default function Home() {
           photos={galleryExpanded ? recentPhotos : recentPhotos.slice(0, 8)}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
+          onDelete={handleDeleteLoose}
         />,
         document.body
       )}
