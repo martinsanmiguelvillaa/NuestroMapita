@@ -483,6 +483,7 @@ function EmocQuickModal({ onClose }) {
 export default function Home() {
   const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
+  const [galleryExpanded, setGalleryExpanded] = useState(false);
   const [previewLetters, setPreviewLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
@@ -508,13 +509,13 @@ export default function Home() {
 
       setPreviewLetters(letters.slice(0, 3));
 
-      // Mezclar aleatoriamente y mostrar 8
+      // Mezclar aleatoriamente
       const all = photos.map((p) => ({ ...p, placeName: p.place_name }));
       for (let i = all.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [all[i], all[j]] = [all[j], all[i]];
       }
-      setRecentPhotos(all.slice(0, 8));
+      setRecentPhotos(all);
     } catch (err) {
       toast.error('No se pudo cargar el inicio');
     } finally {
@@ -662,8 +663,8 @@ export default function Home() {
         <section className="home__recent">
           <h2 className="home__section-title" style={{ marginTop: '40px' }}>Galería</h2>
           <div className="home__polaroids">
-            {recentPhotos.map((photo) => (
-              <div key={photo.id} className="polaroid" onClick={() => setLightboxIndex(recentPhotos.indexOf(photo))}>
+            {(galleryExpanded ? recentPhotos : recentPhotos.slice(0, 8)).map((photo, i) => (
+              <div key={photo.id} className="polaroid" onClick={() => setLightboxIndex(i)}>
                 {photo.resource_type === 'video'
                   ? <VideoPolaroid photo={photo} />
                   : <img src={polaroidUrl(photo.cloudinary_url)} alt={photo.placeName} className="polaroid__img" loading="lazy" />
@@ -672,6 +673,13 @@ export default function Home() {
               </div>
             ))}
           </div>
+          {!galleryExpanded && recentPhotos.length > 8 && (
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <button className="btn btn-ghost" onClick={() => setGalleryExpanded(true)}>
+                Ver más fotos ({recentPhotos.length - 8} más)
+              </button>
+            </div>
+          )}
         </section>
       )}
 
@@ -690,7 +698,7 @@ export default function Home() {
       {/* Lightbox — portal para escapar del stacking context del motion.div de Layout */}
       {lightboxIndex !== null && createPortal(
         <HomeLightbox
-          photos={recentPhotos}
+          photos={galleryExpanded ? recentPhotos : recentPhotos.slice(0, 8)}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
         />,
