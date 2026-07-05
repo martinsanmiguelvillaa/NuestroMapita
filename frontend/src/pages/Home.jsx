@@ -531,13 +531,7 @@ export default function Home() {
 
       setPreviewLetters(letters.slice(0, 3));
 
-      // Mezclar aleatoriamente
-      const all = photos.map((p) => ({ ...p, placeName: p.place_name }));
-      for (let i = all.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [all[i], all[j]] = [all[j], all[i]];
-      }
-      setRecentPhotos(all);
+      setRecentPhotos(photos.map((p) => ({ ...p, placeName: p.place_name })));
     } catch (err) {
       toast.error('No se pudo cargar el inicio');
     } finally {

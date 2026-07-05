@@ -39,8 +39,9 @@ def get_recent_photos(
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    """Devuelve las fotos más recientes (de lugares visitados + sueltas) para la galería del home."""
+    """Devuelve fotos aleatorias (de lugares visitados + sueltas) para la galería del home."""
     from sqlalchemy import or_
+    from sqlalchemy.sql.expression import func as sqlfunc
 
     photos = (
         db.query(Photo)
@@ -54,7 +55,7 @@ def get_recent_photos(
                  & Photo.place_trip_id.is_(None)),
             )
         )
-        .order_by(Photo.created_at.desc())
+        .order_by(sqlfunc.random())
         .limit(limit)
         .all()
     )
