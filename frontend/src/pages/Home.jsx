@@ -519,7 +519,7 @@ export default function Home() {
       const [stats, photos, letters] = await Promise.all([
         getStats(),
         getRecentPhotos(16),
-        getLetters(),
+        getLetters({ limit: 3 }),
       ]);
 
       setStats({
@@ -529,7 +529,7 @@ export default function Home() {
         trips: stats.trips,
       });
 
-      setPreviewLetters(letters.slice(0, 3));
+      setPreviewLetters(letters);
 
       setRecentPhotos(photos.map((p) => ({ ...p, placeName: p.place_name })));
     } catch (err) {

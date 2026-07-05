@@ -15,7 +15,7 @@ export default function Letters() {
 
   const load = useCallback(async (signal) => {
     try {
-      const data = await getLetters(signal);
+      const data = await getLetters({ signal });
       setLetters(data);
     } catch (err) {
       if (err.name === 'AbortError') return;

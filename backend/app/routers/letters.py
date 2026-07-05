@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile, File
+from typing import List, Optional
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -16,10 +16,14 @@ router = APIRouter(prefix="/letters", tags=["Cartitas"])
 
 @router.get("", response_model=List[LetterResponse])
 def list_letters(
+    limit: Optional[int] = Query(None, ge=1, le=100),
     db: Session = Depends(get_db),
     _: bool = Depends(get_current_user),
 ):
-    return db.query(Letter).order_by(Letter.created_at.desc()).all()
+    q = db.query(Letter).order_by(Letter.created_at.desc())
+    if limit is not None:
+        q = q.limit(limit)
+    return q.all()
 
 
 @router.post("", response_model=LetterResponse, status_code=201)

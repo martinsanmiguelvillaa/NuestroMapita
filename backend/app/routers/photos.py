@@ -43,13 +43,12 @@ def get_recent_photos(
     from sqlalchemy import or_
     from sqlalchemy.sql.expression import func as sqlfunc
 
-    photos = (
-        db.query(Photo)
-        .options(joinedload(Photo.place_visited))
+    # Paso 1: traer solo IDs con ORDER BY RANDOM (más liviano que cargar objetos completos)
+    id_query = (
+        db.query(Photo.id)
         .filter(
             or_(
                 Photo.place_visited_id.isnot(None),
-                # Fotos sueltas: sin ningún FK asociado
                 (Photo.place_visited_id.is_(None)
                  & Photo.place_wishlist_id.is_(None)
                  & Photo.place_trip_id.is_(None)),
@@ -57,6 +56,17 @@ def get_recent_photos(
         )
         .order_by(sqlfunc.random())
         .limit(limit)
+    )
+    photo_ids = [row[0] for row in id_query]
+
+    if not photo_ids:
+        return []
+
+    # Paso 2: cargar objetos completos con join solo para los IDs seleccionados
+    photos = (
+        db.query(Photo)
+        .options(joinedload(Photo.place_visited))
+        .filter(Photo.id.in_(photo_ids))
         .all()
     )
     return [
