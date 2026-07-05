@@ -31,3 +31,12 @@ export const polaroidUrl = (url) => imgUrl(url, 'w_400,c_fill,q_auto,f_auto');
 
 /** Lightbox / vista ampliada (max ~1200 px) */
 export const fullUrl = (url) => imgUrl(url, 'w_1200,q_auto,f_auto');
+
+/** Thumbnail de video: convierte la URL de video en un poster JPG via Cloudinary */
+export function videoThumbUrl(url, transforms = 'w_300,c_fill,q_auto,f_jpg') {
+  if (!url) return url;
+  // /video/upload/... → /video/upload/transforms/.../poster.jpg
+  return url
+    .replace('/video/upload/', `/video/upload/${transforms}/`)
+    .replace(/\.[^.]+$/, '.jpg');
+}

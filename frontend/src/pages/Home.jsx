@@ -14,7 +14,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getRecentPhotos, getStats, uploadLoosePhotos, deletePhoto } from '../api/photos';
 import { getLetters } from '../api/letters';
-import { polaroidUrl, fullUrl } from '../utils/cloudinary';
+import { polaroidUrl, fullUrl, videoThumbUrl } from '../utils/cloudinary';
 import { toast } from 'sonner';
 import { EmotionForm } from './Emocionario';
 import { sendPoniPush } from '../api/push';
@@ -240,7 +240,7 @@ function HomeLightbox({ photos, index, onClose, onDelete }) {
           {photos.map((p, i) => (
             <img
               key={p.id}
-              src={polaroidUrl(p.cloudinary_url)}
+              src={p.resource_type === 'video' ? videoThumbUrl(p.cloudinary_url) : polaroidUrl(p.cloudinary_url)}
               alt=""
               className={`lightbox__thumb${i === currentIndex ? ' lightbox__thumb--active' : ''}`}
               onClick={() => setCurrentIndex(i)}
