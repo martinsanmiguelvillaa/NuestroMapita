@@ -12,7 +12,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { getRecentPhotos, getStats } from '../api/photos';
+import { getRecentPhotos, getStats, uploadLoosePhotos, deletePhoto } from '../api/photos';
 import { getLetters } from '../api/letters';
 import { polaroidUrl, fullUrl } from '../utils/cloudinary';
 import { toast } from 'sonner';
@@ -134,8 +134,9 @@ function VideoPlayer({ src }) {
 }
 
 // ── Lightbox de la galería home ────────────────────────────────────
-function HomeLightbox({ photos, index, onClose }) {
+function HomeLightbox({ photos, index, onClose, onDelete }) {
   const [currentIndex, setCurrentIndex] = useState(index);
+  const [deleting, setDeleting] = useState(false);
   const photo = photos[currentIndex];
 
   const prev = useCallback(() => setCurrentIndex((i) => (i - 1 + photos.length) % photos.length), [photos.length]);
@@ -213,6 +214,24 @@ function HomeLightbox({ photos, index, onClose }) {
         <button className="lightbox__action-btn" onClick={handleDownload}>
           ⬇ Descargar
         </button>
+        {photo.is_loose && (
+          <button
+            className="lightbox__action-btn lightbox__action-btn--delete"
+            disabled={deleting}
+            onClick={async () => {
+              setDeleting(true);
+              try {
+                await deletePhoto(photo.id);
+                onDelete?.(photo.id);
+                if (photos.length <= 1) { onClose(); return; }
+                setCurrentIndex((i) => i >= photos.length - 1 ? i - 1 : i);
+              } catch { toast.error('No se pudo eliminar'); }
+              finally { setDeleting(false); }
+            }}
+          >
+            {deleting ? 'Eliminando...' : '🗑 Eliminar'}
+          </button>
+        )}
       </div>
 
       {/* Miniaturas */}
@@ -481,12 +500,14 @@ function EmocQuickModal({ onClose }) {
 
 // ── Página principal ───────────────────────────────────────────────
 export default function Home() {
-  const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0 });
+  const [stats, setStats] = useState({ visited: 0, wishlist: 0, letters: 0, trips: 0 });
   const [recentPhotos, setRecentPhotos] = useState([]);
   const [galleryExpanded, setGalleryExpanded] = useState(false);
   const [previewLetters, setPreviewLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [showEmocModal, setShowEmocModal] = useState(false);
   const [fabDismissed, setFabDismissed]   = useState(fabDismissedSession);
   const openEmoc   = useCallback(() => setShowEmocModal(true), []);
@@ -505,6 +526,7 @@ export default function Home() {
         visited: stats.visited,
         wishlist: stats.wishlist,
         letters: stats.letters,
+        trips: stats.trips,
       });
 
       setPreviewLetters(letters.slice(0, 3));
