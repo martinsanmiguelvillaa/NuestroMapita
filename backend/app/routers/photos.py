@@ -29,7 +29,8 @@ def get_stats(
     visited = db.query(func.count(PlaceVisited.id)).scalar()
     wishlist = db.query(func.count(PlaceWishlist.id)).scalar()
     letters = db.query(func.count(Letter.id)).scalar()
-    return {"visited": visited, "wishlist": wishlist, "letters": letters}
+    trips = db.query(func.count(PlaceTrip.id)).scalar()
+    return {"visited": visited, "wishlist": wishlist, "letters": letters, "trips": trips}
 
 
 @router.get("/photos/recent")

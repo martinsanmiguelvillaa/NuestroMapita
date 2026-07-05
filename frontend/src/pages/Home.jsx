@@ -578,6 +578,10 @@ export default function Home() {
             <div className="home__stat-number">{stats.wishlist}</div>
             <div className="home__stat-label">por hacer</div>
           </div>
+          <div className="home__stat">
+            <div className="home__stat-number">{stats.trips}</div>
+            <div className="home__stat-label">viajecitos</div>
+          </div>
         </div>
       )}
 
