@@ -8,7 +8,8 @@ import RecipeForm from '../components/recipes/RecipeForm';
 import CineForm from '../components/cine/CineForm';
 import { createWishlist } from '../api/placesWishlist';
 import { createVisited } from '../api/placesVisited';
-import { uploadPhotos, uploadWishlistPhotos } from '../api/photos';
+import { createTrip } from '../api/trips';
+import { uploadPhotos, uploadWishlistPhotos, uploadTripPhotos } from '../api/photos';
 import '../styles/share.css';
 
 function detectType(url) {
@@ -48,6 +49,17 @@ const OPTIONS = [
     hints: {
       video: 'Guardar el tráiler en el cine',
       social: 'Guardar en la lista del cine',
+    },
+  },
+  {
+    id: 'trip',
+    icon: '✈️',
+    label: 'Viajecito',
+    desc: 'Agregar como viajecito pendiente',
+    hints: {
+      maps: 'Guardar este lugar como viajecito',
+      social: 'Guardar el reel como viajecito',
+      video: 'Guardar el video como viajecito',
     },
   },
   {
@@ -94,6 +106,12 @@ export default function ShareTarget() {
     video_url: url,
   };
 
+  const tripInitial = {
+    name: sharedTitle,
+    google_maps_url: urlType === 'maps' ? url : '',
+    social_url: urlType !== 'maps' ? url : '',
+  };
+
   const cineInitial = {
     trailer_url: url,
   };
@@ -117,6 +135,18 @@ export default function ShareTarget() {
       if (files?.length) await uploadPhotos(place.id, files);
       setDirty(false);
       navigate('/visitados');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTripSave = async (data, files) => {
+    setSaving(true);
+    try {
+      const place = await createTrip(data);
+      if (files?.length) await uploadTripPhotos(place.id, files);
+      setDirty(false);
+      navigate('/viajecitos');
     } finally {
       setSaving(false);
     }
@@ -182,6 +212,24 @@ export default function ShareTarget() {
           loading={saving}
           onDirtyChange={setDirty}
           submitRef={submitRef}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={selected === 'trip'}
+        onClose={() => handleAttemptClose(() => setSelected(null))}
+        title="Agregar viajecito"
+        fullscreen
+        isDirty={isDirty}
+      >
+        <WishlistForm
+          initialData={tripInitial}
+          onSubmit={handleTripSave}
+          onCancel={() => handleAttemptClose(() => setSelected(null))}
+          loading={saving}
+          onDirtyChange={setDirty}
+          submitRef={submitRef}
+          variant="trip"
         />
       </Modal>
 
